@@ -1,53 +1,46 @@
 import React from "react";
-import { MDBCarousel, MDBCarouselCaption, MDBCarouselInner, MDBCarouselItem, MDBView, MDBMask, MDBContainer,MDBRow,MDBCol } from
-        "mdbreact";
+import {
+    MDBCarousel,
+    MDBCarouselInner,
+    MDBCarouselItem,
+    MDBCol,
+    MDBContainer,
+    MDBDropdown,
+    MDBDropdownItem,
+    MDBDropdownMenu,
+    MDBDropdownToggle,
+    MDBIcon,
+    MDBRow,
+    MDBView
+} from "mdbreact";
 
-const CarouselPage = () => {
-    return (
-        <MDBContainer>
-            <MDBRow>
-                <MDBCol size="12">
-                    <MDBCarousel
-                        activeItem={1}
-                        length={3}
-                        showControls={true}
-                        showIndicators={true}
-                        className="z-depth-1"
-                    >
-                <MDBCarouselInner>
-                    <MDBCarouselItem itemId="1">
-                        <MDBView>
-                            <img
-                                className="d-block w-100"
-                                src="https://mdbootstrap.com/img/Photos/Slides/img%20(130).jpg"
-                                alt="First slide"
-                            />
-                        </MDBView>
-                    </MDBCarouselItem>
-                    <MDBCarouselItem itemId="2">
-                        <MDBView>
-                            <img
-                                className="d-block w-100"
-                                src="https://mdbootstrap.com/img/Photos/Slides/img%20(129).jpg"
-                                alt="Second slide"
-                            />
-                        </MDBView>
-                    </MDBCarouselItem>
-                    <MDBCarouselItem itemId="3">
-                        <MDBView>
-                            <img
-                                className="d-block w-100"
-                                src="https://mdbootstrap.com/img/Photos/Slides/img%20(70).jpg"
-                                alt="Third slide"
-                            />
-                        </MDBView>
-                    </MDBCarouselItem>
-                </MDBCarouselInner>
-            </MDBCarousel>
-                </MDBCol>
-            </MDBRow>
-        </MDBContainer>
-    );
-}
+import Post from './template/post'
 
-export default CarouselPage;
+export default class Dashboard extends React.Component {
+    togglelike = e => {
+        e.target.classList.toggle('fa')
+    }
+
+    render() {
+        return (
+            <>
+                <MDBContainer>
+                    <MDBRow>
+                        <MDBCol size={8} className={"home_dashboard"}>
+                            <div className={"post"}>
+                               <Post
+                                   postusername={"Eric Anthony"}
+                                   posttime={"4 hours"}
+                               />
+                            </div>
+                        </MDBCol>
+                        <MDBCol size={4} className={"home_data"}>
+
+                        </MDBCol>
+                    </MDBRow>
+                </MDBContainer>
+            </>
+        );
+    }
+
+};
