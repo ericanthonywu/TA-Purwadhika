@@ -18,54 +18,54 @@ exports.login = (req, res, next) => {
                 res.status(500).json({
                     error: err
                 });
-            } else {
-                if (data == null) {
-                    res.status(401).json({
-                        message: "Email Not Found"
+                return;
+            }
+            if (data == null) {
+                res.status(401).json({
+                    message: "Email Not Found"
+                });
+                return;
+            }
+            bcrypt.compare(password, data.password, (err, check) => {
+                if (err) {
+                    res.status(500).json({
+                        error: err
                     });
-                } else {
-                    bcrypt.compare(password, data.password, (err, check) => {
-                        if (err) {
-                            res.status(500).json({
-                                error: err
-                            });
-                        } else {
-                            if (check) {
-                                if (data.email_st) {
-                                    jwt.sign(
-                                        {
-                                            username: data.username,
-                                            email: email
-                                        },
-                                        "ysn852jd48",
-                                        {expiresIn: "1000000h"},
-                                        (err, token) => {
-                                            if (err) {
-                                                res.status(500).json({error: err});
-                                            } else {
-                                                res.status(200).json({
-                                                    _token: token,
-                                                    username: data.username,
-                                                    _id: data._id
-                                                });
-                                            }
-                                        }
-                                    );
+                    return;
+                }
+                if (check) {
+                    if (data.email_st) {
+                        jwt.sign(
+                            {
+                                username: data.username,
+                                email: email
+                            },
+                            "ysn852jd48",
+                            {expiresIn: "1000000h"},
+                            (err, token) => {
+                                if (err) {
+                                    res.status(500).json({error: err});
                                 } else {
-                                    res.status(401).json({
-                                        message: "Please Verify Your Email"
+                                    res.status(200).json({
+                                        _token: token,
+                                        username: data.username,
+                                        _id: data._id
                                     });
                                 }
-                            } else {
-                                res.status(401).json({
-                                    message: "Password Incorrect, Please Try Again"
-                                });
+                                return;
                             }
-                        }
+                        );
+                    }
+                    res.status(401).json({
+                        message: "Please Verify Your Email"
                     });
+                    return;
                 }
-            }
-        });
+                res.status(401).json({
+                    message:"Password Incorrect"
+                })
+            })
+        })
     }
 };
 
@@ -381,7 +381,7 @@ exports.register = async (req, res, next) => {
                             transpoter.sendMail(mailOption, (err, info) => {
                                 if (err) return console.error(err);
                             });
-                            res.status(200).json({
+                            res.status(201).json({
                                 message: `User ${username} successfully Created! Please Verify Your Email`
                             });
                         }

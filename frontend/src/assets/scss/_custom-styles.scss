@@ -1,4 +1,4 @@
-// Your custom styles
+
 .rating {
   color: #ffa000;
   list-style-type: none;
@@ -58,29 +58,122 @@
   margin-top: -14px;
 }
 
-.icon{
+.normalweight {
+  font-weight: 400;
+}
+
+.icon {
   display: inline;
 }
+
 .icon > i {
   margin: 10px;
 }
-.bolder{
+
+.bolder {
   font-weight: bold;
 }
-.comments{
+
+.comments {
   display: flex;
 }
-.comment-info > span:last-child{
+
+.comment-info > span:last-child {
   font-weight: 400;
 }
-.pointer{
+
+.pointer {
   cursor: pointer;
 }
-@media screen and (max-width: 768px){
-  .home_data{
+
+.emoji-container {
+  position: absolute;
+  left: 45%;
+  z-index: 2;
+  bottom: 100%;
+}
+
+.valid-feedback, .invalid-feedback {
+  margin-top: -30px;
+  margin-left: 40px;
+}
+
+.valid-input {
+  border-color: #28a745 !important;
+  //padding-right: calc(1.5em + .75rem) !important;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8… 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: center right calc(.375em + .1875rem);
+  background-size: calc(.75em + .375rem) calc(.75em + .375rem);
+}
+
+.invalid-input {
+  border-color: #dc3545 !important;
+  //padding-right: calc(1.5em + .75rem) !important;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='%23dc354…%3e%3ccircle cy='3' r='.5'/%3e%3ccircle cx='3' cy='3' r='.5'/%3e%3c/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center right calc(.375em + .1875rem);
+  background-size: calc(.75em + .375rem) calc(.75em + .375rem);
+}
+.invalid-div{
+  .invalid-feedback {
+    display: block;
+  }
+
+  .valid-feedback {
     display: none;
   }
-  .home_dashboard{
+}
+.valid-div{
+  .invalid-feedback {
+    display: none;
+  }
+
+  .valid-feedback {
+    display: block;
+  }
+}
+
+.like {
+  position: absolute;
+  left: 90%;
+}
+
+.hide {
+  display: none;
+}
+
+.navbar {
+  position: fixed;
+  z-index: 16;
+}
+
+.sticker {
+  border-radius: 50%;
+  padding: 18px 23px !important;
+  margin-top: -80px !important;
+}
+
+.comment-textarea {
+  display: inline !important;
+  width: calc(100% - 73.47px);
+}
+
+.usercomment {
+  margin-top: unset;
+  margin-bottom: unset;
+}
+#emoji-mart-search-2{
+  width: 80% !important;
+}
+@media screen and (max-width: 768px) {
+  .home_data {
+    display: none;
+  }
+  .emoji-container {
+    left: calc(45% - 151px)
+  }
+  .home_dashboard {
     max-width: 100% !important;
     flex: 0 0 100% !important;
   }

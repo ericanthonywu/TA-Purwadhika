@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/react', {
+mongoose.connect('mongodb://localhost/sosmed', {
     useNewUrlParser: true,
     keepAlive: true,
     keepAliveInitialDelay: 300000
@@ -22,6 +22,10 @@ const userSchema = new mongoose.Schema({
 
 exports.user = mongoose.model('user', userSchema);
 
+const post = new mongoose.Schema({
+
+})
+
 const chatRoom = new mongoose.Schema({
     fromID: {type: schema.Types.ObjectId, ref: 'user'},
     msg: [{type: String}],
@@ -29,43 +33,3 @@ const chatRoom = new mongoose.Schema({
 }, {timestamps: true});
 
 exports.chatroom = mongoose.model('chatroom', chatRoom);
-
-const groupChatRoom = new mongoose.Schema({
-    fromID: {type: schema.Types.ObjectId, ref: 'user'},
-    msg: [{text: String}],
-}, {timestamps: true});
-
-exports.groupchatroom = mongoose.model('groupchatroom', groupChatRoom);
-
-const memberGroupChatRoom = new mongoose.Schema({
-    groupID: [
-        {type: schema.Types.ObjectId, ref: 'groupchatroom'}
-    ],
-    userID: [
-        {type: schema.Types.ObjectId, ref: 'user'}
-    ],
-}, {timestamps: true});
-
-exports.membergroupchatroom = mongoose.model('membergroupchatroom', memberGroupChatRoom);
-
-const friendList = new mongoose.Schema({
-    userID: {
-        type: schema.Types.ObjectId, ref: 'user'
-    },
-    friendID: [{
-        type: schema.Types.ObjectId, ref: 'user'
-    }]
-}, {timestamps: true});
-
-exports.friendList = mongoose.model('friendList', friendList);
-
-const friendRequest = new mongoose.Schema({
-    userID: {
-        type: schema.Types.ObjectId, ref: 'user'
-    },
-    friendID: [{
-        type: schema.Types.ObjectId, ref: 'user'
-    }]
-}, {timestamps: true});
-
-exports.friendRequest = mongoose.model('friendRequest',friendRequest);

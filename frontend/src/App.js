@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {BrowserRouter, Route, withRouter, Switch} from "react-router-dom";
+import {Route, withRouter, Switch} from "react-router-dom";
 import {
     MDBBtn,
     MDBCollapse, MDBFormInline,
@@ -11,10 +11,10 @@ import {
     MDBNavLink
 } from "mdbreact";
 import DashboardPage from './views/Dashboard'
-import CariLoker from './views/CariLoker'
-import PasangLoker from './views/PasangLoker'
-import TipsLoker from './views/TipsLoker'
+import Register from './views/Register'
 import Login from './views/Login'
+import validate from './views/validate'
+
 
 const SomeComponent = withRouter(props => <App {...props}/>);
 
@@ -45,9 +45,7 @@ class App extends Component {
         const pathname = location.pathname.split('/')[1];
         const checkurl = [
             '',
-            'pasang-iklan',
-            'cari-loker',
-            'tips-loker'
+            'explore',
         ];
         for (let i = 0; i < allnav.length; i++) {
             allnav[i].classList.remove('active');
@@ -101,10 +99,9 @@ class App extends Component {
                 </MDBNavbar>
                 <Switch>
                     <Route path={'/'} exact component={DashboardPage}/>
-                    <Route path={'/cari-loker'} component={CariLoker}/>
-                    <Route path={'/pasang-loker'} component={PasangLoker}/>
-                    <Route path={'/tips-loker'} component={TipsLoker}/>
                     <Route path={'/login'} component={Login}/>
+                    <Route path={'/register'} component={Register}/>
+                    <Route path={'/validate'} component={validate}/>
                 </Switch>
 
             </>

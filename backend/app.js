@@ -6,6 +6,7 @@ const bodyparser = require('body-parser');
 const path = require('path');
 const app = express();
 const io = require('socket.io')();
+const cors = require('cors');
 app.io = io;
 
 // const socketIOController = require('./app/controllers/chat')(app.io);
@@ -28,6 +29,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 app.use(logger('dev'));
+app.use(cors());
 app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({extended: true}));
 app.use(express.json());
