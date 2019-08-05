@@ -29,6 +29,24 @@ export default class Post extends React.Component {
             commentlike: false,
             likestatus: props.likestatus
         }
+        this.handleOutsideClick = this.handleOutsideClick.bind(this);
+        this.togglesticker = this.togglesticker.bind(this)
+    }
+
+    handleOutsideClick(e) {
+        // ignore clicks on the component itself
+        if(document.querySelector('section.emoji-mart') !== null) {
+            if (!document.querySelector('section.emoji-mart').contains(e.target) || e.key === "Escape") {
+                this.setState({
+                    showsticker: true
+                })
+            }else{
+                this.setState({
+                    showsticker: false
+                })
+            }
+            this.togglesticker()
+        }
     }
 
 
@@ -57,7 +75,9 @@ export default class Post extends React.Component {
             }).catch(tes => {
 
             });
-            e.target.value = ""
+            this.setState({
+                comment: "",
+            })
         } else {
             this.setState({
                 comment: e.target.value,
@@ -69,9 +89,16 @@ export default class Post extends React.Component {
         this.setState({
             comment: this.state.comment += emoji,
         });
-        console.log(this.state.comment)
     };
-    togglesticker = e => {
+    togglesticker = () => {
+        if (!this.state.showsticker) {
+            // attach/remove event handler
+            document.addEventListener('click', this.handleOutsideClick, false);
+            document.onkeydown = this.handleOutsideClick
+        } else {
+            document.removeEventListener('click', this.handleOutsideClick, false);
+            document.onkeydown = this.handleOutsideClick
+        }
         this.setState({
             showsticker: !this.state.showsticker
         })
@@ -79,7 +106,7 @@ export default class Post extends React.Component {
 
     render() {
         return (
-            <>
+            <div>
                 <MDBContainer>
                     <MDBRow>
                         <MDBCol size="12" className={"w-100"}>
@@ -165,14 +192,14 @@ export default class Post extends React.Component {
                                         <div className="md-form usercomment w-100">
                                             {this.state.showsticker && <div className={"emoji-container"}>
                                                 <Picker set='emojione' title={"Choose Sticker"}
-                                                        onSelect={this.addEmoji}/>
+                                                        onSelect={this.addEmoji} onBlur={() => alert('blur')}/>
                                             </div>}
                                             <textarea type="text" style={{paddingTop: 0}}
                                                       className={"md-textarea comment-textarea form-control"}
                                                       id={"usercomment"}
-                                                      onKeyUp={this.handlecomment}>
-                                                {this.state.comment}
-                                            </textarea>
+                                                      onKeyUp={this.handlecomment}
+                                                      value={this.state.comment}
+                                            />
                                             <MDBBtn className={"sticker"}
                                                     onClick={this.togglesticker} size="lg" gradient="purple"><MDBIcon
                                                 far icon="laugh-beam"/></MDBBtn>
@@ -184,7 +211,7 @@ export default class Post extends React.Component {
                         </MDBCol>
                     </MDBRow>
                 </MDBContainer>
-            </>
+            </div>
         );
     }
 
