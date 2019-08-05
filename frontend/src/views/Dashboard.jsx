@@ -1,18 +1,5 @@
 import React from "react";
-import {
-    MDBCarousel,
-    MDBCarouselInner,
-    MDBCarouselItem,
-    MDBCol,
-    MDBContainer,
-    MDBDropdown,
-    MDBDropdownItem,
-    MDBDropdownMenu,
-    MDBDropdownToggle,
-    MDBIcon,
-    MDBRow,
-    MDBView
-} from "mdbreact";
+import {MDBCol, MDBContainer, MDBRow} from "mdbreact";
 
 import Post from './template/Post'
 
@@ -32,6 +19,7 @@ export default class Dashboard extends React.Component {
                                     postcaption={"Hello World!"}
                                     totalcomment={100}
                                     postlikes={319}
+                                    likestatus={true}
                                     postimages={[
                                         {
                                             id: 1,
@@ -53,15 +41,17 @@ export default class Dashboard extends React.Component {
                                             "comment": "wwkwk gblok wwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblok",
                                             "like": 157,
                                             "time": "14 h",
-                                            "profile": "https://mdbootstrap.com/img/Photos/Avatars/avatar-1.jpg"
+                                            "profile": "https://mdbootstrap.com/img/Photos/Avatars/avatar-1.jpg",
+                                            "likestatus":false,
                                         },
                                         {
                                             "id": 2,
                                             "username": "user2",
                                             "comment": "apaan nih",
-                                            "like": 0,
+                                            "like": 1,
                                             "time": "2 min",
-                                            "profile": "https://mdbootstrap.com/img/Photos/Avatars/avatar-2.jpg"
+                                            "profile": "https://mdbootstrap.com/img/Photos/Avatars/avatar-2.jpg",
+                                            "likestatus":true,
                                         }
                                     ]}
                                 />
@@ -73,6 +63,7 @@ export default class Dashboard extends React.Component {
                                     postcaption={"Hello World!"}
                                     totalcomment={100}
                                     postlikes={319}
+                                    likestatus={false}
                                     postimages={[
                                         {
                                             id: 1,
@@ -95,15 +86,17 @@ export default class Dashboard extends React.Component {
                                                 "comment": "wwkwk gblok wwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblok",
                                                 "like": 157,
                                                 "time": "14 h",
-                                                "profile": "https://mdbootstrap.com/img/Photos/Avatars/avatar-1.jpg"
+                                                "profile": "https://mdbootstrap.com/img/Photos/Avatars/avatar-1.jpg",
+                                                "likestatus":false,
                                             },
                                             {
                                                 "id": 2,
                                                 "username": "user1",
                                                 "comment": "apaan nih",
-                                                "like": 0,
+                                                "like": 1,
                                                 "time": "2 min",
-                                                "profile": "https://mdbootstrap.com/img/Photos/Avatars/avatar-2.jpg"
+                                                "profile": "https://mdbootstrap.com/img/Photos/Avatars/avatar-2.jpg",
+                                                "likestatus":true,
                                             }
                                         ]
                                     }

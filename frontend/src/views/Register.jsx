@@ -25,9 +25,16 @@ export default class Register extends React.Component {
         };
     }
 
-    submitHandler = event => {
-        event.preventDefault();
-        event.target.className += " was-validated";
+    submitHandler = e => {
+        e.preventDefault();
+        e.target.className += " was-validated";
+        const input = document.querySelectorAll('form.needs-validation input');
+        for (let i = 0; i < input.length; i++) {
+            const target = {
+                target: input[i]
+            }
+            this.validateinput(target,false)
+        }
     };
     invalidinput = (e, value = null) => {
         if (e.target.parentNode.classList.contains('valid-div')) {
@@ -77,29 +84,38 @@ export default class Register extends React.Component {
                 break;
         }
     };
-    validateinput = e => {
+    removevalidate = e => {
+        e.target.classList.remove('invalid-input')
+        e.target.parentNode.classList.remove('invalid-div')
+    }
+    validateinput = (e,persist = true) => {
+        if(persist) {
+            e.persist();
+        }
         if (e.target.value == "") {
             this.invalidinput(e)
         } else {
-            if (e.target.name == "email") {
-                axios.post('http://localhost:3000/mobile/checkemail', {
-                    email: e.target.value
-                }).then(r => {
-                    console.log(e)
-                }).catch(er => {
-                    this.invalidinput(e)
-                });
-            } else if (e.target.name == "username") {
-                axios.post('http://localhost:3000/mobile/checkusername', {
-                    username: e.target.value
-                }).then(r => {
+            switch (e.target.name) {
+                case "email":
+                    axios.post('http://localhost:3000/mobile/checkemail', {
+                        email: e.target.value
+                    }).then(r => {
+                        this.validinput(e)
+                    }).catch(er => {
+                        this.invalidinput(e)
+                    });
+                    break;
+                case "username":
+                    axios.post('http://localhost:3000/mobile/checkusername', {
+                        username: e.target.value
+                    }).then(r => {
+                        this.validinput(e)
+                    }).catch(er => {
+                        this.invalidinput(e)
+                    });
+                    break;
+                default:
                     this.validinput(e)
-                }).catch(er => {
-                    this.invalidinput(e)
-                });
-
-            } else {
-                this.validinput(e)
             }
         }
     };
@@ -132,6 +148,7 @@ export default class Register extends React.Component {
                                             name={"email"}
                                             onChange={this.changeHandler}
                                             onBlur={this.validateinput}
+                                            onFocus={this.removevalidate}
                                             id={"email"}
                                             validate
                                             error="wrong"
@@ -151,6 +168,7 @@ export default class Register extends React.Component {
                                             value={this.state.username}
                                             name={"username"}
                                             onBlur={this.validateinput}
+                                            onFocus={this.removevalidate}
                                             type="text"
                                             validate
                                             error="wrong"
@@ -170,6 +188,7 @@ export default class Register extends React.Component {
                                             validate
                                             onChange={this.changeHandler}
                                             onBlur={this.validateinput}
+                                            onFocus={this.removevalidate}
                                             value={this.state.password}
                                             name={"password"}
                                             required
@@ -186,6 +205,7 @@ export default class Register extends React.Component {
                                             type="password"
                                             onChange={this.changeHandler}
                                             onBlur={this.validateinput}
+                                            onFocus={this.removevalidate}
                                             value={this.state.cpassword}
                                             name={"cpassword"}
                                             validate
