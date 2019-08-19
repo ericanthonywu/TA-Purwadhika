@@ -34,9 +34,10 @@ exports.login = (req, res, next) => {
                     return;
                 }
                 if (check) {
-                    if (data.email_st) {
+                    if (data.email_st == 1) {
                         jwt.sign(
                             {
+                                id:data._id,
                                 username: data.username,
                                 email: email
                             },
@@ -55,6 +56,7 @@ exports.login = (req, res, next) => {
                                 return;
                             }
                         );
+                        return;
                     }
                     res.status(401).json({
                         message: "Please Verify Your Email"
@@ -415,7 +417,6 @@ exports.verify = (req, res, next) => {
     );
 };
 exports.checkemail = (req, res, next) => {
-    console.log(req.body.email);
     user.count({email: req.body.email}, (err, c) => {
         res.status(c ? 500 : 200).send({
             message: c ? "Email tersedia" : ""

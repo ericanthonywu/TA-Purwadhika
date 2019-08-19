@@ -89,6 +89,7 @@ export default class Post extends React.Component {
         this.setState({
             comment: this.state.comment += emoji,
         });
+        console.log(this.state.comment)
     };
     togglesticker = () => {
         if (!this.state.showsticker) {
@@ -140,8 +141,8 @@ export default class Post extends React.Component {
                             <MDBCarousel
                                 activeItem={1}
                                 length={3}
-                                showControls={true}
-                                showIndicators={true}
+                                showControls={this.props.comments.length > 1}
+                                showIndicators={this.props.comments.length > 1}
                                 className="z-depth-1"
                                 interval={false}
                                 slide
@@ -194,12 +195,14 @@ export default class Post extends React.Component {
                                                 <Picker set='emojione' title={"Choose Sticker"}
                                                         onSelect={this.addEmoji} onBlur={() => alert('blur')}/>
                                             </div>}
-                                            <textarea type="text" style={{paddingTop: 0}}
+                                            <textarea style={{paddingTop: 0}}
                                                       className={"md-textarea comment-textarea form-control"}
                                                       id={"usercomment"}
-                                                      onKeyUp={this.handlecomment}
+                                                      onChange={this.handlecomment}
                                                       value={this.state.comment}
-                                            />
+                                            >
+                                                {this.state.comment}
+                                            </textarea>
                                             <MDBBtn className={"sticker"}
                                                     onClick={this.togglesticker} size="lg" gradient="purple"><MDBIcon
                                                 far icon="laugh-beam"/></MDBBtn>

@@ -3,55 +3,14 @@ import {MDBCol, MDBContainer, MDBRow} from "mdbreact";
 
 import Post from './template/Post'
 
-export default class Dashboard extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            loading:true,
-            pagination: 0
-        }
-    }
-
+export default class Profile extends React.Component {
     componentDidMount() {
-        setTimeout(() => {
-            this.setState({
-                loading:false
-            })
-        },2000)
-        document.addEventListener('scroll',this.infiniteScroll)
-    }
-    componentWillUnmount() {
-        document.removeEventListener('scroll',this.infiniteScroll);
-    }
-
-    infiniteScroll = (e) => {
-        // console.log(e.target.scrollingElement.)
-        if((e.target.scrollingElement.scrollHeight - e.target.scrollingElement.scrollTop) === e.target.scrollingElement.clientHeight){ //Mentok di bawah
-            this.setState({
-                pagination:this.state.pagination+1
-            })
-            console.log(this.state.pagination)
-        }
-
+        const {profile} = this.props.match.params
     }
 
     render() {
         return (
-            <div style={{paddingTop: 100}} id={'scroll-div'} onScroll={this.infiniteScroll}>
-                {this.state.loading
-                    ?
-                    <div className={"container-loading"}>
-                        <div className="spinner-grow text-warning" role="status">
-                            <span className="sr-only">Loading...</span>
-                        </div>
-                        <div className="spinner-grow text-primary" role="status">
-                            <span className="sr-only">Loading...</span>
-                        </div>
-                        <div className="spinner-grow text-primary" role="status">
-                            <span className="sr-only">Loading...</span>
-                        </div>
-                    </div>
-                    :
+            <div style={{paddingTop: 100}}>
                 <MDBContainer>
                     <MDBRow>
                         <MDBCol size={8} className={"home_dashboard"}>
@@ -87,7 +46,7 @@ export default class Dashboard extends React.Component {
                                             "like": 157,
                                             "time": "14 h",
                                             "profile": "https://mdbootstrap.com/img/Photos/Avatars/avatar-1.jpg",
-                                            "likestatus": false,
+                                            "likestatus":false,
                                         },
                                         {
                                             "id": 2,
@@ -96,7 +55,7 @@ export default class Dashboard extends React.Component {
                                             "like": 1,
                                             "time": "2 min",
                                             "profile": "https://mdbootstrap.com/img/Photos/Avatars/avatar-2.jpg",
-                                            "likestatus": true,
+                                            "likestatus":true,
                                         }
                                     ]}
                                 />
@@ -132,7 +91,7 @@ export default class Dashboard extends React.Component {
                                                 "like": 157,
                                                 "time": "14 h",
                                                 "profile": "https://mdbootstrap.com/img/Photos/Avatars/avatar-1.jpg",
-                                                "likestatus": false,
+                                                "likestatus":false,
                                             },
                                             {
                                                 "id": 2,
@@ -141,7 +100,7 @@ export default class Dashboard extends React.Component {
                                                 "like": 1,
                                                 "time": "2 min",
                                                 "profile": "https://mdbootstrap.com/img/Photos/Avatars/avatar-2.jpg",
-                                                "likestatus": true,
+                                                "likestatus":true,
                                             }
                                         ]
                                     }
@@ -153,7 +112,6 @@ export default class Dashboard extends React.Component {
                         </MDBCol>
                     </MDBRow>
                 </MDBContainer>
-                }
             </div>
         );
     }

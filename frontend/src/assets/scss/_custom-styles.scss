@@ -1,3 +1,4 @@
+@import url(https://fonts.googleapis.com/css?family=Montserrat:300,700);
 
 .rating {
   color: #ffa000;
@@ -106,6 +107,7 @@
   background-position: center right calc(.375em + .1875rem);
   background-size: calc(.75em + .375rem) calc(.75em + .375rem);
 }
+
 .invalid-input {
   border-color: #dc3545 !important;
   //padding-right: calc(1.5em + .75rem) !important;
@@ -183,5 +185,100 @@
   .home_dashboard {
     max-width: 100% !important;
     flex: 0 0 100% !important;
+  }
+}
+.container-loading{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
+
+@media screen and (max-width: 992px) {
+  .form-container {
+    width: 100% !important;
+  }
+}
+
+//================================== Error Styling ===============================\\
+.errorcontainer {
+  position: relative;
+  height: 100vh;
+}
+
+.errorcenter {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  max-width: 520px;
+  width: 100%;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.errorcontainer .errorcenter h1 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 146px;
+  font-weight: 700;
+  margin: 0;
+  color: #232323;
+}
+
+.errorcontainer .errorcenter h1>span {
+  display: inline-block;
+  width: 120px;
+  height: 120px;
+  background-image: url(../img/overlays/404.png);
+  background-size: cover;
+  -webkit-transform: scale(1.4);
+  -ms-transform: scale(1.4);
+  transform: scale(1.4);
+  z-index: -1;
+}
+.errorcontainer a{
+  font-family: 'Montserrat', sans-serif;
+  display: inline-block;
+  padding: 12px 30px;
+  font-weight: 700;
+  background-color: #f99827;
+  color: #fff;
+  border-radius: 40px;
+  text-decoration: none;
+  -webkit-transition: 0.2s all;
+  transition: 0.2s all;
+
+  :hover{
+    opacity: 0.8;
+  }
+}
+.errorcontainer p{
+  font-family: 'Montserrat', sans-serif;
+  color: #787878;
+  font-weight: 300;
+}
+.errorcontainer h2{
+  font-family: 'Montserrat', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+  text-transform: uppercase;
+  color: #232323;
+}
+
+@media only screen and (max-width: 767px) {
+  .errorcontainer .con404 {
+    height: 115px;
+  }
+  .errorcontainer .con404 h1 {
+    font-size: 86px;
+  }
+  .errorcontainer .con404 h1>span {
+    width: 86px;
+    height: 86px;
   }
 }

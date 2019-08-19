@@ -15,21 +15,21 @@ const userSchema = new mongoose.Schema({
     password: {type: String, required: true},
     email_st: {type: Number, default: 0},
     nickname: {type: String},
-    token: {type: String, unique: true},
-    status: {type: String, default: "This user has no status yet"},
     profilepicture: {type: String, default: "https://github.githubassets.com/favicon.ico"}
 }, {timestamps: true});
 
 exports.user = mongoose.model('user', userSchema);
 
-const post = new mongoose.Schema({
-
-})
-
-const chatRoom = new mongoose.Schema({
-    fromID: {type: schema.Types.ObjectId, ref: 'user'},
-    msg: [{type: String}],
-    toID: {type: schema.Types.ObjectId, ref: 'user'},
+const postSchema = new mongoose.Schema({
+    image: [{type: String, required: true, unique: true}],
+    comments: [{
+        user: {type: mongoose.Schema.Types.ObjectId, ref: 'user'},
+        comments: {type: String},
+        like: {type: Number},
+        time: {type: Date, default: Date.now}
+    }],
+    caption: {type: String},
+    user: {type: mongoose.Schema.Types.ObjectId,ref: 'user'}
 }, {timestamps: true});
 
-exports.chatroom = mongoose.model('chatroom', chatRoom);
+exports.post = mongoose.model('post', postSchema);
