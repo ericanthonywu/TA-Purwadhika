@@ -183,8 +183,8 @@ export default class Register extends React.Component {
         }
     };
 
-    changeHandler = event => {
-        this.setState({[event.target.name]: event.target.value});
+    changeHandler = e => {
+        this.setState({[e.target.name]: e.target.value});
     };
 
     render() {

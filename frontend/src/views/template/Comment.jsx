@@ -38,7 +38,7 @@ export default class Comment extends React.Component {
                         <span>{this.props.data.time}</span>
                         {
                             this.state.commentlike ?
-                                <span className={"mr-3 ml-3"}>{this.state.commentlike} Like{this.state.commentlike > 1 ? "s" : ""} </span>
+                                <span className={"mr-3 ml-3"}>{this.state.commentlike < 0 ? <span>&infin;</span> : this.state.commentlike} Like{this.state.commentlike > 1 ? "s" : ""} </span>
                                 :
                                 ""
                         }

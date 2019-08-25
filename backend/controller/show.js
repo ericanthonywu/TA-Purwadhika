@@ -24,17 +24,19 @@ exports.profile = (req, res, next) => {
 
 exports.addPost = (req, res, next) => {
     const {caption, user} = req.body;
-    console.log(req)
-    res.status(200).send('asd')
-    // new Post({caption: caption, user: user}).save((err, data) => {
-    //     if (err) {
-    //         res.status(500).json({err: err});
-    //         return
-    //     }
-    //     res.status(200).json({
-    //         message: "Data Berhasil Masuk",
-    //         id: data._id
-    //     })
-    // });
+    const imgname = []
+    for (let i = 0; i < req.files.length ; i++) {
+        imgname.push(req.files[i].filename)
+    }
+    new Post({caption: caption, user: user,image:imgname}).save((err, data) => {
+        if (err) {
+            res.status(500).json({err: err});
+            return
+        }
+        res.status(200).json({
+            message: "Data Berhasil Masuk",
+            id: data._id
+        })
+    });
 };
 

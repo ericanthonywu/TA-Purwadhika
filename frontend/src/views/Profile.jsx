@@ -17,7 +17,7 @@ export default class Profile extends React.Component {
                             <div className={"post"}>
                                 <Post
                                     id={1}
-                                    postusername={"Eric Anthony"}
+                                    postusername={localStorage.getItem('username')}
                                     posttime={"4 hours"}
                                     postprofilepicture={"https://mdbootstrap.com/img/Photos/Avatars/avatar-1.jpg"}
                                     postcaption={"Hello World!"}

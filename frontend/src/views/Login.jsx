@@ -15,8 +15,10 @@ import {Link} from "react-router-dom";
 import {toast, ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from "axios"
+import {connect} from "react-redux";
+import {login} from "../redux/actions";
 
-export default class Login extends React.Component {
+class Login extends React.Component {
     constructor() {
         super();
         this.state = {}
@@ -34,10 +36,14 @@ export default class Login extends React.Component {
             toast.success('Berhasil Login');
             localStorage.setItem('token', res.data._token);
             localStorage.setItem('username', res.data.username);
-            alert(localStorage.getItem('username'))
-            // setTimeout(() => {
-            //     this.props.history.push('/')
-            // }, 1000)
+            this.props.login({
+                token: res.data._token,
+                username: res.data.username,
+                loggedin: true,
+            })
+            setTimeout(() => {
+                this.props.history.push('/')
+            }, 1000)
         }).catch(err => {
             toast.error(err.response.data.message)
         })
@@ -106,5 +112,14 @@ export default class Login extends React.Component {
             </>
         );
     }
+}
 
-};
+const mapStateToProps = state => {
+    return {
+        token: state.user.token,
+        username: state.user.username,
+        loggedin: state.user.loggedin
+    }
+}
+
+export default connect(mapStateToProps, {login})(Login)

@@ -18,6 +18,7 @@ import axios from 'axios'
 import 'emoji-mart/css/emoji-mart.css'
 import {Picker} from 'emoji-mart'
 import Comment from './Comment'
+import PostVideo from "./postvideo";
 
 export default class Post extends React.Component {
     constructor(props) {
@@ -36,15 +37,9 @@ export default class Post extends React.Component {
     handleOutsideClick(e) {
         // ignore clicks on the component itself
         if(document.querySelector('section.emoji-mart') !== null) {
-            if (!document.querySelector('section.emoji-mart').contains(e.target) || e.key === "Escape") {
-                this.setState({
-                    showsticker: true
-                })
-            }else{
-                this.setState({
-                    showsticker: false
-                })
-            }
+            this.setState({
+                showsticker: !document.querySelector('section.emoji-mart').contains(e.target) || e.key === "Escape"
+            })
             this.togglesticker()
         }
     }
@@ -107,7 +102,7 @@ export default class Post extends React.Component {
 
     render() {
         return (
-            <div>
+            <div style={this.props.style}>
                 <MDBContainer>
                     <MDBRow>
                         <MDBCol size="12" className={"w-100"}>
@@ -140,24 +135,25 @@ export default class Post extends React.Component {
                         <MDBCol size="12" className={"mt-3 w-100"}>
                             <MDBCarousel
                                 activeItem={1}
-                                length={3}
-                                showControls={this.props.comments.length > 1}
-                                showIndicators={this.props.comments.length > 1}
+                                length={this.props.postimages.length}
+                                showControls={this.props.postimages.length > 1}
+                                showIndicators={this.props.postimages.length > 1}
                                 className="z-depth-1"
                                 interval={false}
                                 slide
 
                             >
                                 <MDBCarouselInner>
-                                    {this.props.postimages.map(o => {
+                                    {this.props.postimages.map((o,id) => {
                                         return (
-                                            <MDBCarouselItem itemId={o.id}>
+                                            <MDBCarouselItem itemId={id + 1}>
                                                 <MDBView>
-                                                    <img
-                                                        className="d-block w-100"
-                                                        src={o.image}
-                                                        alt={o.image}
-                                                    />
+                                                    {/*<img*/}
+                                                    {/*    className="d-block w-100"*/}
+                                                    {/*    src={o}*/}
+                                                    {/*    alt={`image ${id + 1}`}*/}
+                                                    {/*/>*/}
+                                                    <PostVideo src={"https://ericanthony.website/portofolio/uh_shop.mp4"} type={"video/mp4"}/>
                                                 </MDBView>
                                             </MDBCarouselItem>
                                         )
@@ -176,11 +172,11 @@ export default class Post extends React.Component {
                                 <MDBIcon className={"pointer"} far icon="comment"/>
                             </div>
                             <div className="description">
-                                <span className="bolder">{this.state.postlikes} likes</span>
+                                <span className="bolder">{this.state.postlikes < 0 ? <span>&infin;</span> : this.state.postlikes} likes</span>
                                 <div className={"img_desc normalweight"}><span
                                     className={"bolder pointer normalweight"}>{this.props.postusername}</span> {this.props.postcaption}
                                 </div>
-                                <div className={"pointer mt-2 mb-2"}>View all {this.props.totalcomment} Comments</div>
+                                <div className={"pointer mt-2 mb-2"}>View all {this.props.totalcomment < 0 ? <span>&infin;</span> : this.props.totalcomment} Comments</div>
                                 <div id="comment-container">
                                     {this.props.comments.map(o => {
                                         return <Comment data={o}/>
@@ -193,13 +189,14 @@ export default class Post extends React.Component {
                                         <div className="md-form usercomment w-100">
                                             {this.state.showsticker && <div className={"emoji-container"}>
                                                 <Picker set='emojione' title={"Choose Sticker"}
-                                                        onSelect={this.addEmoji} onBlur={() => alert('blur')}/>
+                                                        onSelect={this.addEmoji}/>
                                             </div>}
                                             <textarea style={{paddingTop: 0}}
                                                       className={"md-textarea comment-textarea form-control"}
                                                       id={"usercomment"}
                                                       onChange={this.handlecomment}
                                                       value={this.state.comment}
+                                                      placeholder={"Enter Your Comments Here"}
                                             >
                                                 {this.state.comment}
                                             </textarea>
@@ -209,7 +206,6 @@ export default class Post extends React.Component {
                                         </div>
                                     </div>
                                 </div>
-
                             </div>
                         </MDBCol>
                     </MDBRow>

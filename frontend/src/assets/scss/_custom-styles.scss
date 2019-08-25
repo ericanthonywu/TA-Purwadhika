@@ -201,6 +201,49 @@
     width: 100% !important;
   }
 }
+.video-time{
+  position: absolute;
+  background: black;
+  z-index: 10;
+  color: white;
+  opacity: .5;
+  left: 85%;
+}
+.carousel .carousel-indicators li{
+  border: 1px solid black;
+}
+.video-volume-icon{
+  float: right;
+  padding: 10px;
+  background-color: #0f0f0f;
+  color: #ffffff;
+  border-radius: 50%;
+  position: absolute;
+  bottom: -.1rem;
+  left: 90%;
+}
+.custom-file-input-container .icon{
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  font-size: -webkit-xxx-large;
+}
+.custom-file-input-container{
+  //background-image: url("http://localhost:3001/favicon.ico");
+  cursor: pointer;
+  background-size: cover;
+  border: 3px solid gray;
+  border-radius: 50%;
+  width: 150px;
+  height: 150px;
+  margin-top: 10px;
+  display: flex;
+  position: relative;
+  vertical-align: middle;
+}
 
 //================================== Error Styling ===============================\\
 .errorcontainer {

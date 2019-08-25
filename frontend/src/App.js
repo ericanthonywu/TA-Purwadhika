@@ -18,8 +18,8 @@ import Error404 from "./views/template/404";
 import AddPost from "./views/AddPost";
 import CheckToken from "./views/template/CheckToken";
 
-
-const SomeComponent = withRouter(props => <App {...props}/>);
+import {connect} from "react-redux";
+import {login,logout} from "./redux/actions";
 
 class App extends Component {
     constructor(a) {
@@ -46,6 +46,7 @@ class App extends Component {
     };
 
     componentDidMount() {
+        console.log(this.props)
         const {location} = this.props;
         const allnav = document.querySelectorAll('.navbar-item,.nav-link');
         const pathname = location.pathname.split('/')[1];
@@ -73,7 +74,7 @@ class App extends Component {
 
     render() {
         return (
-            <div onScroll={() => alert('a')}>
+            <div>
                 <MDBNavbar color="indigo" dark expand="md" className={'mb-2 w-100'}>
                     <MDBNavbarBrand>
                         <strong className="white-text">SosMed</strong>
@@ -98,7 +99,7 @@ class App extends Component {
                                     </div>
                                 </MDBFormInline>
                             </MDBNavItem>
-                            {!this.state.loggedin
+                            {!this.props.loggedin
                                 ?
                                 <>
                                     <MDBNavItem>
@@ -115,15 +116,14 @@ class App extends Component {
                                             <MDBIcon icon="user" />
                                         </MDBDropdownToggle>
                                         <MDBDropdownMenu className="dropdown-default">
-                                            <MDBDropdownItem>Hi, {localStorage.getItem('username')}</MDBDropdownItem>
-                                            <MDBDropdownItem><Link to={`/profile/${localStorage.getItem('username')}`}>My Profile</Link> </MDBDropdownItem>
+                                            <MDBDropdownItem>Hi, {this.props.username}</MDBDropdownItem>
+                                            <MDBDropdownItem><Link to={`/profile/${this.props.username}`}>My Profile</Link> </MDBDropdownItem>
                                             <MDBDropdownItem><Link to={'addpost'}>Add Post</Link></MDBDropdownItem>
                                             <MDBDropdownItem onClick={() => {
                                                 localStorage.removeItem('token');
                                                 localStorage.removeItem('username');
-                                                this.setState({
-                                                    loggedin:false
-                                                })
+                                                this.props.logout()
+                                                this.props.history.push('/')
                                             }}>logout</MDBDropdownItem>
                                         </MDBDropdownMenu>
                                     </MDBDropdown>
@@ -147,5 +147,11 @@ class App extends Component {
         )
     }
 }
-
-export default withRouter(App)
+const mapStateToProps = state => {
+    return {
+        token: state.user.token,
+        username: state.user.username,
+        loggedin: state.user.loggedin
+    }
+}
+export default withRouter(connect(mapStateToProps,{login,logout})(App))

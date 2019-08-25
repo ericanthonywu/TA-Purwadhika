@@ -1,9 +1,9 @@
 import React from "react";
 import {MDBCol, MDBContainer, MDBRow} from "mdbreact";
-
+import {connect} from "react-redux";
 import Post from './template/Post'
 
-export default class Dashboard extends React.Component {
+class Dashboard extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -47,7 +47,7 @@ export default class Dashboard extends React.Component {
                         <div className="spinner-grow text-primary" role="status">
                             <span className="sr-only">Loading...</span>
                         </div>
-                        <div className="spinner-grow text-primary" role="status">
+                        <div className="spinner-grow text-default" role="status">
                             <span className="sr-only">Loading...</span>
                         </div>
                     </div>
@@ -66,18 +66,9 @@ export default class Dashboard extends React.Component {
                                     postlikes={319}
                                     likestatus={true}
                                     postimages={[
-                                        {
-                                            id: 1,
-                                            image: "https://mdbootstrap.com/img/Photos/Slides/img%20(130).jpg",
-                                        },
-                                        {
-                                            id: 2,
-                                            image: "https://mdbootstrap.com/img/Photos/Slides/img%20(129).jpg",
-                                        },
-                                        {
-                                            id: 3,
-                                            image: "https://mdbootstrap.com/img/Photos/Slides/img%20(70).jpg",
-                                        },
+                                        "https://mdbootstrap.com/img/Photos/Slides/img%20(130).jpg",
+                                        "https://mdbootstrap.com/img/Photos/Slides/img%20(129).jpg",
+                                        "https://mdbootstrap.com/img/Photos/Slides/img%20(70).jpg",
                                     ]}
                                     comments={[
                                         {
@@ -110,18 +101,9 @@ export default class Dashboard extends React.Component {
                                     postlikes={319}
                                     likestatus={false}
                                     postimages={[
-                                        {
-                                            id: 1,
-                                            image: "https://mdbootstrap.com/img/Photos/Slides/img%20(130).jpg",
-                                        },
-                                        {
-                                            id: 2,
-                                            image: "https://mdbootstrap.com/img/Photos/Slides/img%20(129).jpg",
-                                        },
-                                        {
-                                            id: 3,
-                                            image: "https://mdbootstrap.com/img/Photos/Slides/img%20(70).jpg",
-                                        },
+                                        "https://mdbootstrap.com/img/Photos/Slides/img%20(130).jpg",
+                                        "https://mdbootstrap.com/img/Photos/Slides/img%20(129).jpg",
+                                        "https://mdbootstrap.com/img/Photos/Slides/img%20(70).jpg",
                                     ]}
                                     comments={
                                         [
@@ -159,3 +141,4 @@ export default class Dashboard extends React.Component {
     }
 
 };
+export default connect(null,{})(Dashboard)
