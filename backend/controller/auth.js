@@ -42,7 +42,7 @@ exports.login = (req, res, next) => {
                                 email: email
                             },
                             "ysn852jd48",
-                            {expiresIn: "1000000h"},
+                            {expiresIn: "1h"},
                             (err, token) => {
                                 if (err) {
                                     res.status(500).json({error: err});
@@ -430,3 +430,27 @@ exports.checkusername = (req, res, next) => {
         });
     });
 };
+exports.checktoken = (req,res,next) => {
+    jwt.verify(req.body.token,"ysn852jd48",(err,data)=>{
+        if(err){
+            res.status(500).send({
+                err:err
+            })
+            return
+        }
+        user.findOne({_id:data.id},(err,data)=>{
+            jwt.sign({
+                    id:data._id,
+                    username: data.username,
+                    email: data.email
+                },
+                "ysn852jd48",
+                {expiresIn: "1h"},(err,token)=>{
+                    res.status(200).send({
+                        token:token
+                    })
+                })
+
+        });
+    })
+}

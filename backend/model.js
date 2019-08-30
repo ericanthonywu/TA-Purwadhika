@@ -15,7 +15,9 @@ const userSchema = new mongoose.Schema({
     password: {type: String, required: true},
     email_st: {type: Number, default: 0},
     nickname: {type: String},
-    profilepicture: {type: String, default: "https://github.githubassets.com/favicon.ico"}
+    profilepicture: {type: String, default: "https://github.githubassets.com/favicon.ico"},
+    follower: [{type: mongoose.Schema.Types.ObjectId,ref: 'user'}],
+    following: [{type: mongoose.Schema.Types.ObjectId,ref: 'user'}]
 }, {timestamps: true});
 
 exports.user = mongoose.model('user', userSchema);

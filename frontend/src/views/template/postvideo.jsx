@@ -27,7 +27,11 @@ export default class PostVideo extends React.Component{
                 this.setState({mute:!this.state.mute})
             }}>
                 <span className={"video-time"}>{this.convertseconds(this.state.seconds)}</span>
-                <video onTimeUpdate={e => this.setState({seconds:Math.round(e.target.currentTime)})} className="video-fluid" autoPlay loop muted={this.state.mute}>
+                <video onTimeUpdate={e => this.setState({seconds:Math.round(e.target.currentTime)})}
+                       className="video-fluid"
+                       autoPlay
+                       loop
+                       muted={this.state.mute}>
                     <source src={this.props.src}
                             type={this.props.type}/>
                 </video>

@@ -17,6 +17,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import axios from "axios"
 import {connect} from "react-redux";
 import {login} from "../redux/actions";
+import {api_url} from "../global";
 
 class Login extends React.Component {
     constructor() {
@@ -29,7 +30,7 @@ class Login extends React.Component {
     };
     submitHandler = e => {
         e.preventDefault();
-        axios.post("http://localhost:3000/web/login", {
+        axios.post(`${api_url}login`, {
             email: this.state.email,
             password: this.state.password
         }).then(res => {

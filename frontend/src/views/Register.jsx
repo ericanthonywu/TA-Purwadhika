@@ -15,6 +15,7 @@ import {Link} from "react-router-dom";
 import axios from "axios"
 import {toast, ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import {api_url} from "../global";
 
 export default class Register extends React.Component {
     constructor(props) {
@@ -46,7 +47,7 @@ export default class Register extends React.Component {
             this.validateinput(target, false)
         }
         if (valid) {
-            axios.post('http://localhost:3000/web/register', {
+            axios.post(`${api_url}register`, {
                 username: this.state.username,
                 email: this.state.email,
                 password: this.state.password
@@ -185,6 +186,14 @@ export default class Register extends React.Component {
 
     changeHandler = e => {
         this.setState({[e.target.name]: e.target.value});
+        if(e.target.name === "username"){
+            const regex = new RegExp("^[a-zA-Z0-9]$");
+            const key = String.fromCharCode(!e.charCode ? e.which : e.charCode);
+            if (!regex.test(key)) {
+                e.preventDefault();
+                return false;
+            }
+        }
     };
 
     render() {

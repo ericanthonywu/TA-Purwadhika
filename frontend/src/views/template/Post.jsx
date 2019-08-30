@@ -29,17 +29,17 @@ export default class Post extends React.Component {
             postlikes: props.postlikes,
             commentlike: false,
             likestatus: props.likestatus
-        }
+        };
         this.handleOutsideClick = this.handleOutsideClick.bind(this);
         this.togglesticker = this.togglesticker.bind(this)
     }
 
     handleOutsideClick(e) {
         // ignore clicks on the component itself
-        if(document.querySelector('section.emoji-mart') !== null) {
+        if (document.querySelector('section.emoji-mart') !== null) {
             this.setState({
                 showsticker: !document.querySelector('section.emoji-mart').contains(e.target) || e.key === "Escape"
-            })
+            });
             this.togglesticker()
         }
     }
@@ -99,6 +99,9 @@ export default class Post extends React.Component {
             showsticker: !this.state.showsticker
         })
     };
+    showPost = () => {
+
+    };
 
     render() {
         return (
@@ -144,16 +147,15 @@ export default class Post extends React.Component {
 
                             >
                                 <MDBCarouselInner>
-                                    {this.props.postimages.map((o,id) => {
+                                    {this.props.postimages.map((o, id) => {
                                         return (
                                             <MDBCarouselItem itemId={id + 1}>
                                                 <MDBView>
-                                                    {/*<img*/}
-                                                    {/*    className="d-block w-100"*/}
-                                                    {/*    src={o}*/}
-                                                    {/*    alt={`image ${id + 1}`}*/}
-                                                    {/*/>*/}
-                                                    <PostVideo src={"https://ericanthony.website/portofolio/uh_shop.mp4"} type={"video/mp4"}/>
+                                                    <img
+                                                        className="d-block w-100"
+                                                        src={o}
+                                                        alt={`image ${id + 1}`}
+                                                    />
                                                 </MDBView>
                                             </MDBCarouselItem>
                                         )
@@ -172,11 +174,14 @@ export default class Post extends React.Component {
                                 <MDBIcon className={"pointer"} far icon="comment"/>
                             </div>
                             <div className="description">
-                                <span className="bolder">{this.state.postlikes < 0 ? <span>&infin;</span> : this.state.postlikes} likes</span>
+                                <span className="bolder">{this.state.postlikes < 0 ?
+                                    <span>&infin;</span> : this.state.postlikes} likes</span>
                                 <div className={"img_desc normalweight"}><span
                                     className={"bolder pointer normalweight"}>{this.props.postusername}</span> {this.props.postcaption}
                                 </div>
-                                <div className={"pointer mt-2 mb-2"}>View all {this.props.totalcomment < 0 ? <span>&infin;</span> : this.props.totalcomment} Comments</div>
+                                <div className={"pointer mt-2 mb-2"}>View all {this.props.totalcomment < 0 ?
+                                    <span>&infin;</span> : this.props.totalcomment} Comments
+                                </div>
                                 <div id="comment-container">
                                     {this.props.comments.map(o => {
                                         return <Comment data={o}/>

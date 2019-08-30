@@ -10,13 +10,16 @@ import {
     MDBInput,
     MDBBtn,
 } from "mdbreact";
-import {Link} from "react-router-dom";
-import {toast} from "react-toastify";
+import {toast, ToastContainer} from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 import {Picker} from "emoji-mart";
 import Post from "./template/Post";
+import axios from 'axios'
+import {api_url} from "../global";
+import {connect} from "react-redux";
+import {logout} from "../redux/actions";
 
-
-export default class AddPost extends React.Component {
+class AddPost extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -32,9 +35,24 @@ export default class AddPost extends React.Component {
     addPost = () => {
         const formdata = new FormData();
         for (let i = 0; i < this.state.file.length; i++) {
-            formdata.append('post', this.state.file[i])
+            formdata.append('image', this.state.file[i])
         }
-        formdata.append('caption', this.state.caption)
+        formdata.append('caption', this.state.caption);
+        formdata.append('token', this.props.token);
+        axios.post(`${api_url}addpost`,formdata,{
+            headers:{
+                "Content-Type":"multipart/form-data;charset=utf-8"
+            }
+        }).then(res =>{
+            this.props.history.push('/')
+        }).catch(err => {
+            console.log(err);
+            toast.error("Session Expire please Login again");
+            setTimeout(async () => {
+                await this.props.logout() //prevent concurrency
+                this.props.history.push('/login')
+            },1000)
+        })
     };
 
     handleOutsideClick(e) {
@@ -106,6 +124,7 @@ export default class AddPost extends React.Component {
     render() {
         return (
             <MDBContainer>
+                <ToastContainer enableMultiContainer position={toast.POSITION.TOP_RIGHT}/>
                 <MDBRow>
                     <MDBCol lg="6">
                         <MDBCard className="d-flex justify-content-center w-100 form-container"
@@ -123,7 +142,7 @@ export default class AddPost extends React.Component {
                                             Image
                                         </button>
                                         <input type="file" multiple onChange={this.filechoosen} ref={"uploadpost"}
-                                               accept={'image/*'} style={{display: "none"}}/>
+                                               accept={'.jpg,.jpeg,.png,.pneg,.mp4,.mov'} style={{display: "none"}}/>
                                     </div>
                                     <div className="md-form form-group">
                                         <div className="md-form usercomment w-100">
@@ -214,3 +233,12 @@ export default class AddPost extends React.Component {
         )
     }
 }
+
+const mapStateToProps = state => {
+    return {
+        token: state.user.token,
+    }
+}
+
+export default connect(mapStateToProps,{logout})(AddPost)
+

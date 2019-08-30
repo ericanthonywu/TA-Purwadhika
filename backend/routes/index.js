@@ -29,9 +29,13 @@ router.get('/verify/:token', authController.verify);
 router.post('/register', authController.register);
 router.post('/checkemail', authController.checkemail);
 router.post('/checkusername', authController.checkusername);
+router.post('/checktoken', authController.checktoken);
+
+//dashboard route
+router.post('/dashboard',authMiddleware.dashboardcheck,showController.dashboard);
 
 //profile route
 router.post('/getprofile', authMiddleware.authcheck, showController.profile);
-router.post('/addpost',uploadPost.array('image', 10), authMiddleware.authcheck, showController.addPost);
+router.post('/addpost',uploadPost.array('image', 10), authMiddleware.fileauthcheck, showController.addPost);
 
 module.exports = router;

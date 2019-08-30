@@ -5,7 +5,7 @@ export default (state = INITIAL_STATE,action) => {
         case 'addCart':
             return {...INITIAL_STATE,produk:action.payload.produk,qty:action.payload.qty};
         case 'removeCart':
-            return {...INITIAL_STATE,produk: 0,}
+            return {...INITIAL_STATE,produk: 0,};
         default:
             return state
     }

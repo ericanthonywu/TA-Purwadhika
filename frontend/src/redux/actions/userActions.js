@@ -9,3 +9,15 @@ export const logout = () => {
         type: 'logout'
     }
 }
+export const setloggedin = payload => {
+    return {
+        type: 'setLoggedIn',
+        payload:payload
+    }
+}
+export const updateToken = payload => {
+    return {
+        type: 'updateToken',
+        payload:payload
+    }
+}

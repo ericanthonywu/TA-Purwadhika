@@ -2,7 +2,13 @@ import React, {Component} from 'react';
 import {Route, withRouter, Switch, Link} from "react-router-dom";
 import {
     MDBBtn,
-    MDBCollapse, MDBDropdown, MDBDropdownItem, MDBDropdownMenu, MDBDropdownToggle, MDBFormInline, MDBIcon,
+    MDBCollapse,
+    MDBDropdown,
+    MDBDropdownItem,
+    MDBDropdownMenu,
+    MDBDropdownToggle,
+    MDBFormInline,
+    MDBIcon,
     MDBNavbar,
     MDBNavbarBrand,
     MDBNavbarNav,
@@ -16,10 +22,10 @@ import Login from './views/Login'
 import Profile from "./views/Profile";
 import Error404 from "./views/template/404";
 import AddPost from "./views/AddPost";
-import CheckToken from "./views/template/CheckToken";
+import {withAuth} from "./views/template/CheckToken";
 
 import {connect} from "react-redux";
-import {login,logout} from "./redux/actions";
+import {login,logout,setloggedin} from "./redux/actions";
 
 class App extends Component {
     constructor(a) {
@@ -30,8 +36,12 @@ class App extends Component {
         };
     }
 
-
-
+    onLogout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('username');
+        this.props.logout();
+        this.props.history.push('/');
+    }
     toggleCollapse = () => {
         this.setState({isOpen: !this.state.isOpen});
     };
@@ -46,7 +56,6 @@ class App extends Component {
     };
 
     componentDidMount() {
-        console.log(this.props)
         const {location} = this.props;
         const allnav = document.querySelectorAll('.navbar-item,.nav-link');
         const pathname = location.pathname.split('/')[1];
@@ -66,9 +75,12 @@ class App extends Component {
             }
         }
         if(localStorage.getItem('token') !== "" && localStorage.getItem('username') !== ""){
-            this.setState({
-                loggedin:true
+            this.props.setloggedin({
+                username: localStorage.getItem('username'),
+                token: localStorage.getItem('token'),
             })
+        }else{
+            this.props.logout()
         }
     }
 
@@ -99,38 +111,31 @@ class App extends Component {
                                     </div>
                                 </MDBFormInline>
                             </MDBNavItem>
-                            {!this.props.loggedin
+                            {this.props.loggedin
                                 ?
-                                <>
                                     <MDBNavItem>
-                                        <MDBNavLink to={'/login'}><MDBBtn gradient={"purple"}>Login</MDBBtn></MDBNavLink>
+                                        <MDBDropdown>
+                                            <MDBDropdownToggle nav caret>
+                                                <MDBIcon icon="user" />
+                                            </MDBDropdownToggle>
+                                            <MDBDropdownMenu className="dropdown-default">
+                                                <MDBDropdownItem>Hi, {this.props.username}</MDBDropdownItem>
+                                                <MDBDropdownItem><Link to={`/profile/${this.props.username}`}>My Profile</Link> </MDBDropdownItem>
+                                                <MDBDropdownItem><Link to={'addpost'}>Add Post</Link></MDBDropdownItem>
+                                                <MDBDropdownItem onClick={this.onLogout}>logout</MDBDropdownItem>
+                                            </MDBDropdownMenu>
+                                        </MDBDropdown>
                                     </MDBNavItem>
-                                    <MDBNavItem>
-                                        <MDBNavLink to={'/register'}><MDBBtn gradient={"aqua"}>Register</MDBBtn></MDBNavLink>
-                                    </MDBNavItem>
-                                </>
                                 :
-                                <MDBNavItem>
-                                    <MDBDropdown>
-                                        <MDBDropdownToggle nav caret>
-                                            <MDBIcon icon="user" />
-                                        </MDBDropdownToggle>
-                                        <MDBDropdownMenu className="dropdown-default">
-                                            <MDBDropdownItem>Hi, {this.props.username}</MDBDropdownItem>
-                                            <MDBDropdownItem><Link to={`/profile/${this.props.username}`}>My Profile</Link> </MDBDropdownItem>
-                                            <MDBDropdownItem><Link to={'addpost'}>Add Post</Link></MDBDropdownItem>
-                                            <MDBDropdownItem onClick={() => {
-                                                localStorage.removeItem('token');
-                                                localStorage.removeItem('username');
-                                                this.props.logout()
-                                                this.props.history.push('/')
-                                            }}>logout</MDBDropdownItem>
-                                        </MDBDropdownMenu>
-                                    </MDBDropdown>
-                                </MDBNavItem>
+                                    <>
+                                        <MDBNavItem>
+                                        <MDBNavLink to={'/login'}><MDBBtn gradient={"purple"}>Login</MDBBtn></MDBNavLink>
+                                        </MDBNavItem>
+                                        <MDBNavItem>
+                                        <MDBNavLink to={'/register'}><MDBBtn gradient={"aqua"}>Register</MDBBtn></MDBNavLink>
+                                        </MDBNavItem>
+                                    </>
                             }
-
-
                         </MDBNavbarNav>
                     </MDBCollapse>
                 </MDBNavbar>
@@ -138,8 +143,8 @@ class App extends Component {
                     <Route path={'/'} exact component={DashboardPage}/>
                     <Route path={'/login'} exact component={Login}/>
                     <Route path={'/register'} exact component={Register}/>
-                    <Route path={'/profile/:profile'} component={CheckToken(Profile)}/>
-                    <Route path={'/addpost'} component={CheckToken(AddPost)}/>
+                    <Route path={'/profile/:profile'} component={withAuth(Profile)}/>
+                    <Route path={'/addpost'} component={withAuth(AddPost)}/>
                     <Route component={Error404}/>
                 </Switch>
 
@@ -154,4 +159,4 @@ const mapStateToProps = state => {
         loggedin: state.user.loggedin
     }
 }
-export default withRouter(connect(mapStateToProps,{login,logout})(App))
+export default withRouter(connect(mapStateToProps,{login,logout,setloggedin})(App))
