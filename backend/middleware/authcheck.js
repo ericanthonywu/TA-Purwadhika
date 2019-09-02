@@ -54,15 +54,16 @@ exports.dashboardcheck = (req, res, next) => {
     if(req.body.token) {
         jwt.verify(req.body.token, "ysn852jd48", (err, data) => {
             if(err){
-                res.status(500).json({
+                return res.status(500).json({
                     message: err.message,
                 });
-                return;
+            }else {
+                res.userdata = data;
+                next()
             }
-            res.userdata = data;
         })
     }else{
         res.userdata = null;
+        next()
     }
-    next()
 };

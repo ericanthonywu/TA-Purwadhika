@@ -19,8 +19,10 @@ import 'emoji-mart/css/emoji-mart.css'
 import {Picker} from 'emoji-mart'
 import Comment from './Comment'
 import PostVideo from "./postvideo";
+import {post_url, profile_url} from "../../global";
+import {connect} from "react-redux";
 
-export default class Post extends React.Component {
+class Post extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -99,9 +101,6 @@ export default class Post extends React.Component {
             showsticker: !this.state.showsticker
         })
     };
-    showPost = () => {
-
-    };
 
     render() {
         return (
@@ -110,7 +109,7 @@ export default class Post extends React.Component {
                     <MDBRow>
                         <MDBCol size="12" className={"w-100"}>
                             <div className={"float-left flex"}>
-                                <img src={this.props.postprofilepicture}
+                                <img src={profile_url + this.props.postprofilepicture}
                                      className="round mr-3"
                                      alt="aligment" width={60}/>
                                 <div className={"user-info"}>
@@ -153,7 +152,7 @@ export default class Post extends React.Component {
                                                 <MDBView>
                                                     <img
                                                         className="d-block w-100"
-                                                        src={o}
+                                                        src={post_url + o}
                                                         alt={`image ${id + 1}`}
                                                     />
                                                 </MDBView>
@@ -179,8 +178,8 @@ export default class Post extends React.Component {
                                 <div className={"img_desc normalweight"}><span
                                     className={"bolder pointer normalweight"}>{this.props.postusername}</span> {this.props.postcaption}
                                 </div>
-                                <div className={"pointer mt-2 mb-2"}>View all {this.props.totalcomment < 0 ?
-                                    <span>&infin;</span> : this.props.totalcomment} Comments
+                                <div className={"pointer mt-2 mb-2"}>View {this.props.totalcomment > 10 ? "all" : ""} {this.props.totalcomment < 0 ?
+                                    <span>&infin;</span> : this.props.totalcomment} Comment{this.props.totalcomment > 1 ? "s" : ""}
                                 </div>
                                 <div id="comment-container">
                                     {this.props.comments.map(o => {
@@ -219,4 +218,12 @@ export default class Post extends React.Component {
         );
     }
 
+}
+
+const mapStateToProps = state => {
+    return {
+        id: state.user._id
+    }
 };
+
+export default connect(mapStateToProps)(Post)

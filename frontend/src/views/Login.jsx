@@ -37,9 +37,13 @@ class Login extends React.Component {
             toast.success('Berhasil Login');
             localStorage.setItem('token', res.data._token);
             localStorage.setItem('username', res.data.username);
+            localStorage.setItem('profile_picture', res.data.profile_picture);
+            localStorage.setItem('_id', res.data._id);
             this.props.login({
                 token: res.data._token,
                 username: res.data.username,
+                profile_picture: res.data.profile_picture,
+                _id:res.data._id,
                 loggedin: true,
             })
             setTimeout(() => {

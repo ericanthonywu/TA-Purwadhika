@@ -37,7 +37,7 @@ exports.login = (req, res, next) => {
                     if (data.email_st == 1) {
                         jwt.sign(
                             {
-                                id:data._id,
+                                id: data._id,
                                 username: data.username,
                                 email: email
                             },
@@ -50,10 +50,11 @@ exports.login = (req, res, next) => {
                                     res.status(200).json({
                                         _token: token,
                                         username: data.username,
-                                        _id: data._id
+                                        _id: data._id,
+                                        profile_picture: data.profilepicture
                                     });
                                 }
-                                return;
+
                             }
                         );
                         return;
@@ -64,7 +65,7 @@ exports.login = (req, res, next) => {
                     return;
                 }
                 res.status(401).json({
-                    message:"Password Incorrect"
+                    message: "Password Incorrect"
                 })
             })
         })
@@ -406,8 +407,7 @@ exports.verify = (req, res, next) => {
     user.findOneAndUpdate(
         req.params,
         {email_st: 1},
-        {upsert: true},
-        (err, doc) => {
+        err => {
             if (err)
                 return res.status(500).json({
                     err: err
@@ -430,27 +430,26 @@ exports.checkusername = (req, res, next) => {
         });
     });
 };
-exports.checktoken = (req,res,next) => {
-    jwt.verify(req.body.token,"ysn852jd48",(err,data)=>{
-        if(err){
+exports.checktoken = (req, res, next) => {
+    jwt.verify(req.body.token, "ysn852jd48", (err, data) => {
+        if (err) {
             res.status(500).send({
-                err:err
-            })
+                err: err
+            });
             return
         }
-        user.findOne({_id:data.id},(err,data)=>{
+        user.findOne({_id: data.id}, (err, data) => {
             jwt.sign({
-                    id:data._id,
+                    id: data._id,
                     username: data.username,
                     email: data.email
                 },
                 "ysn852jd48",
-                {expiresIn: "1h"},(err,token)=>{
+                {expiresIn: "1h"}, (err, token) => {
                     res.status(200).send({
-                        token:token
+                        token: token
                     })
                 })
-
         });
     })
-}
+};

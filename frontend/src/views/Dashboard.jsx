@@ -2,38 +2,68 @@ import React from "react";
 import {MDBCol, MDBContainer, MDBRow} from "mdbreact";
 import {connect} from "react-redux";
 import Post from './template/Post'
+import axios from 'axios'
+import {api_url, backend_url} from "../global";
+import moment from "moment";
+import socketio from "socket.io-client";
 
 class Dashboard extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            loading:true,
-            pagination: 0
+            loading: true,
+            pagination: 0,
+            post: []
         }
     }
 
     componentDidMount() {
-        setTimeout(() => {
+        const socket = socketio(backend_url,{
+            query: {
+                token:localStorage.getItem('token'),
+                offset: this.state.pagination
+            }
+        });
+        socket.emit('get post',{
+            token: localStorage.getItem('token'),
+            offset: this.state.pagination
+        });
+        socket.on('show post',post => {
+
+        })
+        axios.post(`${api_url}dashboard`, {
+            token: localStorage.getItem('token'),
+            offset: this.state.pagination
+        }).then(res => {
             this.setState({
-                loading:false
-            })
-        },2000)
-        document.addEventListener('scroll',this.infiniteScroll)
+                loading: false,
+                post: res.data.post
+            });
+        }).catch(err => {
+            if(err.data.message === "jwt expired"){
+                alert('Session Expired');
+                this.props.history.push('/')
+            }else {
+                alert('Error Connection, Please try again');
+
+            }
+        });
+        document.addEventListener('scroll', this.infiniteScroll)
     }
+
     componentWillUnmount() {
-        document.removeEventListener('scroll',this.infiniteScroll);
+        document.removeEventListener('scroll', this.infiniteScroll);
     }
 
     infiniteScroll = (e) => {
         // console.log(e.target.scrollingElement.)
-        if((e.target.scrollingElement.scrollHeight - e.target.scrollingElement.scrollTop) === e.target.scrollingElement.clientHeight){ //Mentok di bawah
+        if ((e.target.scrollingElement.scrollHeight - e.target.scrollingElement.scrollTop) === e.target.scrollingElement.clientHeight) { //Mentok di bawah
             this.setState({
-                pagination:this.state.pagination+1
-            })
-            console.log(this.state.pagination)
+                pagination: this.state.pagination + 10
+            });
         }
 
-    }
+    };
 
     render() {
         return (
@@ -52,93 +82,46 @@ class Dashboard extends React.Component {
                         </div>
                     </div>
                     :
-                <MDBContainer>
-                    <MDBRow>
-                        <MDBCol size={8} className={"home_dashboard"}>
-                            <div className={"post"}>
-                                <Post
-                                    id={1}
-                                    postusername={"Eric Anthony"}
-                                    posttime={"4 hours"}
-                                    postprofilepicture={"https://mdbootstrap.com/img/Photos/Avatars/avatar-1.jpg"}
-                                    postcaption={"Hello World!"}
-                                    totalcomment={100}
-                                    postlikes={319}
-                                    likestatus={true}
-                                    postimages={[
-                                        "https://mdbootstrap.com/img/Photos/Slides/img%20(130).jpg",
-                                        "https://mdbootstrap.com/img/Photos/Slides/img%20(129).jpg",
-                                        "https://mdbootstrap.com/img/Photos/Slides/img%20(70).jpg",
-                                    ]}
-                                    comments={[
-                                        {
-                                            "id": 1,
-                                            "username": "user1",
-                                            "comment": "wwkwk gblok wwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblok",
-                                            "like": 157,
-                                            "time": "14 h",
-                                            "profile": "https://mdbootstrap.com/img/Photos/Avatars/avatar-1.jpg",
-                                            "likestatus": false,
-                                        },
-                                        {
-                                            "id": 2,
-                                            "username": "user2",
-                                            "comment": "apaan nih",
-                                            "like": 1,
-                                            "time": "2 min",
-                                            "profile": "https://mdbootstrap.com/img/Photos/Avatars/avatar-2.jpg",
-                                            "likestatus": true,
-                                        }
-                                    ]}
-                                />
-                                <Post
-                                    id={2}
-                                    postusername={"Eric Anthony"}
-                                    posttime={"4 hours"}
-                                    postprofilepicture={"https://mdbootstrap.com/img/Photos/Avatars/avatar-1.jpg"}
-                                    postcaption={"Hello World!"}
-                                    totalcomment={100}
-                                    postlikes={319}
-                                    likestatus={false}
-                                    postimages={[
-                                        "https://mdbootstrap.com/img/Photos/Slides/img%20(130).jpg",
-                                        "https://mdbootstrap.com/img/Photos/Slides/img%20(129).jpg",
-                                        "https://mdbootstrap.com/img/Photos/Slides/img%20(70).jpg",
-                                    ]}
-                                    comments={
-                                        [
-                                            {
-                                                "id": 1,
-                                                "username": "user1",
-                                                "comment": "wwkwk gblok wwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblokwwkwk gblok",
-                                                "like": 157,
-                                                "time": "14 h",
-                                                "profile": "https://mdbootstrap.com/img/Photos/Avatars/avatar-1.jpg",
-                                                "likestatus": false,
-                                            },
-                                            {
-                                                "id": 2,
-                                                "username": "user1",
-                                                "comment": "apaan nih",
-                                                "like": 1,
-                                                "time": "2 min",
-                                                "profile": "https://mdbootstrap.com/img/Photos/Avatars/avatar-2.jpg",
-                                                "likestatus": true,
-                                            }
-                                        ]
+                    <MDBContainer>
+                        <MDBRow>
+                            <MDBCol size={9} className={"home_dashboard"}>
+                                <div className={"post"}>
+                                    {
+                                        this.state.post.length
+                                            ?
+                                        this.state.post.map(o => {
+                                            return (
+                                                <Post
+                                                    id={o.id}
+                                                    postusername={o.user.username}
+                                                    posttime={moment(o.createdAt).fromNow()}
+                                                    postprofilepicture={o.user.profilepicture}
+                                                    postcaption={o.caption}
+                                                    totalcomment={o.comments.length}
+                                                    postlikes={o.like.length}
+                                                    likestatus={o.like.includes(this.props.id)}
+                                                    postimages={o.image}
+                                                    comments={o.comments}
+                                                />
+                                            )
+                                        })
+                                            :
+                                        <h1>Upload Post to be shared to your friends! :)</h1>
                                     }
-                                />
-                            </div>
-                        </MDBCol>
-                        <MDBCol size={4} className={"home_data"}>
-
-                        </MDBCol>
-                    </MDBRow>
-                </MDBContainer>
+                                </div>
+                            </MDBCol>
+                        </MDBRow>
+                    </MDBContainer>
                 }
             </div>
         );
     }
+}
 
+const mapStateToProps = state => {
+    return {
+        token: state.user.token,
+        id: state.user._id
+    }
 };
-export default connect(null,{})(Dashboard)
+export default connect(mapStateToProps)(Dashboard)

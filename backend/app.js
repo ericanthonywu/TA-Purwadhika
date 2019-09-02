@@ -7,14 +7,31 @@ const path = require('path');
 const app = express();
 const io = require('socket.io')();
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
+//model
+const model = require('./model');
+const Post = model.post;
+const User = model.user;
 app.io = io;
 
-// const socketIOController = require('./app/controllers/chat')(app.io);
-io.emit('send chat', 'users');
 io.on("connection", socket => {
-    io.emit('send chat', 'users');
-    console.log("A user connected s");
+    const {token,offset} = socket.handshake.query;
+    let userdata = {};
+    if(token) {
+        jwt.verify(token, "ysn852jd48", (err, data) => {
+            if (err) {
+                io.sockets.emit('error',"error");
+            }
+            userdata = data;
+        })
+    }
+
+    socket.on('send chat',msg => {
+        io.sockets.emit('show chat',msg);
+        console.log(msg)
+    })
 });
+
 app.use((req, res, next) => {
     req.io = io;
     next()
@@ -36,7 +53,8 @@ app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/uploads', express.static('uploads'));
+
+app.use('/uploads', express.static('uploads')); //ngasih akses folder uploads
 
 app.use('/web', indexRouter);
 app.use('/mobile', usersRouter);

@@ -4,50 +4,18 @@ import axios from 'axios'
 import {api_url} from "../../global";
 import {connect} from 'react-redux'
 import {updateToken, logout} from "../../redux/actions";
+import {toast} from "react-toastify";
 
 export const withAuth = ComponentToProtect => {
-    const mapStateToProps = state => ({
-        token: state.user.token
-    });
-
     class CheckToken extends Component {
         constructor(a) {
             super(a);
-            this.state = {
-                loggedin: true
-            }
         }
 
-        // componentWillReceiveProps(nextProps, nextContext)  {
-        //     if (nextProps.token) {
-        //         axios.post(`${api_url}checktoken`, {
-        //             token: nextProps.token
-        //         })
-        //             .then(async res => {
-        //                 const loadData = () => {
-        //                     this.props.updateToken({
-        //                         token: res.data.token
-        //                     });
-        //                     localStorage.setItem('token', res.data.token);
-        //                 };
-        //                 await loadData();
-        //                 this.setState({
-        //                     loggedin: true
-        //                 })
-        //             })
-        //             .catch(err => {
-        //                 nextProps.logout();
-        //                 this.setState({loggedin: false})
-        //             })
-        //     }else{
-        //         nextProps.logout();
-        //         this.setState({loggedin: false})
-        //     }
-        // }
-        componentDidMount() {
-            if (this.props.token) {
+        componentWillReceiveProps(nextProps, nextContext)  {
+            if (nextProps.token) {
                 axios.post(`${api_url}checktoken`, {
-                    token: this.props.token
+                    token: nextProps.token
                 })
                     .then(async res => {
                         const loadData = () => {
@@ -62,27 +30,91 @@ export const withAuth = ComponentToProtect => {
                         })
                     })
                     .catch(err => {
-                        this.props.logout();
+                        nextProps.logout();
                         this.setState({loggedin: false})
                     })
             }else{
-                this.props.logout();
+                nextProps.logout();
                 this.setState({loggedin: false})
             }
         }
+        // componentWillMount() {
+        //     if (this.props.token) {
+        //         axios.post(`${api_url}checktoken`, {
+        //             token: this.props.token
+        //         }).then(async res => {
+        //             const loadData = () => {
+        //                 this.props.updateToken({
+        //                     token: res.data.token
+        //                 });
+        //                 localStorage.setItem('token', res.data.token);
+        //             };
+        //             await loadData();
+        //             this.setState({
+        //                 loggedin: true
+        //             })
+        //         })
+        //             .catch(err => {
+        //                 this.props.logout();
+        //                 this.setState({loggedin: false})
+        //             })
+        //     }else{
+        //         this.props.logout();
+        //         this.setState({loggedin: false})
+        //     }
+        // }
+
+        componentWillMount() {
+            this.setState({
+                loggedin: localStorage.getItem('token')
+            })
+        }
+
+        // async checktoken(){
+        //     if (this.props.token) {
+        //         axios.post(`${api_url}checktoken`, {
+        //             token: this.props.token
+        //         }).then(async res => {
+        //             const loadData = () => {
+        //                 this.props.updateToken({
+        //                     token: res.data.token
+        //                 });
+        //                 localStorage.setItem('token', res.data.token);
+        //             };
+        //             await loadData();
+        //             return true
+        //         })
+        //             .catch(async err => {
+        //                 await this.props.logout();
+        //                 return false;
+        //             })
+        //     }else{
+        //         await this.props.logout();
+        //         return false
+        //     }
+        // }
 
         render() {
-            if (this.state.loggedin) {
-                return (
-                    <React.Fragment>
-                        <ComponentToProtect {...this.props} />
-                    </React.Fragment>
-                );
-            } else {
-                return <Error404/>
-            }
+            // new Promise((resolve, reject) => {
+            //     resolve(this.checktoken())
+            // }).then(check => {
+                if (this.state.loggedin) {
+                    return (
+                        <React.Fragment>
+                            <ComponentToProtect {...this.props} />
+                        </React.Fragment>
+                    );
+                } else {
+                    return <Error404/>
+                }
+
+            // });
         }
     }
+
+    const mapStateToProps = state => ({
+        token: state.user.token
+    });
 
     return connect(mapStateToProps, {updateToken, logout})(CheckToken)
 };

@@ -14,7 +14,10 @@ import {
     MDBNavbarNav,
     MDBNavbarToggler,
     MDBNavItem,
-    MDBNavLink
+    MDBNavLink,
+    MDBContainer,
+    MDBRow,
+    MDBCol
 } from "mdbreact";
 import DashboardPage from './views/Dashboard'
 import Register from './views/Register'
@@ -23,6 +26,7 @@ import Profile from "./views/Profile";
 import Error404 from "./views/template/404";
 import AddPost from "./views/AddPost";
 import {withAuth} from "./views/template/CheckToken";
+import Chat from "./views/Chat";
 
 import {connect} from "react-redux";
 import {login,logout,setloggedin} from "./redux/actions";
@@ -74,7 +78,7 @@ class App extends Component {
                 allnav[x].closest('.nav-item').classList.add('active')
             }
         }
-        if(localStorage.getItem('token') !== "" && localStorage.getItem('username') !== ""){
+        if(localStorage.getItem('token') && localStorage.getItem('username')){
             this.props.setloggedin({
                 username: localStorage.getItem('username'),
                 token: localStorage.getItem('token'),
@@ -139,15 +143,106 @@ class App extends Component {
                         </MDBNavbarNav>
                     </MDBCollapse>
                 </MDBNavbar>
+                <div className={"chat-container"}>
+                    <div>
+                        <img src="https://github.githubassets.com/favicon.ico" alt=""/>
+                        <span>github</span>
+                        <span className={"online"}>
+
+                        </span>
+                    </div>
+                    <div>
+                        <img src="https://github.githubassets.com/favicon.ico" alt=""/>
+                        <span>github</span>
+                        <span className={"online"}>
+
+                        </span>
+                    </div>
+                    <div>
+                        <img src="https://github.githubassets.com/favicon.ico" alt=""/>
+                        <span>github</span>
+                        <span className={"online"}>
+
+                        </span>
+                    </div>
+                    <div>
+                        <img src="https://github.githubassets.com/favicon.ico" alt=""/>
+                        <span>github</span>
+                        <span className={"online"}>
+
+                        </span>
+                    </div>
+                    <div>
+                        <img src="https://github.githubassets.com/favicon.ico" alt=""/>
+                        <span>github</span>
+                        <span className={"online"}></span>
+                    </div>
+                    <div>
+                        <img src="https://github.githubassets.com/favicon.ico" alt=""/>
+                        <span>github</span>
+                        <span className={"online"}>
+
+                        </span>
+                    </div>
+                    <div>
+                        <img src="https://github.githubassets.com/favicon.ico" alt=""/>
+                        <span>github</span>
+                        <span className={"online"}>
+
+                        </span>
+                    </div>
+                    <div>
+                        <img src="https://github.githubassets.com/favicon.ico" alt=""/>
+                        <span>github</span>
+                        <span className={"online"}>
+
+                        </span>
+                    </div>
+                    <div>
+                        <img src="https://github.githubassets.com/favicon.ico" alt=""/>
+                        <span>github</span>
+                        <span className={"online"}>
+
+                        </span>
+                    </div>
+                    <div>
+                        <img src="https://github.githubassets.com/favicon.ico" alt=""/>
+                        <span>github</span>
+                        <span className={"online"}>
+
+                        </span>
+                    </div>
+                    <div>
+                        <img src="https://github.githubassets.com/favicon.ico" alt=""/>
+                        <span>github</span>
+                        <span className={"online"}>
+
+                        </span>
+                    </div>
+                    <div>
+                        <img src="https://github.githubassets.com/favicon.ico" alt=""/>
+                        <span>github</span>
+                        <span className={"online"}>
+
+                        </span>
+                    </div>
+                    <div>
+                        <img src="https://github.githubassets.com/favicon.ico" alt=""/>
+                        <span>github</span>
+                        <span className={"online"}>
+
+                        </span>
+                    </div>
+                </div>
                 <Switch>
                     <Route path={'/'} exact component={DashboardPage}/>
                     <Route path={'/login'} exact component={Login}/>
                     <Route path={'/register'} exact component={Register}/>
                     <Route path={'/profile/:profile'} component={withAuth(Profile)}/>
                     <Route path={'/addpost'} component={withAuth(AddPost)}/>
+                    <Route path={'/chat'} component={Chat}/>
                     <Route component={Error404}/>
                 </Switch>
-
             </div>
         )
     }
