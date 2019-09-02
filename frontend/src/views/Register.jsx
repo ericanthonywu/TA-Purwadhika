@@ -14,8 +14,8 @@ import {
 import {Link} from "react-router-dom";
 import axios from "axios"
 import {toast, ToastContainer} from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import {api_url} from "../global";
+
+import {api_url, backend_url} from "../global";
 
 export default class Register extends React.Component {
     constructor(props) {
@@ -123,7 +123,7 @@ export default class Register extends React.Component {
         } else {
             switch (e.target.name) {
                 case "email":
-                    axios.post('http://localhost:3000/web/checkemail', {
+                    axios.post(`${backend_url}checkemail`, {
                         email: e.target.value
                     }).then(r => {
                         this.validinput(e);
@@ -138,7 +138,7 @@ export default class Register extends React.Component {
                     });
                     break;
                 case "username":
-                    axios.post('http://localhost:3000/web/checkusername', {
+                    axios.post(`${backend_url}checkusername`, {
                         username: e.target.value
                     }).then(r => {
                         this.validinput(e);

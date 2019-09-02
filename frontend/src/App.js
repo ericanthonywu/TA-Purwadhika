@@ -57,6 +57,9 @@ class App extends Component {
         }
         e.target.classList.add('active');
         e.target.closest('.nav-item').classList.add('active')
+        this.setState({
+            isOpen:false
+        })
     };
 
     componentDidMount() {
@@ -78,10 +81,12 @@ class App extends Component {
                 allnav[x].closest('.nav-item').classList.add('active')
             }
         }
-        if(localStorage.getItem('token') && localStorage.getItem('username')){
+        if(localStorage.getItem('token')){
             this.props.setloggedin({
                 username: localStorage.getItem('username'),
                 token: localStorage.getItem('token'),
+                _id: localStorage.getItem('_id'),
+                profilepicture: localStorage.getItem('profile_picture')
             })
         }else{
             this.props.logout()
@@ -124,19 +129,27 @@ class App extends Component {
                                             </MDBDropdownToggle>
                                             <MDBDropdownMenu className="dropdown-default">
                                                 <MDBDropdownItem>Hi, {this.props.username}</MDBDropdownItem>
-                                                <MDBDropdownItem><Link to={`/profile/${this.props.username}`}>My Profile</Link> </MDBDropdownItem>
-                                                <MDBDropdownItem><Link to={'addpost'}>Add Post</Link></MDBDropdownItem>
+                                                <MDBDropdownItem><Link onClick={() => this.setState({
+                                                    isOpen:false
+                                                })} to={`/profile/${this.props.username}`}>My Profile</Link></MDBDropdownItem>
+                                                    <MDBDropdownItem><Link onClick={() => this.setState({
+                                                    isOpen:false
+                                                    })} to={'addpost'}>Add Post</Link></MDBDropdownItem>
                                                 <MDBDropdownItem onClick={this.onLogout}>logout</MDBDropdownItem>
                                             </MDBDropdownMenu>
                                         </MDBDropdown>
                                     </MDBNavItem>
                                 :
                                     <>
-                                        <MDBNavItem>
-                                        <MDBNavLink to={'/login'}><MDBBtn gradient={"purple"}>Login</MDBBtn></MDBNavLink>
+                                        <MDBNavItem >
+                                        <MDBNavLink to={'/login'} ><MDBBtn onClick={() => this.setState({
+                                            isOpen:false
+                                        })} gradient={"purple"}>Login</MDBBtn></MDBNavLink>
                                         </MDBNavItem>
                                         <MDBNavItem>
-                                        <MDBNavLink to={'/register'}><MDBBtn gradient={"aqua"}>Register</MDBBtn></MDBNavLink>
+                                        <MDBNavLink to={'/register'}><MDBBtn onClick={() => this.setState({
+                                            isOpen:false
+                                        })} gradient={"aqua"}>Register</MDBBtn></MDBNavLink>
                                         </MDBNavItem>
                                     </>
                             }

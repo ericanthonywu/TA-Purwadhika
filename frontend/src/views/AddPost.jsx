@@ -11,7 +11,7 @@ import {
     MDBBtn,
 } from "mdbreact";
 import {toast, ToastContainer} from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
+
 import {Picker} from "emoji-mart";
 import Post from "./template/Post";
 import axios from 'axios'
@@ -39,19 +39,19 @@ class AddPost extends React.Component {
         }
         formdata.append('caption', this.state.caption);
         formdata.append('token', this.props.token);
-        axios.post(`${api_url}addpost`,formdata,{
-            headers:{
-                "Content-Type":"multipart/form-data;charset=utf-8"
+        axios.post(`${api_url}addpost`, formdata, {
+            headers: {
+                "Content-Type": "multipart/form-data;charset=utf-8"
             }
-        }).then(res =>{
+        }).then(res => {
             this.props.history.push('/')
         }).catch(err => {
             console.log(err);
             toast.error("Session Expire please Login again");
             setTimeout(async () => {
-                await this.props.logout() //prevent concurrency
+                await this.props.logout(); //prevent concurrency
                 this.props.history.push('/login')
-            },1000)
+            }, 1000)
         })
     };
 
@@ -237,8 +237,9 @@ class AddPost extends React.Component {
 const mapStateToProps = state => {
     return {
         token: state.user.token,
+        profilepicture: state.user.profilepicture
     }
-}
+};
 
-export default connect(mapStateToProps,{logout})(AddPost)
+export default connect(mapStateToProps, {logout})(AddPost)
 

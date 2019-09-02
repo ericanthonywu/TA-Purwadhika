@@ -36,6 +36,11 @@ router.post('/dashboard',authMiddleware.dashboardcheck,showController.dashboard)
 
 //profile route
 router.post('/getprofile', authMiddleware.authcheck, showController.profile);
+
+//post route
 router.post('/addpost',uploadPost.array('image', 10), authMiddleware.fileauthcheck, showController.addPost);
+router.post('/tooglelike',authMiddleware.authcheck,showController.togglelike);
+router.post('/comments',authMiddleware.authcheck,showController.comments);
+router.post('/toogleCommentLike',authMiddleware.authcheck,showController.toogleCommentLike);
 
 module.exports = router;

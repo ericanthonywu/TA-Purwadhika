@@ -19,18 +19,22 @@ import 'emoji-mart/css/emoji-mart.css'
 import {Picker} from 'emoji-mart'
 import Comment from './Comment'
 import PostVideo from "./postvideo";
-import {post_url, profile_url} from "../../global";
+import {api_url, post_url, profile_url} from "../../global";
 import {connect} from "react-redux";
+import {toast} from "react-toastify";
+import moment from "moment";
 
 class Post extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            comment: "",
             showsticker: false,
             postlikes: props.postlikes,
             commentlike: false,
-            likestatus: props.likestatus
+            likestatus: props.likestatus,
+            comments: props.comments,
+            tempComments:[],
+            showFullComments: false
         };
         this.handleOutsideClick = this.handleOutsideClick.bind(this);
         this.togglesticker = this.togglesticker.bind(this)
@@ -48,45 +52,84 @@ class Post extends React.Component {
 
 
     togglelike = e => {
-        if (e.target.classList.contains('fa')) {
-            e.target.classList.remove('fa');
-            e.target.classList.add('far');
-            this.setState({
-                postlikes: this.state.postlikes - 1
-            })
-        } else {
-            e.target.classList.remove('far');
-            e.target.classList.add('fa');
-            this.setState({
-                postlikes: this.state.postlikes + 1
-            })
+        if(this.props.loggedin) {
+            if (e.target.classList.contains('fa')) {
+                e.target.classList.remove('fa');
+                e.target.classList.add('far');
+                this.setState({
+                    postlikes: this.state.postlikes - 1
+                });
+                axios.post(`${api_url}tooglelike`, {
+                    token: this.props.token,
+                    id: this.props._id,
+                    action: "remove"
+                }).catch(err => {
+                    console.log(err)
+                    this.setState({
+                        postlikes: this.state.postlikes + 1
+                    })
+                })
+            } else {
+                e.target.classList.remove('far');
+                e.target.classList.add('fa');
+                this.setState({
+                    postlikes: this.state.postlikes + 1
+                })
+                axios.post(`${api_url}tooglelike`, {
+                    token: this.props.token,
+                    id: this.props._id,
+                    action: "add"
+                }).catch(err => {
+                    console.log(err)
+                    this.setState({
+                        postlikes: this.state.postlikes - 1
+                    })
+                })
+            }
+        }else{
+            toast.error('You need to logged In');
         }
     };
     handlecomment = e => {
-        if (e.keyCode == 13 && !e.shiftKey) {
-            axios.post("http://localhost:3000/api/comments", {
-                value: e.target.value,
-                id: this.props.id
+        if (e.keyCode === 13 && !e.shiftKey) {
+            const comments = e.target.value.replace(/\n$/, "");
+            e.target.value = "";
+            axios.post(`${api_url}comments`, {
+                value: comments,
+                id: this.props._id,
+                token: this.props.token,
             }).then(res => {
+                this.setState({
+                    tempComments: [...this.state.tempComments,{
+                        _id: res.data.id,
+                        comments: comments,
+                        like: 0,
+                        time: moment(),
+                        user: {
+                            username: this.props.username,
+                            // profilepicture: this.props.profilepicture
+                            profilepicture: localStorage.getItem('profile_picture')
+                        }
+                    }],
+                    comments: [...this.state.comments,{
+                        _id: res.data.id,
+                        comments: comments,
+                        like: 0,
+                        time: moment(),
+                        user: {
+                            username: this.props.username,
+                            profilepicture: localStorage.getItem('profile_picture')
+                        }
+                    }]
+                })
+            }).catch(err => {
 
-            }).catch(tes => {
-
-            });
-            this.setState({
-                comment: "",
-            })
-        } else {
-            this.setState({
-                comment: e.target.value,
             })
         }
     };
     addEmoji = e => {
         let emoji = e.native;
-        this.setState({
-            comment: this.state.comment += emoji,
-        });
-        console.log(this.state.comment)
+        this.refs.comment.value += emoji
     };
     togglesticker = () => {
         if (!this.state.showsticker) {
@@ -143,7 +186,6 @@ class Post extends React.Component {
                                 className="z-depth-1"
                                 interval={false}
                                 slide
-
                             >
                                 <MDBCarouselInner>
                                     {this.props.postimages.map((o, id) => {
@@ -152,7 +194,7 @@ class Post extends React.Component {
                                                 <MDBView>
                                                     <img
                                                         className="d-block w-100"
-                                                        src={post_url + o}
+                                                        src={this.state.postlikes < 0 ? o :post_url + o}
                                                         alt={`image ${id + 1}`}
                                                     />
                                                 </MDBView>
@@ -174,41 +216,55 @@ class Post extends React.Component {
                             </div>
                             <div className="description">
                                 <span className="bolder">{this.state.postlikes < 0 ?
-                                    <span>&infin;</span> : this.state.postlikes} likes</span>
+                                    <span>&infin;</span> : this.state.postlikes} like {this.state.postlikes > 1 ? "s" : ""}</span>
                                 <div className={"img_desc normalweight"}><span
                                     className={"bolder pointer normalweight"}>{this.props.postusername}</span> {this.props.postcaption}
                                 </div>
-                                <div className={"pointer mt-2 mb-2"}>View {this.props.totalcomment > 10 ? "all" : ""} {this.props.totalcomment < 0 ?
-                                    <span>&infin;</span> : this.props.totalcomment} Comment{this.props.totalcomment > 1 ? "s" : ""}
-                                </div>
-                                <div id="comment-container">
-                                    {this.props.comments.map(o => {
-                                        return <Comment data={o}/>
-                                    })}
-                                    <div className="comments mb-2">
-                                        <img src={"https://mdbootstrap.com/img/Photos/Avatars/avatar-1.jpg"}
-                                             className="round mr-3"
-                                             alt="aligment" width={40} height={"100%"}
-                                        />
-                                        <div className="md-form usercomment w-100">
-                                            {this.state.showsticker && <div className={"emoji-container"}>
-                                                <Picker set='emojione' title={"Choose Sticker"}
-                                                        onSelect={this.addEmoji}/>
-                                            </div>}
-                                            <textarea style={{paddingTop: 0}}
-                                                      className={"md-textarea comment-textarea form-control"}
-                                                      id={"usercomment"}
-                                                      onChange={this.handlecomment}
-                                                      value={this.state.comment}
-                                                      placeholder={"Enter Your Comments Here"}
-                                            >
-                                                {this.state.comment}
-                                            </textarea>
-                                            <MDBBtn className={"sticker"}
-                                                    onClick={this.togglesticker} size="lg" gradient="purple"><MDBIcon
-                                                far icon="laugh-beam"/></MDBBtn>
-                                        </div>
+                                {
+                                    !this.state.showFullComments ? <div onClick={() => this.setState({
+                                            showFullComments: true
+                                        })} className={"pointer mt-2 mb-2"}>View {this.props.totalcomment > 10 ? "all" : ""} {this.props.totalcomment < 0 ?
+                                        <span>&infin;</span> : this.props.totalcomment} Comment{this.props.totalcomment > 1 ? "s" : ""}
                                     </div>
+                                    :
+                                    null
+                                }
+                                <div id="comment-container" className={"mt-3"}>
+                                    {this.state.showFullComments ?
+                                        this.state.comments.map(o => {
+                                            return <Comment data={o} postid={this.props._id}/>
+                                        })
+                                        :
+                                        this.state.tempComments.map(o => {
+                                            return <Comment data={o} postid={this.props._id}/>
+                                        })
+                                    }
+                                    {this.props.loggedin ?
+                                        <div className="comments mb-2">
+                                            <img src={profile_url + this.props.postprofilepicture}
+                                                 className="round mr-3"
+                                                 alt="aligment" width={40} height={"100%"}
+                                            />
+                                            <div className="md-form usercomment w-100">
+                                                {this.state.showsticker && <div className={"emoji-container"}>
+                                                    <Picker set='emojione' title={"Choose Sticker"}
+                                                            onSelect={this.addEmoji}/>
+                                                </div>}
+                                                <textarea style={{paddingTop: 0}}
+                                                          className={"md-textarea comment-textarea form-control"}
+                                                          id={"usercomment"}
+                                                          onKeyUp={this.handlecomment}
+                                                          ref={"comment"}
+                                                          placeholder={"Enter Your Comments Here"}
+                                                />
+                                                <MDBBtn className={"sticker"}
+                                                        onClick={this.togglesticker} size="lg" gradient="purple"><MDBIcon
+                                                    far icon="laugh-beam"/></MDBBtn>
+                                            </div>
+                                        </div>
+                                        :
+                                        ""
+                                    }
                                 </div>
                             </div>
                         </MDBCol>
@@ -222,7 +278,11 @@ class Post extends React.Component {
 
 const mapStateToProps = state => {
     return {
-        id: state.user._id
+        id: state.user._id,
+        token: state.user.token,
+        loggedin: state.user.loggedin,
+        profilepicture: state.user.profilepicture,
+        username: state.user.username,
     }
 };
 

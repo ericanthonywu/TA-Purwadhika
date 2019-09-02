@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import 'bootstrap-css-only/css/bootstrap.min.css';
 import 'mdbreact/dist/css/mdb.css';
+import 'react-toastify/dist/ReactToastify.css';
 import "./assets/scss/mdb.scss"
 import "./assets/scss/_custom-styles.scss"
 import App from './App';

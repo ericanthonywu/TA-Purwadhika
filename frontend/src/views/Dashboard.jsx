@@ -6,6 +6,9 @@ import axios from 'axios'
 import {api_url, backend_url} from "../global";
 import moment from "moment";
 import socketio from "socket.io-client";
+import {toast, ToastContainer} from 'react-toastify';
+
+import {logout} from "../redux/actions";
 
 class Dashboard extends React.Component {
     constructor(props) {
@@ -40,12 +43,14 @@ class Dashboard extends React.Component {
                 post: res.data.post
             });
         }).catch(err => {
-            if(err.data.message === "jwt expired"){
-                alert('Session Expired');
-                this.props.history.push('/')
+            if(err.response.data && err.response.data.message === "jwt expired"){
+                toast.error('Session Expired');
+                setTimeout(async () => {
+                    await this.props.logout();
+                    this.props.history.push('/login');
+                },1000);
             }else {
-                alert('Error Connection, Please try again');
-
+                toast.error('Error Connection, Please try again');
             }
         });
         document.addEventListener('scroll', this.infiniteScroll)
@@ -67,7 +72,9 @@ class Dashboard extends React.Component {
 
     render() {
         return (
-            <div style={{paddingTop: 100}} id={'scroll-div'} onScroll={this.infiniteScroll}>
+            <>
+                <ToastContainer enableMultiContainer position={toast.POSITION.TOP_RIGHT}/>
+                <div style={{paddingTop: 100}} id={'scroll-div'} onScroll={this.infiniteScroll}>
                 {this.state.loading
                     ?
                     <div className={"container-loading"}>
@@ -92,7 +99,7 @@ class Dashboard extends React.Component {
                                         this.state.post.map(o => {
                                             return (
                                                 <Post
-                                                    id={o.id}
+                                                    _id={o._id}
                                                     postusername={o.user.username}
                                                     posttime={moment(o.createdAt).fromNow()}
                                                     postprofilepicture={o.user.profilepicture}
@@ -114,6 +121,7 @@ class Dashboard extends React.Component {
                     </MDBContainer>
                 }
             </div>
+            </>
         );
     }
 }
@@ -124,4 +132,4 @@ const mapStateToProps = state => {
         id: state.user._id
     }
 };
-export default connect(mapStateToProps)(Dashboard)
+export default connect(mapStateToProps,{logout})(Dashboard)

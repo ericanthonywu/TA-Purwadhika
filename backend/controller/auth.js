@@ -13,7 +13,7 @@ exports.login = (req, res, next) => {
             message: "Email / Password is Empty"
         });
     } else {
-        user.findOne({email: email}, (err, data) => {
+        user.findOne({email: email}).select('+password').exec((err, data) => {
             if (err) {
                 res.status(500).json({
                     error: err
@@ -405,14 +405,14 @@ exports.getlogin = (req, res, next) => {
 };
 exports.verify = (req, res, next) => {
     user.findOneAndUpdate(
-        req.params,
-        {email_st: 1},
+        {token: req.params.token},
+        {email_st: 1,token:""},
         err => {
             if (err)
                 return res.status(500).json({
                     err: err
                 });
-            return res.render("email");
+            return res.status(200).render("email");
         }
     );
 };
@@ -445,7 +445,7 @@ exports.checktoken = (req, res, next) => {
                     email: data.email
                 },
                 "ysn852jd48",
-                {expiresIn: "1h"}, (err, token) => {
+                {expiresIn: "24h"}, (err, token) => {
                     res.status(200).send({
                         token: token
                     })

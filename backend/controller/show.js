@@ -34,51 +34,120 @@ exports.addPost = (req, res) => {
 
 exports.dashboard = (req, res) => {
     const {offset} = req.body;
-    if (res.userdata) {
-        User.findOne({_id: res.userdata.id}, (err, data) => {
-            if (err) {
-                return res.status(500).json({err: err});
-            }
+    User.findOne(res.userdata ? {_id: res.userdata.id} : {}, (err, data) => {
+        if (err) {
+            return res.status(500).json({err: err});
+        }
 
-            Post.find({
-                user: [...data.following, res.userdata.id]
-            }, [], {
-                skip: offset, // Starting Row
-                limit: 10, // Ending Row
-                sort: {
-                    createdAt: -1 //Sort by Date Added DESC
-                }
-            }).populate("user").exec((err, post) => {
-                console.log(post)
-                if(err){
-                    return res.status(500).json({
-                        err:err
-                    })
-                }else {
-                    return res.status(200).json({
-                        post: post
-                    });
-                }
-            })
-        })
-    }else {
-        Post.find({}, [], {
+        Post.find( res.userdata ? {
+            user:  [...data.following, res.userdata.id]
+        } : {}, [], {
             skip: offset, // Starting Row
             limit: 10, // Ending Row
             sort: {
                 createdAt: -1 //Sort by Date Added DESC
             }
-        }).populate("user").exec((err, post) => {
-            if(err){
+        }).populate("user").populate("comments.user").exec((err, post) => {
+            if (err) {
                 return res.status(500).json({
-                    err:err
+                    err: err
                 })
-            }else {
+            } else {
                 return res.status(200).json({
                     post: post
                 });
             }
         })
+    })
+};
+exports.togglelike = (req, res) => {
+    switch (req.body.action) {
+        case "add":
+            Post.findByIdAndUpdate(req.body.id, {
+                $push: {
+                    like: res.userdata.id
+                }
+            }, {}, err => {
+                res.status(200).json({
+                    message: "success",
+                    err: err
+                });
+            });
+            break;
+        case "remove":
+            Post.findByIdAndUpdate(req.body.id, {
+                $pull: {
+                    like: res.userdata.id
+                }
+            }, {}, err => {
+                res.status(200).json({
+                    message: "success",
+                    err: err
+                });
+            });
+            break;
+        default:
+            res.status(500).json({
+                err: "action undefined"
+            })
     }
 };
+exports.comments = (req, res) => {
+    Post.findByIdAndUpdate(req.body.id, {
+        $push: {
+            comments: {
+                user: res.userdata.id,
+                comments: req.body.value
+            }
+        }
+    }, {}, (err,data) => {
+        if (err) {
+            return res.status(500).json({
+                err: err
+            })
+        } else {
+            Post.findById(req.body.id,{},{},(err,data) => {
+                return res.status(200).json({
+                    id: data.comments[data.comments.length - 1]._id
+                })
+            })
+        }
+    })
+};
+exports.toogleCommentLike = (req,res) => {
+    switch (req.body.action) {
+        case "add":
+            Post.findOneAndUpdate({
+                _id:req.body.postid,
+                'comments.id':req.body.id
+            }, {
+                $set: {
+                    comments: {
 
+                    }
+                }
+            }, {}, err => {
+                res.status(200).json({
+                    message: "success",
+                    err: err
+                });
+            });
+            break;
+        case "remove":
+            Post.findByIdAndUpdate(req.body.id, {
+                $pull: {
+                    like: res.userdata.id
+                }
+            }, {}, err => {
+                res.status(200).json({
+                    message: "success",
+                    err: err
+                });
+            });
+            break;
+        default:
+            res.status(500).json({
+                err: "action undefined"
+            })
+    }
+};

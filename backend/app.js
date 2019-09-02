@@ -15,7 +15,7 @@ const User = model.user;
 app.io = io;
 
 io.on("connection", socket => {
-    const {token,offset} = socket.handshake.query;
+    const {token} = socket.handshake.query;
     let userdata = {};
     if(token) {
         jwt.verify(token, "ysn852jd48", (err, data) => {

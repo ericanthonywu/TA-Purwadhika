@@ -2,17 +2,18 @@ const mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/sosmed', {
     useNewUrlParser: true,
     keepAlive: true,
-    keepAliveInitialDelay: 300000
+    keepAliveInitialDelay: 300000,
+    useFindAndModify: false,
+    useCreateIndex: true
 }).then(r => {
     const db = mongoose.connection;
     db.on('error', console.error.bind(console, 'connection error:'));
 });
-const schema = mongoose.Schema;
 
 const userSchema = new mongoose.Schema({
     email: {type: String, required: true, unique: true},
     username: {type: String, required: true, unique: true, lowercase: true, trim: true},
-    password: {type: String, required: true},
+    password: {type: String, required: true, select: false},
     email_st: {type: Number, default: 0},
     nickname: {type: String},
     profilepicture: {type: String, default: "default.jpg"},
@@ -26,6 +27,7 @@ exports.user = mongoose.model('user', userSchema);
 const postSchema = new mongoose.Schema({
     image: [{type: String, required: true, unique: true}],
     comments: [{
+        id: {type: mongoose.Schema.Types.ObjectId},
         user: {type: mongoose.Schema.Types.ObjectId, ref: 'user'},
         comments: {type: String},
         like: {type: Number, default: 0},
@@ -33,7 +35,8 @@ const postSchema = new mongoose.Schema({
     }],
     caption: {type: String},
     user: {type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true},
-    like: [{type: mongoose.Schema.Types.ObjectId, ref: 'user', default: 0}]
+    like: [{type: mongoose.Schema.Types.ObjectId, ref: 'user'}],
+    status: {type: Number,default: 0}
 }, {timestamps: true});
 
 exports.post = mongoose.model('post', postSchema);
@@ -41,7 +44,7 @@ exports.post = mongoose.model('post', postSchema);
 const notificationSchema = new mongoose.Schema({
     notification: {type: String, required: true},
     user: {type: mongoose.Schema.Types.ObjectId, ref: 'user'},
-    post: {type: mongoose.Schema.Types.ObjectId, ref: 'post'}
-});
+    url: {type: String}
+},{timestamps: true});
 
 exports.notification = mongoose.model('notification',notificationSchema);

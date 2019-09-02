@@ -13,7 +13,6 @@ import {
 } from "mdbreact";
 import {Link} from "react-router-dom";
 import {toast, ToastContainer} from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 import axios from "axios"
 import {connect} from "react-redux";
 import {login} from "../redux/actions";
@@ -42,7 +41,7 @@ class Login extends React.Component {
             this.props.login({
                 token: res.data._token,
                 username: res.data.username,
-                profile_picture: res.data.profile_picture,
+                profilepicture: res.data.profile_picture,
                 _id:res.data._id,
                 loggedin: true,
             })
@@ -123,7 +122,7 @@ const mapStateToProps = state => {
     return {
         token: state.user.token,
         username: state.user.username,
-        loggedin: state.user.loggedin
+        loggedin: state.user.loggedin,
     }
 }
 
