@@ -105,8 +105,9 @@ class Dashboard extends React.Component {
                                                     postprofilepicture={o.user.profilepicture}
                                                     postcaption={o.caption}
                                                     totalcomment={o.comments.length}
+                                                    likeslist={o.like}
                                                     postlikes={o.like.length}
-                                                    likestatus={o.like.includes(this.props.id)}
+                                                    likestatus={o.like.some(e => e._id === this.props.id)}
                                                     postimages={o.image}
                                                     comments={o.comments}
                                                 />

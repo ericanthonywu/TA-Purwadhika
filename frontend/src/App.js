@@ -17,7 +17,7 @@ import {
     MDBNavLink,
     MDBContainer,
     MDBRow,
-    MDBCol
+    MDBCol, MDBModal, MDBModalBody
 } from "mdbreact";
 import DashboardPage from './views/Dashboard'
 import Register from './views/Register'
@@ -37,6 +37,7 @@ class App extends Component {
         this.state = {
             isOpen: false,
             loggedin:false,
+            bottommodal: false,
         };
     }
 
@@ -63,6 +64,11 @@ class App extends Component {
     };
 
     componentDidMount() {
+        if(!localStorage.getItem('token')){
+            this.setState({
+                bottommodal:true
+            })
+        }
         const {location} = this.props;
         const allnav = document.querySelectorAll('.navbar-item,.nav-link');
         const pathname = location.pathname.split('/')[1];
@@ -256,6 +262,16 @@ class App extends Component {
                     <Route path={'/chat'} component={Chat}/>
                     <Route component={Error404}/>
                 </Switch>
+                <MDBModal isOpen={this.state.bottommodal} backdrop={false} toggle={() => this.setState({
+                    bottommodal: !this.state.bottommodal
+                })} frame position="bottom">
+                    <MDBModalBody className="text-center">
+                        Somedata is missing from your browser, Please Login Again
+                        <MDBBtn color="secondary" onClick={() => this.setState({
+                            bottommodal: false
+                        })}>Close</MDBBtn>
+                    </MDBModalBody>
+                </MDBModal>
             </div>
         )
     }

@@ -47,7 +47,7 @@ exports.dashboard = (req, res) => {
             sort: {
                 createdAt: -1 //Sort by Date Added DESC
             }
-        }).populate("user").populate("comments.user").exec((err, post) => {
+        }).populate("user").populate("comments.user").populate("comments.like").populate('like').exec((err, post) => {
             if (err) {
                 return res.status(500).json({
                     err: err
@@ -121,28 +121,39 @@ exports.toogleCommentLike = (req,res) => {
                 _id:req.body.postid,
                 'comments.id':req.body.id
             }, {
-                $set: {
-                    comments: {
-
-                    }
+                $push :{ //$set nimpa, $push push aray, $pull delete array
+                    "comments.$.like" : res.userdata.id
                 }
-            }, {}, err => {
-                res.status(200).json({
-                    message: "success",
-                    err: err
-                });
+            }, err => {
+                if(err){
+                    res.status(500).json({
+                        err: err
+                    })
+                }else {
+                    res.status(200).json({
+                        message: "success",
+                    });
+                }
             });
             break;
         case "remove":
-            Post.findByIdAndUpdate(req.body.id, {
+            Post.findOneAndUpdate({
+                _id:req.body.postid,
+                'comments.id':req.body.id
+            }, {
                 $pull: {
-                    like: res.userdata.id
+                    "comments.$.like" : res.userdata.id
                 }
             }, {}, err => {
-                res.status(200).json({
-                    message: "success",
-                    err: err
-                });
+                if(err){
+                    res.status(500).json({
+                        err: err
+                    })
+                }else {
+                    res.status(200).json({
+                        message: "success",
+                    });
+                }
             });
             break;
         default:

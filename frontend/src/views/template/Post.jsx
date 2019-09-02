@@ -10,7 +10,7 @@ import {
     MDBDropdownItem,
     MDBDropdownMenu,
     MDBDropdownToggle,
-    MDBIcon,
+    MDBIcon, MDBModal, MDBModalBody, MDBModalFooter, MDBModalHeader,
     MDBRow,
     MDBView
 } from "mdbreact";
@@ -34,7 +34,8 @@ class Post extends React.Component {
             likestatus: props.likestatus,
             comments: props.comments,
             tempComments:[],
-            showFullComments: false
+            showFullComments: false,
+            likeslist: props.likeslist
         };
         this.handleOutsideClick = this.handleOutsideClick.bind(this);
         this.togglesticker = this.togglesticker.bind(this)
@@ -53,11 +54,13 @@ class Post extends React.Component {
 
     togglelike = e => {
         if(this.props.loggedin) {
+            const likelist = [...this.state.likeslist];
             if (e.target.classList.contains('fa')) {
                 e.target.classList.remove('fa');
                 e.target.classList.add('far');
                 this.setState({
-                    postlikes: this.state.postlikes - 1
+                    postlikes: this.state.postlikes - 1,
+                    likeslist: likelist.filter(o => {return o === this.props.id})
                 });
                 axios.post(`${api_url}tooglelike`, {
                     token: this.props.token,
@@ -65,16 +68,27 @@ class Post extends React.Component {
                     action: "remove"
                 }).catch(err => {
                     console.log(err)
+                    likelist.push({
+                        username: this.props.username,
+                        profilepicture: localStorage.getItem('profile_picture')
+                    })
                     this.setState({
-                        postlikes: this.state.postlikes + 1
+                        postlikes: this.state.postlikes + 1,
+                        likeslist: likelist
                     })
                 })
             } else {
                 e.target.classList.remove('far');
                 e.target.classList.add('fa');
-                this.setState({
-                    postlikes: this.state.postlikes + 1
+                likelist.push({
+                    username: this.props.username,
+                    profilepicture: localStorage.getItem('profile_picture')
                 })
+                this.setState({
+                    postlikes: this.state.postlikes + 1,
+                    likeslist: likelist
+                });
+                console.log(this.state.likeslist)
                 axios.post(`${api_url}tooglelike`, {
                     token: this.props.token,
                     id: this.props._id,
@@ -82,7 +96,8 @@ class Post extends React.Component {
                 }).catch(err => {
                     console.log(err)
                     this.setState({
-                        postlikes: this.state.postlikes - 1
+                        postlikes: this.state.postlikes - 1,
+                        likeslist: likelist.filter(o => {return o === this.props.id})
                     })
                 })
             }
@@ -206,6 +221,33 @@ class Post extends React.Component {
                         </MDBCol>
                     </MDBRow>
                 </MDBContainer>
+                <MDBModal isOpen={this.state.showlikes} toggle={() => this.setState({
+                    showlikes: !this.state.showlikes
+                })}>
+                    <MDBModalHeader toggle={() => this.setState({
+                        showlikes: !this.state.showlikes
+                    })}>Likes List</MDBModalHeader>
+                    <MDBModalBody>
+                        {
+                            this.state.likeslist.map(o => {
+                                return  (
+                                    <div className="comments mb-2"><img
+                                        src={profile_url+o.profilepicture}
+                                        className="round mr-3" alt="aligment" width="40" height="100%"/>
+                                        <div className="comment-info mr-5"><span
+                                            className="bolder mr-2 pointer">{o.username}</span>
+                                        </div>
+                                    </div>
+                                )
+                            })
+                        }
+                    </MDBModalBody>
+                    <MDBModalFooter>
+                        <MDBBtn color="secondary" onClick={() => this.setState({
+                            showlikes: false
+                        })}>Close</MDBBtn>
+                    </MDBModalFooter>
+                </MDBModal>
                 <MDBContainer>
                     <MDBRow>
                         <MDBCol size={12}>
@@ -215,13 +257,19 @@ class Post extends React.Component {
                                 <MDBIcon className={"pointer"} far icon="comment"/>
                             </div>
                             <div className="description">
-                                <span className="bolder">{this.state.postlikes < 0 ?
-                                    <span>&infin;</span> : this.state.postlikes} like {this.state.postlikes > 1 ? "s" : ""}</span>
+                                {this.state.postlikes > 0 ?
+                                    <span className="bolder pointer" onClick={() => this.setState({
+                                        showlikes:true
+                                    })}>{this.state.postlikes < 0 ?
+                                        <span>&infin;</span> : this.state.postlikes} like{this.state.postlikes > 1 ? "s" : ""}</span>
+                                    :
+                                    null
+                                }
                                 <div className={"img_desc normalweight"}><span
                                     className={"bolder pointer normalweight"}>{this.props.postusername}</span> {this.props.postcaption}
                                 </div>
                                 {
-                                    !this.state.showFullComments ? <div onClick={() => this.setState({
+                                    !this.state.showFullComments && this.props.totalcomment > 0 ? <div onClick={() => this.setState({
                                             showFullComments: true
                                         })} className={"pointer mt-2 mb-2"}>View {this.props.totalcomment > 10 ? "all" : ""} {this.props.totalcomment < 0 ?
                                         <span>&infin;</span> : this.props.totalcomment} Comment{this.props.totalcomment > 1 ? "s" : ""}
