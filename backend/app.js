@@ -22,7 +22,7 @@ io.on("connection", socket => {
             if (err) {
                 io.sockets.emit('error',"error");
             }
-            userdata = data;
+            userdata = err ? null : data;
         })
     }
 

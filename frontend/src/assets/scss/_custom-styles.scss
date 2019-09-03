@@ -352,10 +352,55 @@
 
 .user_data {
   display: block;
+
+  div {
+    display: block;
+  }
+  button{
+    margin-left: 30px;
+  }
+
+  div:nth-child(2) {
+    margin-top: 20px;
+    span:nth-child(2), span:last-child {
+      margin-left: 20px;
+    }
+  }
+  div:last-child{
+    margin-top: 20px;
+    word-break: break-word;
+  }
 }
 
-.user_data div {
-  display: inline;
+.post-thumbnail{
+  margin-top: 50px;
+  position: relative;
+  cursor: pointer;
+
+  .post_desc{
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    visibility: hidden;
+    background-color: #0d47a1;
+    transition: .5s;
+    opacity: 0;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    span:last-child{
+      margin-left: 20px;
+    }
+  }
+}
+.post-thumbnail:hover .post_desc{
+  visibility: visible;
+  opacity: .8;
+  transition: .5s;
 }
 
 .chat-container::-webkit-scrollbar-track {
@@ -390,6 +435,7 @@
   width: 210px;
   transition: .5s;
   user-select: none;
+  z-index: 2;
 
   div {
     padding-bottom: 15px;
@@ -402,17 +448,19 @@
       border-radius: 50%;
     }
 
-    span:last-child{
+    span:last-child {
       border-radius: 50%;
       margin-top: 10px;
       margin-right: 10px;
       width: 6px;
       float: right;
     }
-    span.online{
+
+    span.online {
       border: 4px solid lightgreen;
     }
-    span.offline{
+
+    span.offline {
       border: 4px solid red;
     }
   }

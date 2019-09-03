@@ -30,6 +30,8 @@ import Chat from "./views/Chat";
 
 import {connect} from "react-redux";
 import {login,logout,setloggedin} from "./redux/actions";
+import ShowPost from "./views/ShowPost";
+import UpdateProfile from "./views/UpdateProfile";
 
 class App extends Component {
     constructor(a) {
@@ -42,8 +44,6 @@ class App extends Component {
     }
 
     onLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('username');
         this.props.logout();
         this.props.history.push('/');
     }
@@ -260,6 +260,8 @@ class App extends Component {
                     <Route path={'/profile/:profile'} component={withAuth(Profile)}/>
                     <Route path={'/addpost'} component={withAuth(AddPost)}/>
                     <Route path={'/chat'} component={Chat}/>
+                    <Route path={'/post/:postid'} component={ShowPost}/>
+                    <Route path={'/updateProfile'} component={withAuth(UpdateProfile)}/>
                     <Route component={Error404}/>
                 </Switch>
                 <MDBModal isOpen={this.state.bottommodal} backdrop={false} toggle={() => this.setState({

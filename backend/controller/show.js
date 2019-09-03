@@ -6,11 +6,34 @@ const User = model.user;
 const Post = model.post;
 
 exports.profile = (req, res) => {
-    User.findOne({_id: res.userdata.id}, (err, data) => {
-        if (err) console.error(err);
-        return res.status(200).json({
-            data: data
-        })
+    User.findOne({_id: res.userdata.id, email_st: 1}).populate('follower').populate('following').exec((err, data) => {
+        if (err) {
+            res.status(500).json({
+                err: err
+            })
+        } else {
+            Post.find({user: res.userdata.id}, [], {
+                sort: {
+                    createdAt: -1 //Sort by Date Added DESC
+                }
+            })
+                .populate("user")
+                .populate("comments.user")
+                .populate("comments.like")
+                .populate('like')
+                .exec((err, post) => {
+                    if (err) {
+                        res.status(500).json({
+                            err: err
+                        });
+                    } else {
+                        res.status(200).json({
+                            user: data,
+                            post: post
+                        })
+                    }
+                })
+        }
     })
 };
 
@@ -23,7 +46,6 @@ exports.addPost = (req, res) => {
     new Post({caption: caption, user: res.userdata.id, image: imgname}).save((err, data) => {
         if (err) {
             return res.status(500).json({err: err});
-            return;
         }
         return res.status(200).json({
             message: "Data Berhasil Masuk",
@@ -39,8 +61,8 @@ exports.dashboard = (req, res) => {
             return res.status(500).json({err: err});
         }
 
-        Post.find( res.userdata ? {
-            user:  [...data.following, res.userdata.id]
+        Post.find(res.userdata ? {
+            user: [...data.following, res.userdata.id]
         } : {}, [], {
             skip: offset, // Starting Row
             limit: 10, // Ending Row
@@ -100,13 +122,13 @@ exports.comments = (req, res) => {
                 comments: req.body.value
             }
         }
-    }, {}, (err,data) => {
+    }, {}, (err, data) => {
         if (err) {
             return res.status(500).json({
                 err: err
             })
         } else {
-            Post.findById(req.body.id,{},{},(err,data) => {
+            Post.findById(req.body.id, {}, {}, (err, data) => {
                 return res.status(200).json({
                     id: data.comments[data.comments.length - 1]._id
                 })
@@ -114,22 +136,22 @@ exports.comments = (req, res) => {
         }
     })
 };
-exports.toogleCommentLike = (req,res) => {
+exports.toogleCommentLike = (req, res) => {
     switch (req.body.action) {
         case "add":
             Post.findOneAndUpdate({
-                _id:req.body.postid,
-                'comments.id':req.body.id
+                _id: req.body.postid,
+                'comments.id': req.body.id
             }, {
-                $push :{ //$set nimpa, $push push aray, $pull delete array
-                    "comments.$.like" : res.userdata.id
+                $push: { //$set nimpa, $push push aray, $pull delete array
+                    "comments.$.like": res.userdata.id
                 }
             }, err => {
-                if(err){
+                if (err) {
                     res.status(500).json({
                         err: err
                     })
-                }else {
+                } else {
                     res.status(200).json({
                         message: "success",
                     });
@@ -138,18 +160,18 @@ exports.toogleCommentLike = (req,res) => {
             break;
         case "remove":
             Post.findOneAndUpdate({
-                _id:req.body.postid,
-                'comments.id':req.body.id
+                _id: req.body.postid,
+                'comments.id': req.body.id
             }, {
                 $pull: {
-                    "comments.$.like" : res.userdata.id
+                    "comments.$.like": res.userdata.id
                 }
             }, {}, err => {
-                if(err){
+                if (err) {
                     res.status(500).json({
                         err: err
                     })
-                }else {
+                } else {
                     res.status(200).json({
                         message: "success",
                     });
@@ -162,3 +184,14 @@ exports.toogleCommentLike = (req,res) => {
             })
     }
 };
+exports.showPost = (req,res) => {
+    Post.findById(req.body.id).populate("user").populate("comments.user").populate("comments.like").populate('like').exec().then(data => {
+        res.status(200).json({
+            post: data
+        })
+    }).catch(err => {
+        res.status(500).json({
+            err: err
+        })
+    })
+}

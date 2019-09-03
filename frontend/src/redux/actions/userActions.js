@@ -5,6 +5,10 @@ export const login = payload => {
     }
 }
 export const logout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('username');
+    localStorage.removeItem('profile_picture');
+    localStorage.removeItem('_id');
     return {
         type: 'logout'
     }

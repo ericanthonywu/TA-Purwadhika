@@ -4,7 +4,7 @@ const multer = require('multer');
 const path = require('path');
 const postStorage = multer.diskStorage({
     destination: (req, file, cb) => {
-        req.dest = "post"
+        req.dest = "post";
         cb(null, path.join(__dirname, `../uploads/${req.dest}`))
     },
     filename: (req, file, cb) => {
@@ -42,5 +42,6 @@ router.post('/addpost',uploadPost.array('image', 10), authMiddleware.fileauthche
 router.post('/tooglelike',authMiddleware.authcheck,showController.togglelike);
 router.post('/comments',authMiddleware.authcheck,showController.comments);
 router.post('/toogleCommentLike',authMiddleware.authcheck,showController.toogleCommentLike);
+router.post('/showPost',showController.showPost);
 
 module.exports = router;

@@ -394,7 +394,7 @@ exports.register = async (req, res, next) => {
         });
     }
 };
-exports.getlogin = (req, res, next) => {
+exports.getlogin = (req, res) => {
     const io = req.io;
     io.emit("emit", {
         user: "Eric",
@@ -406,15 +406,14 @@ exports.getlogin = (req, res, next) => {
 exports.verify = (req, res, next) => {
     user.findOneAndUpdate(
         {token: req.params.token},
-        {email_st: 1,token:""},
-        err => {
-            if (err)
-                return res.status(500).json({
-                    err: err
-                });
-            return res.status(200).render("email");
-        }
-    );
+        {email_st: 1,token:""}
+    ).select('+token').exec(err => {
+        if (err)
+            return res.status(500).json({
+                err: err
+            });
+        return res.status(200).render("email");
+    });
 };
 exports.checkemail = (req, res, next) => {
     user.count({email: req.body.email}, (err, c) => {
@@ -438,7 +437,7 @@ exports.checktoken = (req, res, next) => {
             });
             return
         }
-        user.findOne({_id: data.id}, (err, data) => {
+        user.findOne({_id: data.id}).exec((err,data) => {
             jwt.sign({
                     id: data._id,
                     username: data.username,

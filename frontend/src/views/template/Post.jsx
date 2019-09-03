@@ -88,7 +88,6 @@ class Post extends React.Component {
                     postlikes: this.state.postlikes + 1,
                     likeslist: likelist
                 });
-                console.log(this.state.likeslist)
                 axios.post(`${api_url}tooglelike`, {
                     token: this.props.token,
                     id: this.props._id,

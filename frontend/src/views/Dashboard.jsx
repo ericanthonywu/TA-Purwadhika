@@ -43,7 +43,7 @@ class Dashboard extends React.Component {
                 post: res.data.post
             });
         }).catch(err => {
-            if(err.response.data && err.response.data.message === "jwt expired"){
+            if(err.response.data && (err.response.data.message === "jwt expired")){
                 toast.error('Session Expired');
                 setTimeout(async () => {
                     await this.props.logout();

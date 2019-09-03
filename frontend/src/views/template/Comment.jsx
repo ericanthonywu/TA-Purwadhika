@@ -9,15 +9,15 @@ class Comment extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            commentlike: props.data.like.length,
-            likeslist: props.data.like,
+            commentlike: props.data.like.length || 0,
+            likeslist: props.data.like || [],
             showlikes: false
         }
     }
 
     togglelike = e => {
         if(this.props.loggedin) {
-            const likelist = [...this.state.likeslist];
+            const likelist = this.state.likeslist ? [...this.state.likeslist] : [];
             if (e.target.classList.contains('fa')) {
                 e.target.classList.remove('fa');
                 e.target.classList.add('far');
@@ -79,6 +79,7 @@ class Comment extends React.Component {
                     })}>Likes List</MDBModalHeader>
                     <MDBModalBody>
                         {
+                            this.state.likeslist ?
                             this.state.likeslist.map(o => {
                                 return  (
                                     <div className="comments mb-2"><img
@@ -90,6 +91,8 @@ class Comment extends React.Component {
                                     </div>
                                 )
                             })
+                                :
+                                ""
                         }
                     </MDBModalBody>
                     <MDBModalFooter>
@@ -120,7 +123,7 @@ class Comment extends React.Component {
                 <div>
                     <MDBIcon className={"pointer ml-2 like"}
                              onClick={this.togglelike}
-                             fa={this.state.likeslist.some(e => e._id === this.props.userid)} far={!this.state.likeslist.some(e => e._id === this.props.userid)}
+                             fa={this.state.likeslist ? this.state.likeslist.some(e => e._id === this.props.userid) : false} far={ this.state.likeslist ? !this.state.likeslist.some(e => e._id === this.props.userid) : true}
                              icon="heart"
                     />
                 </div>

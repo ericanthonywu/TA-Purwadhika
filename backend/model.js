@@ -17,9 +17,10 @@ const userSchema = new mongoose.Schema({
     email_st: {type: Number, default: 0},
     nickname: {type: String},
     profilepicture: {type: String, default: "default.jpg"},
-    token: {type: String, unique: true},
+    token: {type: String, unique: true, select: false},
     follower: [{type: mongoose.Schema.Types.ObjectId, ref: 'user'}],
-    following: [{type: mongoose.Schema.Types.ObjectId, ref: 'user'}]
+    following: [{type: mongoose.Schema.Types.ObjectId, ref: 'user'}],
+    bio: {type: String}
 }, {timestamps: true});
 
 exports.user = mongoose.model('user', userSchema);

@@ -197,32 +197,14 @@ class AddPost extends React.Component {
                                                 id={1}
                                                 postusername={localStorage.getItem("username")}
                                                 posttime={"a few seconds ago"}
-                                                postprofilepicture={"https://mdbootstrap.com/img/Photos/Avatars/avatar-1.jpg"}
+                                                postprofilepicture={localStorage.getItem('profile_picture')}
                                                 postcaption={this.state.caption || "No caption here"}
-                                                totalcomment={-1}
+                                                totalcomment={-2}
                                                 postlikes={-2}
                                                 likestatus={true}
+                                                likeslist={[]}
                                                 postimages={this.state.image}
-                                                comments={[
-                                                    {
-                                                        "id": 1,
-                                                        "username": "user1",
-                                                        "comment": "You have an AWESOME post!",
-                                                        "like": -2,
-                                                        "time": "a few seconds ago",
-                                                        "profile": "https://mdbootstrap.com/img/Photos/Avatars/avatar-1.jpg",
-                                                        "likestatus": true,
-                                                    },
-                                                    {
-                                                        "id": 2,
-                                                        "username": "user2",
-                                                        "comment": "What is this?",
-                                                        "like": -2,
-                                                        "time": "a few seconds ago",
-                                                        "profile": "https://mdbootstrap.com/img/Photos/Avatars/avatar-2.jpg",
-                                                        "likestatus": true,
-                                                    }
-                                                ]}
+                                                comments={[]}
                                             />
                                         </> : <p className={"bolder"}>Choose Photo to Preview Post</p>}
                             </MDBCol>
