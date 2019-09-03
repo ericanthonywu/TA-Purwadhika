@@ -181,7 +181,10 @@ class Post extends React.Component {
                                     </MDBDropdownToggle>
                                     <MDBDropdownMenu right basic>
                                         <MDBDropdownItem>Report</MDBDropdownItem>
-                                        <MDBDropdownItem>Copy Link</MDBDropdownItem>
+                                        <MDBDropdownItem onClick={async () => {
+                                            await navigator.clipboard.writeText(`${window.location.origin}/post/${this.props._id}`);
+                                            toast.success('Copied!')
+                                        }}>Copy Link</MDBDropdownItem>
                                         <MDBDropdownItem>Mute</MDBDropdownItem>
                                     </MDBDropdownMenu>
                                 </MDBDropdown>

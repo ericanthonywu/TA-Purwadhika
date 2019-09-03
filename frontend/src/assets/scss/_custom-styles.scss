@@ -371,6 +371,27 @@
     word-break: break-word;
   }
 }
+.profilepicture{
+  width: 150px;
+  margin: auto;
+  img{
+    border-radius: 50%;
+    border: 1px solid darkgray;
+  }
+  input[type="file"]{
+    display: none;
+  }
+}
+.change-camera{
+  position: absolute;
+  cursor: pointer;
+  margin-left: -35px;
+  margin-top: 12px;
+  background: white;
+  border: 1px solid;
+  border-radius: 50%;
+  padding: 10px;
+}
 
 .post-thumbnail{
   margin-top: 50px;

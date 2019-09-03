@@ -12,12 +12,21 @@ import {
     MDBRow
 } from "mdbreact";
 import {Link} from "react-router-dom";
+import {connect} from "react-redux";
+import {profile_url} from "../global";
 
 class UpdateProfile extends React.Component {
     constructor(props) {
-        super(props)
+        super(props);
         this.state = {}
     }
+
+    changeHandler = e => {
+        this.setState({[e.target.name]: e.target.value});
+    };
+    submitHandler = () => {
+
+    };
 
     render() {
         return (
@@ -29,11 +38,18 @@ class UpdateProfile extends React.Component {
                             <MDBCardBody>
                                 <MDBCardHeader className="form-header deep-blue-gradient rounded">
                                     <h3 className="my-3">
-                                        <MDBIcon icon="lock"/> Login:
+                                        <MDBIcon icon="user"/> Update Profile
                                     </h3>
                                 </MDBCardHeader>
                                 <form onSubmit={this.submitHandler}>
                                     <div className="grey-text">
+                                        <div className="md-form form-group">
+                                            <div className="profilepicture">
+                                                <img src={profile_url+localStorage.getItem('profile_picture')} width={"100%"} alt=""/>
+                                                <MDBIcon icon={"plus"} className={"change-camera"}/>
+                                                <input type="file" ref={"cgprofile"} accept={"image/*"}/>
+                                            </div>
+                                        </div>
                                         <MDBInput
                                             label="Type your email"
                                             name={"email"}
@@ -80,4 +96,12 @@ class UpdateProfile extends React.Component {
         )
     }
 }
-export default UpdateProfile
+
+const mapToStateProps = state => {
+    return {
+        profilepicture: state.user.profilepicture,
+        username: state.user.username,
+    }
+}
+
+export default connect(mapToStateProps)(UpdateProfile)

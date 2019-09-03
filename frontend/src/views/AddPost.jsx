@@ -142,7 +142,7 @@ class AddPost extends React.Component {
                                             Image
                                         </button>
                                         <input type="file" multiple onChange={this.filechoosen} ref={"uploadpost"}
-                                               accept={'.jpg,.jpeg,.png,.pneg,.mp4,.mov'} style={{display: "none"}}/>
+                                               accept={'.jpg,.jpeg,.png,.pneg'} style={{display: "none"}}/>
                                     </div>
                                     <div className="md-form form-group">
                                         <div className="md-form usercomment w-100">
