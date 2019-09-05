@@ -6,29 +6,35 @@ const User = model.user;
 const Post = model.post;
 
 exports.profile = (req, res) => {
-    User.findOne({_id: res.userdata.id, email_st: 1}).populate('follower').populate('following').exec()
+    User.findOne({username: req.body.username, email_st: 1}).populate('follower').populate('following').exec()
         .then(data => {
-            Post.find({user: res.userdata.id}, [], {
-                sort: {
-                    createdAt: -1 //Sort by Date Added DESC
-                }
-            })
-                .populate("user")
-                .populate("comments.user")
-                .populate("comments.like")
-                .populate('like')
-                .exec()
-                .then(post => {
-                    res.status(200).json({
-                        user: data,
-                        post: post
-                    })
+            if(data) {
+                Post.find({user: res.userdata.id}, [], {
+                    sort: {
+                        createdAt: -1 //Sort by Date Added DESC
+                    }
                 })
-                .catch(err => {
-                    res.status(500).json({
-                        err: err
+                    .populate("user")
+                    .populate("comments.user")
+                    .populate("comments.like")
+                    .populate('like')
+                    .exec()
+                    .then(post => {
+                        res.status(200).json({
+                            user: data,
+                            post: post
+                        })
                     })
+                    .catch(err => {
+                        res.status(500).json({
+                            err: err
+                        })
+                    })
+            }else{
+                res.status(500).json({
+                    err: "No User founded"
                 })
+            }
         })
         .catch(err => {
             res.status(500).json({

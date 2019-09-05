@@ -124,7 +124,16 @@ class App extends Component {
                                     <div className="md-form my-0">
                                         <input className="form-control mr-sm-2 w-100 mt-3 w-100" type="text"
                                                placeholder="Find User"
-                                               aria-label="Search"/>
+                                               aria-label="Search"
+                                               onKeyDown={
+                                                   e => {
+                                                       if (e.keyCode === 13){
+                                                           e.preventDefault();
+                                                           this.props.history.push(`/profile/${e.target.value}`)
+                                                       }
+                                                   }
+                                               }
+                                        />
                                     </div>
                                 </MDBFormInline>
                             </MDBNavItem>
