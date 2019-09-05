@@ -89,7 +89,7 @@ class Profile extends React.Component {
                                                         this.props.match.params.profile === this.props.username
                                                             ?
                                                             <MDBBtn className={"waves-effect"} outline
-                                                                    color={"elegant"}> Edit
+                                                                    color={"elegant"} onClick={() => this.props.history.push('/updateProfile')}> Edit
                                                                 Profile </MDBBtn>
                                                             :
                                                             this.state.user.follower.includes(this.props.userid) ?

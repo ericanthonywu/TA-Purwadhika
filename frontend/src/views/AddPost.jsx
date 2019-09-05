@@ -66,7 +66,7 @@ class AddPost extends React.Component {
     }
 
     addEmoji = e => {
-        let emoji = e.native;
+        const emoji = e.native;
         this.setState({
             caption: this.state.caption += emoji,
         });
@@ -113,9 +113,7 @@ class AddPost extends React.Component {
                     loadimage: false,
                     image: images
                 });
-                console.log(this.state.image)
-
-            }, error => {
+            }, e => {
                 toast.error("an error occured please upload again")
             });
         }
@@ -145,7 +143,7 @@ class AddPost extends React.Component {
                                                accept={'.jpg,.jpeg,.png,.pneg'} style={{display: "none"}}/>
                                     </div>
                                     <div className="md-form form-group">
-                                        <div className="md-form usercomment w-100">
+                                        <div className="md-form">
                                             {this.state.showsticker && <div className={"emoji-container"}>
                                                 <Picker set='emojione' title={"Choose Sticker"}
                                                         onSelect={this.addEmoji}/>
@@ -158,7 +156,7 @@ class AddPost extends React.Component {
                                                       onChange={this.handlecaption}
                                                       value={this.state.caption}
                                             >
-                                            {this.state.comment}
+                                            {this.state.caption}
                                         </textarea>
                                             <label htmlFor="caption" ref={"captionlabel"}>Caption</label>
                                             <MDBBtn className={"sticker"}

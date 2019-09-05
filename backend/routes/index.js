@@ -36,6 +36,7 @@ router.post('/dashboard',authMiddleware.dashboardcheck,showController.dashboard)
 
 //profile route
 router.post('/getprofile', authMiddleware.authcheck, showController.profile);
+router.post('/showProfile', authMiddleware.authcheck, showController.showProfile);
 
 //post route
 router.post('/addpost',uploadPost.array('image', 10), authMiddleware.fileauthcheck, showController.addPost);

@@ -6,12 +6,8 @@ const User = model.user;
 const Post = model.post;
 
 exports.profile = (req, res) => {
-    User.findOne({_id: res.userdata.id, email_st: 1}).populate('follower').populate('following').exec((err, data) => {
-        if (err) {
-            res.status(500).json({
-                err: err
-            })
-        } else {
+    User.findOne({_id: res.userdata.id, email_st: 1}).populate('follower').populate('following').exec()
+        .then(data => {
             Post.find({user: res.userdata.id}, [], {
                 sort: {
                     createdAt: -1 //Sort by Date Added DESC
@@ -21,21 +17,31 @@ exports.profile = (req, res) => {
                 .populate("comments.user")
                 .populate("comments.like")
                 .populate('like')
-                .exec((err, post) => {
-                    if (err) {
-                        res.status(500).json({
-                            err: err
-                        });
-                    } else {
-                        res.status(200).json({
-                            user: data,
-                            post: post
-                        })
-                    }
+                .exec()
+                .then(post => {
+                    res.status(200).json({
+                        user: data,
+                        post: post
+                    })
                 })
-        }
-    })
+                .catch(err => {
+                    res.status(500).json({
+                        err: err
+                    })
+                })
+        })
+        .catch(err => {
+            res.status(500).json({
+                err: err
+            })
+        })
+
 };
+exports.showProfile = (req,res) => {
+    User.findById(res.userdata.id).exec().then(res => {
+        res.status(200)
+    })
+}
 
 exports.addPost = (req, res) => {
     const {caption} = req.body;
@@ -184,7 +190,7 @@ exports.toogleCommentLike = (req, res) => {
             })
     }
 };
-exports.showPost = (req,res) => {
+exports.showPost = (req, res) => {
     Post.findById(req.body.id).populate("user").populate("comments.user").populate("comments.like").populate('like').exec().then(data => {
         res.status(200).json({
             post: data
@@ -194,4 +200,4 @@ exports.showPost = (req,res) => {
             err: err
         })
     })
-}
+};

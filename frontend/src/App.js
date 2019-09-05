@@ -29,16 +29,17 @@ import {withAuth} from "./views/template/CheckToken";
 import Chat from "./views/Chat";
 
 import {connect} from "react-redux";
-import {login,logout,setloggedin} from "./redux/actions";
+import {login, logout, setloggedin} from "./redux/actions";
 import ShowPost from "./views/ShowPost";
 import UpdateProfile from "./views/UpdateProfile";
+import {profile_url} from "./global";
 
 class App extends Component {
     constructor(a) {
         super(a);
         this.state = {
             isOpen: false,
-            loggedin:false,
+            loggedin: false,
             bottommodal: false,
         };
     }
@@ -46,7 +47,7 @@ class App extends Component {
     onLogout = () => {
         this.props.logout();
         this.props.history.push('/');
-    }
+    };
     toggleCollapse = () => {
         this.setState({isOpen: !this.state.isOpen});
     };
@@ -57,16 +58,16 @@ class App extends Component {
             allnav[i].closest('.nav-item').classList.remove('active')
         }
         e.target.classList.add('active');
-        e.target.closest('.nav-item').classList.add('active')
+        e.target.closest('.nav-item').classList.add('active');
         this.setState({
-            isOpen:false
+            isOpen: false
         })
     };
 
     componentDidMount() {
-        if(!localStorage.getItem('token')){
+        if (!localStorage.getItem('token') && this.props.token) {
             this.setState({
-                bottommodal:true
+                bottommodal: true
             })
         }
         const {location} = this.props;
@@ -87,14 +88,14 @@ class App extends Component {
                 allnav[x].closest('.nav-item').classList.add('active')
             }
         }
-        if(localStorage.getItem('token')){
+        if (localStorage.getItem('token')) {
             this.props.setloggedin({
                 username: localStorage.getItem('username'),
                 token: localStorage.getItem('token'),
                 _id: localStorage.getItem('_id'),
                 profilepicture: localStorage.getItem('profile_picture')
             })
-        }else{
+        } else {
             this.props.logout()
         }
     }
@@ -121,43 +122,46 @@ class App extends Component {
                             <MDBNavItem>
                                 <MDBFormInline waves>
                                     <div className="md-form my-0">
-                                        <input className="form-control mr-sm-2 w-100 mt-3 w-100" type="text" placeholder="Find User"
+                                        <input className="form-control mr-sm-2 w-100 mt-3 w-100" type="text"
+                                               placeholder="Find User"
                                                aria-label="Search"/>
                                     </div>
                                 </MDBFormInline>
                             </MDBNavItem>
                             {this.props.loggedin
                                 ?
-                                    <MDBNavItem>
-                                        <MDBDropdown>
-                                            <MDBDropdownToggle nav caret>
-                                                <MDBIcon icon="user" />
-                                            </MDBDropdownToggle>
-                                            <MDBDropdownMenu className="dropdown-default">
-                                                <MDBDropdownItem>Hi, {this.props.username}</MDBDropdownItem>
-                                                <MDBDropdownItem><Link onClick={() => this.setState({
-                                                    isOpen:false
-                                                })} to={`/profile/${this.props.username}`}>My Profile</Link></MDBDropdownItem>
-                                                    <MDBDropdownItem><Link onClick={() => this.setState({
-                                                    isOpen:false
-                                                    })} to={'addpost'}>Add Post</Link></MDBDropdownItem>
-                                                <MDBDropdownItem onClick={this.onLogout}>logout</MDBDropdownItem>
-                                            </MDBDropdownMenu>
-                                        </MDBDropdown>
-                                    </MDBNavItem>
+                                <MDBNavItem>
+                                    <MDBDropdown>
+                                        <MDBDropdownToggle nav caret>
+                                            <img src={profile_url + localStorage.getItem('profile_picture')} width={30}
+                                                 className={"round"} alt=""/>
+                                            <span className={"ml-2"}>{this.props.username}</span>
+                                        </MDBDropdownToggle>
+                                        <MDBDropdownMenu className="dropdown-default">
+                                            <MDBDropdownItem><Link onClick={() => this.setState({
+                                                isOpen: false
+                                            })} to={`/profile/${this.props.username}`}>My
+                                                Profile</Link></MDBDropdownItem>
+                                            <MDBDropdownItem><Link onClick={() => this.setState({
+                                                isOpen: false
+                                            })} to={'addpost'}>Add Post</Link></MDBDropdownItem>
+                                            <MDBDropdownItem onClick={this.onLogout}><a>logout</a></MDBDropdownItem>
+                                        </MDBDropdownMenu>
+                                    </MDBDropdown>
+                                </MDBNavItem>
                                 :
-                                    <>
-                                        <MDBNavItem >
-                                        <MDBNavLink to={'/login'} ><MDBBtn onClick={() => this.setState({
-                                            isOpen:false
+                                <>
+                                    <MDBNavItem>
+                                        <MDBNavLink to={'/login'}><MDBBtn onClick={() => this.setState({
+                                            isOpen: false
                                         })} gradient={"purple"}>Login</MDBBtn></MDBNavLink>
-                                        </MDBNavItem>
-                                        <MDBNavItem>
+                                    </MDBNavItem>
+                                    <MDBNavItem>
                                         <MDBNavLink to={'/register'}><MDBBtn onClick={() => this.setState({
-                                            isOpen:false
+                                            isOpen: false
                                         })} gradient={"aqua"}>Register</MDBBtn></MDBNavLink>
-                                        </MDBNavItem>
-                                    </>
+                                    </MDBNavItem>
+                                </>
                             }
                         </MDBNavbarNav>
                     </MDBCollapse>
@@ -278,11 +282,12 @@ class App extends Component {
         )
     }
 }
+
 const mapStateToProps = state => {
     return {
         token: state.user.token,
         username: state.user.username,
         loggedin: state.user.loggedin
     }
-}
-export default withRouter(connect(mapStateToProps,{login,logout,setloggedin})(App))
+};
+export default withRouter(connect(mapStateToProps, {login, logout, setloggedin})(App))
