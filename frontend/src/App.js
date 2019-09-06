@@ -8,16 +8,14 @@ import {
     MDBDropdownMenu,
     MDBDropdownToggle,
     MDBFormInline,
-    MDBIcon,
     MDBNavbar,
     MDBNavbarBrand,
     MDBNavbarNav,
     MDBNavbarToggler,
     MDBNavItem,
     MDBNavLink,
-    MDBContainer,
-    MDBRow,
-    MDBCol, MDBModal, MDBModalBody
+    MDBModal,
+    MDBModalBody,
 } from "mdbreact";
 import DashboardPage from './views/Dashboard'
 import Register from './views/Register'
@@ -33,6 +31,7 @@ import {login, logout, setloggedin} from "./redux/actions";
 import ShowPost from "./views/ShowPost";
 import UpdateProfile from "./views/UpdateProfile";
 import {profile_url} from "./global";
+import {toast, ToastContainer} from "react-toastify";
 
 class App extends Component {
     constructor(a) {
@@ -103,6 +102,7 @@ class App extends Component {
     render() {
         return (
             <div>
+                <ToastContainer enableMultiContainer position={toast.POSITION.TOP_RIGHT}/>
                 <MDBNavbar color="indigo" dark expand="md" className={'mb-2 w-100'}>
                     <MDBNavbarBrand>
                         <strong className="white-text">SosMed</strong>
@@ -129,7 +129,7 @@ class App extends Component {
                                                    e => {
                                                        if (e.keyCode === 13){
                                                            e.preventDefault();
-                                                           this.props.history.push(`/profile/${e.target.value}`)
+                                                           this.props.history.push(`/profile/${e.target.value}`);
                                                        }
                                                    }
                                                }
@@ -142,7 +142,7 @@ class App extends Component {
                                 <MDBNavItem>
                                     <MDBDropdown>
                                         <MDBDropdownToggle nav caret>
-                                            <img src={profile_url + localStorage.getItem('profile_picture')} width={30}
+                                            <img src={profile_url + this.props.profilepicture} width={30}
                                                  className={"round"} alt=""/>
                                             <span className={"ml-2"}>{this.props.username}</span>
                                         </MDBDropdownToggle>
@@ -280,7 +280,7 @@ class App extends Component {
                 <MDBModal isOpen={this.state.bottommodal} backdrop={false} toggle={() => this.setState({
                     bottommodal: !this.state.bottommodal
                 })} frame position="bottom">
-                    <MDBModalBody className="text-center">
+                    <MDBModalBody>
                         Somedata is missing from your browser, Please Login Again
                         <MDBBtn color="secondary" onClick={() => this.setState({
                             bottommodal: false
@@ -296,7 +296,8 @@ const mapStateToProps = state => {
     return {
         token: state.user.token,
         username: state.user.username,
-        loggedin: state.user.loggedin
+        loggedin: state.user.loggedin,
+        profilepicture: state.user.profilepicture
     }
 };
 export default withRouter(connect(mapStateToProps, {login, logout, setloggedin})(App))

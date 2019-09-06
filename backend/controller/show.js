@@ -8,7 +8,7 @@ const Post = model.post;
 exports.profile = (req, res) => {
     User.findOne({username: req.body.username, email_st: 1}).populate('follower').populate('following').exec()
         .then(data => {
-            if(data) {
+            if (data) {
                 Post.find({user: res.userdata.id}, [], {
                     sort: {
                         createdAt: -1 //Sort by Date Added DESC
@@ -30,7 +30,7 @@ exports.profile = (req, res) => {
                             err: err
                         })
                     })
-            }else{
+            } else {
                 res.status(500).json({
                     err: "No User founded"
                 })
@@ -43,11 +43,41 @@ exports.profile = (req, res) => {
         })
 
 };
-exports.showProfile = (req,res) => {
-    User.findById(res.userdata.id).exec().then(res => {
-        res.status(200)
+exports.showProfile = (req, res) => {
+    User.findById(res.userdata.id).exec((err, data) => {
+        if (err) {
+            res.status(500).json({
+                err: err
+            })
+        } else {
+            res.status(200).json({
+                data: data
+            })
+        }
     })
-}
+};
+
+exports.updateProfile = (req, res) => {
+    const updatedData = {
+        email: req.body.email,
+        nickname: req.body.nickname,
+        bio: req.body.bio
+    };
+    if (req.file) {
+        updatedData.profilepicture = req.file.filename
+    }
+    User.findByIdAndUpdate(res.userdata.id, updatedData, (err, data) => {
+        if (err) {
+            res.status(500).json({
+                err: err
+            })
+        } else {
+            res.status(200).json({
+                data: req.file ? req.file.filename: null
+            })
+        }
+    })
+};
 
 exports.addPost = (req, res) => {
     const {caption} = req.body;

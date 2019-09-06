@@ -73,7 +73,7 @@ class Dashboard extends React.Component {
     render() {
         return (
             <>
-                <ToastContainer enableMultiContainer position={toast.POSITION.TOP_RIGHT}/>
+
                 <div style={{paddingTop: 100}} id={'scroll-div'} onScroll={this.infiniteScroll}>
                 {this.state.loading
                     ?

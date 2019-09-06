@@ -25,3 +25,9 @@ export const updateToken = payload => {
         payload:payload
     }
 }
+export const updateProfile = payload => {
+    return {
+        type: 'updateProfile',
+        payload: payload
+    }
+}

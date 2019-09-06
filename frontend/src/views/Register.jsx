@@ -199,7 +199,7 @@ export default class Register extends React.Component {
     render() {
         return (
             <>
-                <ToastContainer enableMultiContainer position={toast.POSITION.TOP_RIGHT}/>
+
                 <MDBContainer>
                     <MDBRow>
                         <MDBCol md="12">

@@ -55,9 +55,7 @@ class Login extends React.Component {
 
     render() {
         return (
-            <>
-                <ToastContainer enableMultiContainer position={toast.POSITION.TOP_RIGHT}/>
-                <MDBContainer>
+            <MDBContainer>
                     <MDBRow>
                         <MDBCol md="12">
                             <MDBCard className="d-flex justify-content-center w-50 form-container"
@@ -113,7 +111,6 @@ class Login extends React.Component {
                         </MDBCol>
                     </MDBRow>
                 </MDBContainer>
-            </>
         );
     }
 }

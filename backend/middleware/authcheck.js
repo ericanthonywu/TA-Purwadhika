@@ -8,8 +8,7 @@ exports.fileauthcheck = (req, res, next) => {
             if (req.files) {
                 const deldata = () => {
                     for (let i = 0; i < req.files.length; i++) {
-                        fs.unlink(path.join(__dirname, `../uploads/${req.dest}/${req.files[i].filename}`), () => {
-                        })
+                        fs.unlink(path.join(__dirname, `../uploads/${req.dest}/${req.files[i].filename}`),() => {})
                     }
                 };
                 await deldata();

@@ -122,7 +122,7 @@ class AddPost extends React.Component {
     render() {
         return (
             <MDBContainer>
-                <ToastContainer enableMultiContainer position={toast.POSITION.TOP_RIGHT}/>
+
                 <MDBRow>
                     <MDBCol lg="6">
                         <MDBCard className="d-flex justify-content-center w-100 form-container"

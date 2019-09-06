@@ -17,6 +17,22 @@ const uploadPost = multer({
         fileSize: 1024 * 1024 * 5
     },
 });
+const userStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        req.dest = "profile_picture";
+        cb(null, path.join(__dirname, `../uploads/${req.dest}`))
+    },
+    filename: (req, file, cb) => {
+        cb(null, new Date().toISOString().replace(/:/g, '-') + file.originalname.trim())
+    }
+});
+
+const uploadUser = multer({
+    storage: userStorage,
+    limits: {
+        fileSize: 1024 * 1024 * 5
+    },
+});
 
 const authController = require('../controller/auth');
 const showController = require('../controller/show');
@@ -37,6 +53,7 @@ router.post('/dashboard',authMiddleware.dashboardcheck,showController.dashboard)
 //profile route
 router.post('/getprofile', authMiddleware.authcheck, showController.profile);
 router.post('/showProfile', authMiddleware.authcheck, showController.showProfile);
+router.post('/updateProfile',uploadUser.single('file'), authMiddleware.fileauthcheck, showController.updateProfile);
 
 //post route
 router.post('/addpost',uploadPost.array('image', 10), authMiddleware.fileauthcheck, showController.addPost);
