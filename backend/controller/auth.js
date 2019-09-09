@@ -415,7 +415,8 @@ exports.getlogin = (req, res) => {
 exports.verify = (req, res, next) => {
     user.findOneAndUpdate(
         {token: req.params.token},
-        {email_st: 1,token:null}
+        {email_st: 1,token:null},
+        {'new':true} //https://stackoverflow.com/questions/33992359/mongoosastic-findoneandupdate-not-indexing-in-elasticsearch
     ).select('+token').exec(err => {
         if (err)
             return res.status(500).json({

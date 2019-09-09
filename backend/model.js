@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema({
     username: 'text',
     nickname: 'text'
 }, {
-    weights: {
+    weights: { //apply index
         username: 5,
         nickname: 1
     }
@@ -58,7 +58,11 @@ const postSchema = new mongoose.Schema({
     user: {type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true},
     like: [{type: mongoose.Schema.Types.ObjectId, ref: 'user'}],
     status: {type: Number, default: 0}
-}, {timestamps: true});
+}, {timestamps: true}).plugin(elastic_search,{
+    hosts: [
+        'localhost:9200'
+    ]
+});
 
 exports.post = mongoose.model('post', postSchema);
 
@@ -66,6 +70,10 @@ const notificationSchema = new mongoose.Schema({
     notification: {type: String, required: true},
     user: {type: mongoose.Schema.Types.ObjectId, ref: 'user'},
     url: {type: String}
-}, {timestamps: true});
+}, {timestamps: true}).plugin(elastic_search,{
+    hosts: [
+        'localhost:9200'
+    ]
+});
 
 exports.notification = mongoose.model('notification', notificationSchema);

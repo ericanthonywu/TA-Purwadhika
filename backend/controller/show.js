@@ -78,13 +78,17 @@ exports.searchUser = (req, res) => {
                 bool:{
                     must:{ //required
                         match:{ //match data
-                            email_st:0
+                            email_st:1
                         }
                     }
                 }
             }
         }
-    },{_source:["username"]}, (err, data) => {
+    },{
+        // _source:["username"],
+        from:0, //pagination
+        size:10, //limit
+    }, (err, data) => {
         if (err) {
             res.status(err.statusCode).json({
                 msg: err.msg,
