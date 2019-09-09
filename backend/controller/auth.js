@@ -83,7 +83,7 @@ function makeid(length) {
     return result;
 }
 
-exports.register = async (req, res, next) => {
+exports.register =  (req, res, next) => {
     const {username, password, email} = req.body;
     if (!username || !password || !email) {
         res.status(401).json({
@@ -98,35 +98,42 @@ exports.register = async (req, res, next) => {
         bcrypt.genSalt(10, (err, salt) => {
             bcrypt.hash(password, salt, async (err, enc_password) => {
                 const token = makeid(50);
-                await user.create(
-                    {
-                        username: username,
-                        password: enc_password,
-                        email: email,
-                        token: token
-                    },
+                const userDoc = new user({
+                    username: username,
+                    nickname: username,
+                    password: enc_password,
+                    email: email,
+                    token: token
+                });
+                userDoc.save(
                     err => {
                         if (err) {
                             res.status(500).json({
                                 error: err
                             });
                         } else {
-                            const transpoter = nodeMailer.createTransport({
-                                host: "smtp.gmail.com",
-                                port: 465,
-                                secure: true,
-                                service: "Gmail",
-                                requireTLS: true,
-                                auth: {
-                                    user: "noreplyerictes@gmail.com",
-                                    pass: "ysn852jd48;"
-                                }
-                            });
-                            const mailOption = {
-                                from: "My Chat Email Verification",
-                                to: email,
-                                subject: "Email Verification",
-                                html: `
+                            userDoc.on('es-indexed', err => {
+                                if (err) {
+                                    res.status(500).json({
+                                        error: err
+                                    });
+                                } else {
+                                    const transpoter = nodeMailer.createTransport({
+                                        host: "smtp.gmail.com",
+                                        port: 465,
+                                        secure: true,
+                                        service: "Gmail",
+                                        requireTLS: true,
+                                        auth: {
+                                            user: "noreplyerictes@gmail.com",
+                                            pass: "ysn852jd48;"
+                                        }
+                                    });
+                                    const mailOption = {
+                                        from: "My Chat Email Verification",
+                                        to: email,
+                                        subject: "Email Verification",
+                                        html: `
 <!DOCTYPE html PUBLIC>
 <html xmlns='http://www.w3.org/1999/xhtml'>
 <head>
@@ -380,13 +387,15 @@ exports.register = async (req, res, next) => {
 
 </body>
 </html>`
-                            };
-                            transpoter.sendMail(mailOption, (err, info) => {
-                                if (err) return console.error(err);
-                            });
-                            res.status(201).json({
-                                message: `User ${username} successfully Created! Please Verify Your Email`
-                            });
+                                    };
+                                    transpoter.sendMail(mailOption, (err, info) => {
+                                        if (err) return console.error(err);
+                                        res.status(201).json({
+                                            message: `User ${username} successfully Created! Please Verify Your Email`
+                                        });
+                                    });
+                                }
+                            })
                         }
                     }
                 );
@@ -406,7 +415,7 @@ exports.getlogin = (req, res) => {
 exports.verify = (req, res, next) => {
     user.findOneAndUpdate(
         {token: req.params.token},
-        {email_st: 1,token:""}
+        {email_st: 1,token:null}
     ).select('+token').exec(err => {
         if (err)
             return res.status(500).json({

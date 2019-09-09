@@ -57,6 +57,47 @@ exports.showProfile = (req, res) => {
     })
 };
 
+exports.searchUser = (req, res) => {
+    // User.find({
+    //     username:  { $regex: req.body.param + '.*' },
+    //     email_st: 1
+    // }, (err, data) => {
+    //     if (err) console.error(err);
+    //     res.status(200).json({
+    //         data: data
+    //     })
+    // })
+    User.search({
+        bool:{
+            must:{ //required
+                prefix:{
+                    username: req.body.param, //search prefix
+                },
+            },
+            filter:{
+                bool:{
+                    must:{ //required
+                        match:{ //match data
+                            email_st:0
+                        }
+                    }
+                }
+            }
+        }
+    },{_source:["username"]}, (err, data) => {
+        if (err) {
+            res.status(err.statusCode).json({
+                msg: err.msg,
+                response: JSON.parse(err.response)
+            })
+        } else {
+            res.status(200).json({
+                data: data.hits.hits
+            })
+        }
+    })
+};
+
 exports.updateProfile = (req, res) => {
     const updatedData = {
         email: req.body.email,
@@ -73,7 +114,7 @@ exports.updateProfile = (req, res) => {
             })
         } else {
             res.status(200).json({
-                data: req.file ? req.file.filename: null
+                data: req.file ? req.file.filename : null
             })
         }
     })

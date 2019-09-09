@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const elastic_search = require('mongoosastic');
 mongoose.connect('mongodb://localhost/sosmed', {
     useNewUrlParser: true,
     keepAlive: true,
@@ -21,7 +22,19 @@ const userSchema = new mongoose.Schema({
     follower: [{type: mongoose.Schema.Types.ObjectId, ref: 'user'}],
     following: [{type: mongoose.Schema.Types.ObjectId, ref: 'user'}],
     bio: {type: String}
-}, {timestamps: true});
+}, {timestamps: true}).index({
+    username: 'text',
+    nickname: 'text'
+}, {
+    weights: {
+        username: 5,
+        nickname: 1
+    }
+}).plugin(elastic_search,{
+    hosts: [
+        'localhost:9200'
+    ]
+});
 
 exports.user = mongoose.model('user', userSchema);
 
@@ -44,7 +57,7 @@ const postSchema = new mongoose.Schema({
     caption: {type: String},
     user: {type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true},
     like: [{type: mongoose.Schema.Types.ObjectId, ref: 'user'}],
-    status: {type: Number,default: 0}
+    status: {type: Number, default: 0}
 }, {timestamps: true});
 
 exports.post = mongoose.model('post', postSchema);
@@ -53,6 +66,6 @@ const notificationSchema = new mongoose.Schema({
     notification: {type: String, required: true},
     user: {type: mongoose.Schema.Types.ObjectId, ref: 'user'},
     url: {type: String}
-},{timestamps: true});
+}, {timestamps: true});
 
-exports.notification = mongoose.model('notification',notificationSchema);
+exports.notification = mongoose.model('notification', notificationSchema);

@@ -92,30 +92,34 @@ class AddPost extends React.Component {
     };
     filechoosen = e => {
         if (e.target.files.length) { //cek file
-            const files = Array.from(e.target.files); //get files array
-            this.setState({
-                file: e.target.files
-            });
-            this.setState({
-                loadimage: true
-            });
-            Promise.all(files.map(file => { //mapping files
-                return (new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.addEventListener('load', e => {
-                        resolve(e.target.result); //return images
-                    });
-                    reader.addEventListener('error', reject); //put error handler
-                    reader.readAsDataURL(file);
-                }));
-            })).then(images => {
+            if (e.target.files.length < 10) {
+                toast.error("Upload 10 photo maximum")
+            } else {
+                const files = Array.from(e.target.files); //get files array
                 this.setState({
-                    loadimage: false,
-                    image: images
+                    file: e.target.files
                 });
-            }, e => {
-                toast.error("an error occured please upload again")
-            });
+                this.setState({
+                    loadimage: true
+                });
+                Promise.all(files.map(file => { //mapping files
+                    return (new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.addEventListener('load', e => {
+                            resolve(e.target.result); //return images
+                        });
+                        reader.addEventListener('error', reject); //put error handler
+                        reader.readAsDataURL(file);
+                    }));
+                })).then(images => {
+                    this.setState({
+                        loadimage: false,
+                        image: images
+                    });
+                }, e => {
+                    toast.error("an error occured please upload again")
+                });
+            }
         }
     };
 

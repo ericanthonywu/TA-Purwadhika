@@ -32,6 +32,7 @@ import ShowPost from "./views/ShowPost";
 import UpdateProfile from "./views/UpdateProfile";
 import {profile_url} from "./global";
 import {toast, ToastContainer} from "react-toastify";
+import Search from "./views/Search";
 
 class App extends Component {
     constructor(a) {
@@ -125,12 +126,9 @@ class App extends Component {
                                         <input className="form-control mr-sm-2 w-100 mt-3 w-100" type="text"
                                                placeholder="Find User"
                                                aria-label="Search"
-                                               onKeyDown={
+                                               onChange={
                                                    e => {
-                                                       if (e.keyCode === 13){
-                                                           e.preventDefault();
-                                                           this.props.history.push(`/profile/${e.target.value}`);
-                                                       }
+                                                       this.props.history.push('/search?user='+e.target.value)
                                                    }
                                                }
                                         />
@@ -271,10 +269,11 @@ class App extends Component {
                     <Route path={'/login'} exact component={Login}/>
                     <Route path={'/register'} exact component={Register}/>
                     <Route path={'/profile/:profile'} component={withAuth(Profile)}/>
-                    <Route path={'/addpost'} component={withAuth(AddPost)}/>
-                    <Route path={'/chat'} component={Chat}/>
+                    <Route path={'/addpost'} exact component={withAuth(AddPost)}/>
+                    <Route path={'/chat'} exact component={Chat}/>
                     <Route path={'/post/:postid'} component={ShowPost}/>
-                    <Route path={'/updateProfile'} component={withAuth(UpdateProfile)}/>
+                    <Route path={'/updateProfile'} exact component={withAuth(UpdateProfile)}/>
+                    <Route path={'/search'} component={Search}/>
                     <Route component={Error404}/>
                 </Switch>
                 <MDBModal isOpen={this.state.bottommodal} backdrop={false} toggle={() => this.setState({

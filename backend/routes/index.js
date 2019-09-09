@@ -47,6 +47,8 @@ router.post('/checkemail', authController.checkemail);
 router.post('/checkusername', authController.checkusername);
 router.post('/checktoken', authController.checktoken);
 
+router.post('/searchUser', showController.searchUser);
+
 //dashboard route
 router.post('/dashboard',authMiddleware.dashboardcheck,showController.dashboard);
 
