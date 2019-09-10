@@ -1,6 +1,8 @@
 # TA-Purwadhika
 
-Cloning Instagram menggunakan:
+# Tema: Cloning Instagram 
+
+Framework yang digunakan:
 - express JS sebagai backend
 - React JS sebagai FrontEnd
 - MongoDB sebagai database dengan mongoose sebagai ORM
