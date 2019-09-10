@@ -10,7 +10,7 @@ import {logout} from "../redux/actions";
 import {connect} from 'react-redux'
 import Post from './template/Post'
 import Error404 from "./template/404";
-import {api_url, post_url, profile_url} from "../global";
+import {api_url, followformat, post_url, profile_url} from "../global";
 
 class Profile extends React.Component {
     constructor(props) {
@@ -208,12 +208,12 @@ class Profile extends React.Component {
                                                         if(this.state.follower.length){
                                                             this.setState({showFollower: true})
                                                         }
-                                                    }} style={this.state.follower.length ? {cursor:"pointer"}:{}}><span className={"bolder"} >{this.state.follower.length}</span> followers</span>
+                                                    }} style={this.state.follower.length ? {cursor:"pointer"}:{}}><span className={"bolder"} >{followformat(parseInt(this.state.follower.length))}</span> followers</span>
                                                     <span onClick={() => {
                                                        if(this.state.user.following.length){
                                                            this.setState({showFollowing: true})
                                                        }
-                                                    }} style={this.state.user.following.length ? {cursor:"pointer"}:{}}><span className={"bolder"}>{this.state.user.following.length}</span> following</span>
+                                                    }} style={this.state.user.following.length ? {cursor:"pointer"}:{}}><span className={"bolder"}>{followformat(parseInt(this.state.user.following.length))}</span> following</span>
                                                 </div>
                                                 <div>
                                                     {this.state.user.nickname || ""}
