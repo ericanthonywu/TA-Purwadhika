@@ -11,4 +11,10 @@ Copy project :
 - npm install / yarn install
 - cd backend && npm start
 - cd frontend && npm start
+note: nyalakan mongoDB dan elasticsearch terlebih dahulu
+
+software yang dibutuhkan :
+- npm / yarn (package manager)
+- elasticsearch
+- mongoDB
 
