@@ -82,7 +82,7 @@ class Comment extends React.Component {
                             this.state.likeslist ?
                             this.state.likeslist.map(o => {
                                 return  (
-                                    <div className="comments mb-2"><img
+                                    <div className="comments mb-2" onClick={() => this.props.history.push("/profile/"+o.username)}><img
                                         src={profile_url+o.profilepicture}
                                         className="round mr-3" alt="aligment" width="40" height="100%"/>
                                         <div className="comment-info mr-5"><span
@@ -101,10 +101,10 @@ class Comment extends React.Component {
                         })}>Close</MDBBtn>
                     </MDBModalFooter>
                 </MDBModal>
-                <img src={profile_url+this.props.data.user.profilepicture} className="round mr-3"
-                     alt="aligment" width={40} height={"100%"}/>
+                <img src={profile_url+this.props.data.user.profilepicture} className="round mr-3 pointer"
+                     alt="aligment" width={40} height={"100%"} onClick={() => this.props.history.push("/profile/"+this.props.data.user.username)} />
                 <div className={"comment-info mr-5"}>
-                    <span className={"bolder mr-2 pointer"}>{this.props.data.user.username}</span>
+                    <span className={"bolder mr-2 pointer"} onClick={() => this.props.history.push("/profile/"+this.props.data.user.username)}>{this.props.data.user.username}</span>
                     <span className={"normalweight"}>{this.props.data.comments}</span>
                     <div className={"mt-2"}>
                         <span>{moment(this.props.data.time).fromNow()}</span>
@@ -136,7 +136,7 @@ const mapToStateProps = state => {
         token: state.user.token,
         loggedin: state.user.loggedin,
         userid: state.user._id,
-        username: state.user.username
+        username: state.user.username,
     }
 }
 export default connect(mapToStateProps)(Comment)

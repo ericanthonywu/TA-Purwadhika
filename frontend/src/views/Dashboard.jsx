@@ -110,6 +110,7 @@ class Dashboard extends React.Component {
                                                     likestatus={o.like.some(e => e._id === this.props.id)}
                                                     postimages={o.image}
                                                     comments={o.comments}
+                                                    {...this.props}
                                                 />
                                             )
                                         })

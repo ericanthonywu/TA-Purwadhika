@@ -70,6 +70,7 @@ class ShowPost extends React.Component {
                                                 likestatus={this.state.post.like.some(e => e._id === this.props.id)}
                                                 postimages={this.state.post.image}
                                                 comments={this.state.post.comments}
+                                                {...this.props}
                                             />
                                     )
                             }

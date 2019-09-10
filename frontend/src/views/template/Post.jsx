@@ -168,9 +168,9 @@ class Post extends React.Component {
                             <div className={"float-left flex"}>
                                 <img src={profile_url + this.props.postprofilepicture}
                                      className="round mr-3"
-                                     alt="aligment" width={60}/>
+                                     alt="aligment" width={60} onClick={() => this.props.history.push("/profile/"+this.props.postusername)}/>
                                 <div className={"user-info"}>
-                                    <span className={"bolder pointer"}>{this.props.postusername}</span>
+                                    <span className={"bolder pointer"} onClick={() => this.props.history.push("/profile/"+this.props.postusername)}>{this.props.postusername}</span>
                                     <span>{this.props.posttime}</span>
                                 </div>
                             </div>
@@ -269,7 +269,7 @@ class Post extends React.Component {
                                     null
                                 }
                                 <div className={"img_desc normalweight"}><span
-                                    className={"bolder pointer normalweight"}>{this.props.postusername}</span> {this.props.postcaption}
+                                    className={"bolder pointer normalweight"} onClick={() => this.props.history.push("/profile/"+this.props.postusername)}>{this.props.postusername}</span> {this.props.postcaption}
                                 </div>
                                 {
                                     !this.state.showFullComments && this.props.totalcomment > 0 ? <div onClick={() => this.setState({
@@ -283,16 +283,16 @@ class Post extends React.Component {
                                 <div id="comment-container" className={"mt-3"}>
                                     {this.state.showFullComments ?
                                         this.state.comments.map(o => {
-                                            return <Comment data={o} postid={this.props._id}/>
+                                            return <Comment {...this.props} data={o} postid={this.props._id}/>
                                         })
                                         :
                                         this.state.tempComments.map(o => {
-                                            return <Comment data={o} postid={this.props._id}/>
+                                            return <Comment {...this.props} data={o} postid={this.props._id}/>
                                         })
                                     }
                                     {this.props.loggedin ?
                                         <div className="comments mb-2">
-                                            <img src={profile_url + this.props.postprofilepicture}
+                                            <img src={profile_url + this.props.profilepicture}
                                                  className="round mr-3"
                                                  alt="aligment" width={40} height={"100%"}
                                             />

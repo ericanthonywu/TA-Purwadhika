@@ -11,6 +11,7 @@ import {connect} from 'react-redux'
 import Post from './template/Post'
 import Error404 from "./template/404";
 import {api_url, followformat, post_url, profile_url} from "../global";
+import moment from "moment";
 
 class Profile extends React.Component {
     constructor(props) {
@@ -22,7 +23,12 @@ class Profile extends React.Component {
             notFound: false,
             follower:[],
             showFollower: false,
-            showFollowing: false
+            showFollowing: false,
+            postDetail: {
+                user:{username: ""},
+                comments: [],
+                like: []
+            }
         }
     }
 
@@ -227,13 +233,58 @@ class Profile extends React.Component {
                                             </MDBCol>
                                         </MDBRow>
                                         <MDBRow>
-                                            <MDBCol size={10}>
+                                            <MDBModal size={"lg"} isOpen={this.state.showPost} toggle={() => this.setState({
+                                                showPost: !this.state.showPost
+                                            })}>
+                                                <MDBModalHeader toggle={() => this.setState({
+                                                    showPost: !this.state.showPost
+                                                })}>Show Post</MDBModalHeader>
+                                                <MDBModalBody>
+                                                    {
+                                                        this.state.postDetail !== {} ?
+                                                            <Post
+                                                                _id={this.state.postDetail._id}
+                                                                postusername={this.state.postDetail.user.username}
+                                                                posttime={moment(this.state.postDetail.createdAt).fromNow()}
+                                                                postprofilepicture={this.state.postDetail.user.profilepicture}
+                                                                postcaption={this.state.postDetail.caption}
+                                                                totalcomment={this.state.postDetail.comments.length}
+                                                                likeslist={this.state.postDetail.like}
+                                                                postlikes={this.state.postDetail.like.length}
+                                                                likestatus={this.state.postDetail.like.some(e => e._id === this.props.userid)}
+                                                                postimages={this.state.postDetail.image}
+                                                                comments={this.state.postDetail.comments}
+                                                                {...this.props}
+                                                            />
+                                                            :
+                                                            ""
+                                                    }
+                                                </MDBModalBody>
+                                                <MDBModalFooter>
+                                                    <MDBBtn color="secondary" onClick={() => this.setState({
+                                                        showPost: false
+                                                    })}>Close</MDBBtn>
+                                                </MDBModalFooter>
+                                            </MDBModal>
+                                            <MDBCol size={12}>
                                                 <MDBRow>
                                                     {
+                                                        this.state.post.length ?
                                                         this.state.post.map(o => {
                                                             return (
                                                                 <MDBCol size={4}>
-                                                                    <div className={"post-thumbnail"} onClick={() => this.props.history.push(`/post/${o._id}`)}>
+                                                                    <div className={"post-thumbnail"} onClick={() => {
+                                                                        axios.post(`${api_url}showPost`,{
+                                                                            id: o._id
+                                                                        }).then(res => {
+                                                                            this.setState({
+                                                                                postDetail: res.data.post,
+                                                                                showPost: true,
+                                                                            })
+                                                                        });
+
+                                                                    }
+                                                                    }>
                                                                         <img
                                                                             src={post_url+o.image[0]}
                                                                             width={"100%"} alt={o.image}/>
@@ -248,6 +299,8 @@ class Profile extends React.Component {
                                                                 </MDBCol>
                                                             )
                                                         })
+                                                            :
+                                                            <center><h1>This User Has no Post to be Shown</h1></center>
                                                     }
                                                 </MDBRow>
                                             </MDBCol>

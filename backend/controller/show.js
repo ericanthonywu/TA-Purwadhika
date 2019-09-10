@@ -9,7 +9,7 @@ exports.profile = (req, res) => {
     User.findOne({username: req.body.username, email_st: 1}).populate('follower').populate('following').exec()
         .then(data => {
             if (data) {
-                Post.find({user: res.userdata.id}, [], {
+                Post.find({user: data._id}, [], {
                     sort: {
                         createdAt: -1 //Sort by Date Added DESC
                     }
