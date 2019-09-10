@@ -172,7 +172,7 @@ class Profile extends React.Component {
                                                 })}>
                                                     <MDBModalHeader toggle={() => this.setState({
                                                         showFollowing: !this.state.showFollowing
-                                                    })}>Followers List</MDBModalHeader>
+                                                    })}>Following List</MDBModalHeader>
                                                     <MDBModalBody>
                                                         {
                                                             this.state.user.following.map(o => {
