@@ -92,7 +92,7 @@ class AddPost extends React.Component {
     };
     filechoosen = e => {
         if (e.target.files.length) { //cek file
-            if (e.target.files.length < 10) {
+            if (e.target.files.length > 10) {
                 toast.error("Upload 10 photo maximum")
             } else {
                 const files = Array.from(e.target.files); //get files array

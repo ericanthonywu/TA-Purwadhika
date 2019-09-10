@@ -68,31 +68,31 @@ exports.searchUser = (req, res) => {
     //     })
     // })
     User.search({
-        bool:{
-            must:{ //required
-                prefix:{
+        bool: {
+            must: { //required
+                prefix: {
                     username: req.body.param, //search prefix
                 },
             },
-            filter:{
-                bool:{
-                    must:{ //required
-                        match:{ //match data
-                            email_st:1
+            filter: {
+                bool: {
+                    must: { //required
+                        match: { //match data
+                            email_st: 1
                         }
                     }
                 }
             }
         }
-    },{
+    }, {
         // _source:["username"],
-        from:0, //pagination
-        size:10, //limit
+        from: 0, //pagination
+        size: 10, //limit
     }, (err, data) => {
         if (err) {
             res.status(err.statusCode).json({
                 msg: err.msg,
-                response: JSON.parse(err.response)
+                response: JSON.parse(err.response) || JSON.parse(err)
             })
         } else {
             res.status(200).json({
@@ -111,7 +111,9 @@ exports.updateProfile = (req, res) => {
     if (req.file) {
         updatedData.profilepicture = req.file.filename
     }
-    User.findByIdAndUpdate(res.userdata.id, updatedData, (err, data) => {
+    User.findByIdAndUpdate(res.userdata.id, updatedData, {
+        'new': true
+    }, (err, data) => {
         if (err) {
             res.status(500).json({
                 err: err
@@ -279,6 +281,58 @@ exports.showPost = (req, res) => {
     }).catch(err => {
         res.status(500).json({
             err: err
+        })
+    })
+};
+exports.follow = (req, res) => {
+    User.findByIdAndUpdate(req.body.userTarget,{
+        $push:{
+            follower: res.userdata.id
+        }
+    },{
+        "new":true
+    },(err,data) => {
+        if(err){
+            res.status(500).json({
+                err: err
+            })
+        }
+        User.findByIdAndUpdate(res.userdata.id,{
+            $push:{
+                following: req.body.userTarget
+            }
+        },{
+            "new":true
+        },(err,data) => {
+            res.status(err ? 500 : 200).json(err ? {
+                err: err
+            } : {})
+        })
+    })
+};
+exports.unfollow = (req, res) => {
+    User.findByIdAndUpdate(req.body.userTarget,{
+        $pull:{
+            follower: res.userdata.id
+        }
+    },{
+        "new":true
+    },(err,data) => {
+        if(err){
+            res.status(500).json({
+                err: err
+            })
+        }
+        User.findByIdAndUpdate(res.userdata.id,{
+            $pull:{
+                following: req.body.userTarget
+            }
+        },{
+            "new":true
+        },(err,data) => {
+            res.status(err ? 500 : 200).json(err ? {
+                err: err
+            } : {})
         })
     })
 };

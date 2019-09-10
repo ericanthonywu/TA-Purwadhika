@@ -3,7 +3,7 @@ import {
     MDBCol,
     MDBContainer,
     MDBRow,
-    MDBBtn, MDBIcon
+    MDBBtn, MDBIcon, MDBModalHeader, MDBModalBody, MDBModalFooter, MDBModal
 } from "mdbreact";
 import axios from 'axios'
 import {logout} from "../redux/actions";
@@ -19,8 +19,65 @@ class Profile extends React.Component {
             user: {},
             post: [],
             isLoading: true,
-            notFound: false
+            notFound: false,
+            follower:[],
+            showFollower: false,
+            showFollowing: false
         }
+    }
+
+    follow = () => {
+        axios.post(`${api_url}follow`,{
+            token: this.props.token,
+            userid: this.props.userid,
+            userTarget: this.state.user._id
+        }).then(res => {
+            // console.log(this.state.follower)
+            this.setState({
+                follower: [...this.state.follower,{
+                    username: this.props.username,
+                    profilepicture: this.props.profilepicture,
+                    _id: this.props.userid
+                }]
+            })
+            // console.log(this.state.follower)
+        })
+    }
+    unFollow = () =>{
+        axios.post(`${api_url}unfollow`,{
+            token: this.props.token,
+            userid: this.props.userid,
+            userTarget: this.state.user._id
+        }).then(res => {
+            this.setState({
+                follower: this.state.follower.filter(o => {
+                    return o._id !== this.props.userid
+                })
+            })
+        })
+    }
+    followStatus = () => {
+        return (
+            this.props.match.params.profile === this.props.username
+                ?
+                <MDBBtn className={"waves-effect"} outline
+                        color={"elegant"} onClick={() => this.props.history.push('/updateProfile')}> Edit
+                    Profile </MDBBtn>
+                :
+                this.state.follower.some(e => e._id === this.props.userid) ?
+                    <MDBBtn className={"waves-effect"} outline
+                            color={"primary"} onClick={this.unFollow}> Following </MDBBtn> :
+                    (
+                        this.state.user.following.some(e => e._id === this.props.userid)
+                            ?
+                            <MDBBtn className={"waves-effect"}
+                                    color={"primary"} onClick={this.follow}> Following
+                                You </MDBBtn>
+                            :
+                            <MDBBtn className={"waves-effect"}
+                                    color={"primary"} onClick={this.follow}> Follow </MDBBtn>
+                    )
+        )
     }
 
 
@@ -33,9 +90,11 @@ class Profile extends React.Component {
             }).then(res => {
                 this.setState({
                     user: res.data.user,
+                    follower: res.data.user.follower,
                     post: res.data.post,
-                    isLoading: false
+                    isLoading: false,
                 })
+                console.log(this.state.follower)
             }).catch(err => {
                 console.log(err);
                 this.setState({
@@ -80,42 +139,86 @@ class Profile extends React.Component {
                                                      className={"round-img"} alt=""/>
                                             </MDBCol>
                                             <MDBCol size={1}>
+                                                <MDBModal isOpen={this.state.showFollower} toggle={() => this.setState({
+                                                    showFollower: !this.state.showFollower
+                                                })}>
+                                                    <MDBModalHeader toggle={() => this.setState({
+                                                        showFollower: !this.state.showFollower
+                                                    })}>Followers List</MDBModalHeader>
+                                                    <MDBModalBody>
+                                                        {
+                                                            this.state.follower.map(o => {
+                                                                return  (
+                                                                    <div className="comments mb-2" onClick={() => this.props.history.push("/profile/"+o.username)}><img
+                                                                        src={profile_url+o.profilepicture}
+                                                                        className="round mr-3" alt="aligment" width="40" height="100%"/>
+                                                                        <div className="comment-info mr-5"><span
+                                                                            className="bolder mr-2 pointer">{o.username}</span>
+                                                                        </div>
+                                                                    </div>
+                                                                )
+                                                            })
+                                                        }
+                                                    </MDBModalBody>
+                                                    <MDBModalFooter>
+                                                        <MDBBtn color="secondary" onClick={() => this.setState({
+                                                            showFollower: false
+                                                        })}>Close</MDBBtn>
+                                                    </MDBModalFooter>
+                                                </MDBModal>
 
+                                                <MDBModal isOpen={this.state.showFollowing} toggle={() => this.setState({
+                                                    showFollower: !this.state.showFollowing
+                                                })}>
+                                                    <MDBModalHeader toggle={() => this.setState({
+                                                        showFollowing: !this.state.showFollowing
+                                                    })}>Followers List</MDBModalHeader>
+                                                    <MDBModalBody>
+                                                        {
+                                                            this.state.user.following.map(o => {
+                                                                return  (
+                                                                    <div className="comments mb-2" onClick={() => this.props.history.push("/profile/"+o.username)}><img
+                                                                        src={profile_url+o.profilepicture}
+                                                                        className="round mr-3" alt="aligment" width="40" height="100%"/>
+                                                                        <div className="comment-info mr-5"><span
+                                                                            className="bolder mr-2 pointer">{o.username}</span>
+                                                                        </div>
+                                                                    </div>
+                                                                )
+                                                            })
+                                                        }
+                                                    </MDBModalBody>
+                                                    <MDBModalFooter>
+                                                        <MDBBtn color="secondary" onClick={() => this.setState({
+                                                            showFollowing: false
+                                                        })}>Close</MDBBtn>
+                                                    </MDBModalFooter>
+                                                </MDBModal>
                                             </MDBCol>
                                             <MDBCol size={6} className={"user_data"}>
                                                 <div>
                                                     <span className={"profile_username"}>{this.state.user.username}</span>
                                                     {
-                                                        this.props.match.params.profile === this.props.username
-                                                            ?
-                                                            <MDBBtn className={"waves-effect"} outline
-                                                                    color={"elegant"} onClick={() => this.props.history.push('/updateProfile')}> Edit
-                                                                Profile </MDBBtn>
-                                                            :
-                                                            this.state.user.follower.includes(this.props.userid) ?
-                                                                <MDBBtn className={"waves-effect"} outline
-                                                                        color={"primary"}> Following </MDBBtn> :
-                                                                (
-                                                                    this.state.user.following.includes(this.props.userid)
-                                                                        ?
-                                                                        <MDBBtn className={"waves-effect"}
-                                                                                color={"primary"}> Following
-                                                                            You </MDBBtn>
-                                                                        :
-                                                                        <MDBBtn className={"waves-effect"}
-                                                                                color={"primary"}> Follow </MDBBtn>
-                                                                )
+                                                        this.followStatus()
                                                     }
                                                 </div>
                                                 <div>
                                                     <span className={"bolder"}>{this.state.post.length}</span> posts
-                                                    <span className={"bolder"}>{this.state.user.follower.length}</span> followers
-                                                    <span className={"bolder"}>{this.state.user.following.length}</span> following
+                                                    <span onClick={() => {
+                                                        if(this.state.follower.length){
+                                                            this.setState({showFollower: true})
+                                                        }
+                                                    }} style={this.state.follower.length ? {cursor:"pointer"}:{}}><span className={"bolder"} >{this.state.follower.length}</span> followers</span>
+                                                    <span onClick={() => {
+                                                       if(this.state.user.following.length){
+                                                           this.setState({showFollowing: true})
+                                                       }
+                                                    }} style={this.state.user.following.length ? {cursor:"pointer"}:{}}><span className={"bolder"}>{this.state.user.following.length}</span> following</span>
                                                 </div>
                                                 <div>
                                                     {this.state.user.nickname || ""}
                                                 </div>
-                                                <div>
+                                                <div style={{whiteSpace:"pre-line"}}>
                                                     {this.state.user.bio || null}
                                                 </div>
                                             </MDBCol>
@@ -163,7 +266,8 @@ const mapToStateProps = state => {
     return {
         token: state.user.token,
         username: state.user.username,
-        userid: state.user.id
+        userid: state.user._id,
+        profilepicture: state.user.profilepicture
     }
 };
 export default connect(mapToStateProps, {logout})(Profile)

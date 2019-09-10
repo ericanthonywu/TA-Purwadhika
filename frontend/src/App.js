@@ -41,6 +41,7 @@ class App extends Component {
             isOpen: false,
             loggedin: false,
             bottommodal: false,
+            timeout: null
         };
     }
 
@@ -128,7 +129,18 @@ class App extends Component {
                                                aria-label="Search"
                                                onChange={
                                                    e => {
-                                                       this.props.history.push('/search?user='+e.target.value)
+                                                       if(this.state.timeout){
+                                                           clearTimeout(this.state.timeout)
+                                                           this.setState({
+                                                               timeout: null
+                                                           })
+                                                       }
+                                                       const search = e.target.value
+                                                       this.setState({
+                                                           timeout: setTimeout(() => {
+                                                               this.props.history.push("/search?user="+search)
+                                                           },500)
+                                                       })
                                                    }
                                                }
                                         />

@@ -55,6 +55,8 @@ router.post('/dashboard',authMiddleware.dashboardcheck,showController.dashboard)
 //profile route
 router.post('/getprofile', authMiddleware.authcheck, showController.profile);
 router.post('/showProfile', authMiddleware.authcheck, showController.showProfile);
+router.post('/follow', authMiddleware.authcheck, showController.follow);
+router.post('/unfollow', authMiddleware.authcheck, showController.unfollow);
 router.post('/updateProfile',uploadUser.single('file'), authMiddleware.fileauthcheck, showController.updateProfile);
 
 //post route

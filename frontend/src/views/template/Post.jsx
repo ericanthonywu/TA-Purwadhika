@@ -55,9 +55,9 @@ class Post extends React.Component {
     togglelike = e => {
         if(this.props.loggedin) {
             const likelist = [...this.state.likeslist];
-            if (e.target.classList.contains('fa')) {
-                e.target.classList.remove('fa');
-                e.target.classList.add('far');
+            if (document.getElementById('postlike').classList.contains('fa')) {
+                document.getElementById('postlike').classList.remove('fa');
+                document.getElementById('postlike').classList.add('far');
                 this.setState({
                     postlikes: this.state.postlikes - 1,
                     likeslist: likelist.filter(o => {return o === this.props.id})
@@ -78,8 +78,8 @@ class Post extends React.Component {
                     })
                 })
             } else {
-                e.target.classList.remove('far');
-                e.target.classList.add('fa');
+                document.getElementById('postlike').classList.remove('far');
+                document.getElementById('postlike').classList.add('fa');
                 likelist.push({
                     username: this.props.username,
                     profilepicture: localStorage.getItem('profile_picture')
@@ -210,6 +210,7 @@ class Post extends React.Component {
                                             <MDBCarouselItem itemId={id + 1}>
                                                 <MDBView>
                                                     <img
+                                                        onDoubleClick={this.togglelike}
                                                         className="d-block w-100"
                                                         src={this.state.postlikes < 0 ? o :post_url + o}
                                                         alt={`image ${id + 1}`}
@@ -233,7 +234,7 @@ class Post extends React.Component {
                         {
                             this.state.likeslist.map(o => {
                                 return  (
-                                    <div className="comments mb-2"><img
+                                    <div className="comments mb-2" onClick={() => this.props.history.push("/profile/"+o.username)}><img
                                         src={profile_url+o.profilepicture}
                                         className="round mr-3" alt="aligment" width="40" height="100%"/>
                                         <div className="comment-info mr-5"><span
@@ -255,7 +256,7 @@ class Post extends React.Component {
                         <MDBCol size={12}>
                             <div className="icon">
                                 <MDBIcon className={'pointer '} fa={this.props.likestatus} far={!this.props.likestatus}
-                                         onClick={this.togglelike} icon="heart"/>
+                                         onClick={this.togglelike} id={"postlike"} icon="heart"/>
                                 <MDBIcon className={"pointer"} far icon="comment"/>
                             </div>
                             <div className="description">

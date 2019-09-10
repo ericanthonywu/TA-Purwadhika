@@ -456,6 +456,7 @@
   transition: .5s;
   user-select: none;
   z-index: 2;
+  display: none;
 
   div {
     padding-bottom: 15px;
@@ -487,5 +488,37 @@
 
   span {
     margin-left: 10px;
+  }
+}
+.search-container{
+  display: flex;
+  margin-top: 20px;
+  .user-img{
+    cursor: pointer;
+    width:100px;
+    z-index: 10;
+    img{
+      border-radius: 50%;
+    }
+  }
+
+  .user-desc{
+    margin-left: -85px;
+    padding-left: 120px;
+    -webkit-box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    height: 70px;
+    margin-bottom: auto;
+    margin-top: auto;
+    p{
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button{
+      float: right;
+    }
+    p:last-child{
+      font-weight: bolder;
+    }
   }
 }

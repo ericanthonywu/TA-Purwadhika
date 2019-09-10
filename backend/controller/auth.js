@@ -103,7 +103,8 @@ exports.register =  (req, res, next) => {
                     nickname: username,
                     password: enc_password,
                     email: email,
-                    token: token
+                    token: token,
+                    email_st: 1 //TODO: remove on production
                 });
                 userDoc.save(
                     err => {
@@ -416,7 +417,7 @@ exports.verify = (req, res, next) => {
     user.findOneAndUpdate(
         {token: req.params.token},
         {email_st: 1,token:null},
-        {'new':true} //https://stackoverflow.com/questions/33992359/mongoosastic-findoneandupdate-not-indexing-in-elasticsearch
+        {'new':true} //based on https://stackoverflow.com/questions/33992359/mongoosastic-findoneandupdate-not-indexing-in-elasticsearch
     ).select('+token').exec(err => {
         if (err)
             return res.status(500).json({
