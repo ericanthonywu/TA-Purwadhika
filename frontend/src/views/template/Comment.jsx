@@ -1,6 +1,6 @@
 import {MDBBtn, MDBIcon, MDBModal, MDBModalBody, MDBModalFooter, MDBModalHeader} from "mdbreact";
 import React from "react";
-import {api_url, profile_url} from "../../global";
+import {api_url, base_url, profile_url} from "../../global";
 import moment from "moment";
 import {connect} from "react-redux";
 import axios from 'axios'
@@ -105,7 +105,9 @@ class Comment extends React.Component {
                      alt="aligment" width={40} height={"100%"} onClick={() => this.props.history.push("/profile/"+this.props.data.user.username)} />
                 <div className={"comment-info mr-5"}>
                     <span className={"bolder mr-2 pointer"} onClick={() => this.props.history.push("/profile/"+this.props.data.user.username)}>{this.props.data.user.username}</span>
-                    <span className={"normalweight"}>{this.props.data.comments}</span>
+                    <span className={"normalweight"} dangerouslySetInnerHTML={{__html: this.props.data.comments.split(" ").map(o => {
+                            return o.charAt(0) === "@" ? `<a href="${base_url}profile/${o.substring(1)}" target="_blank" style="color:blue"> ${o} </a>` : o
+                        }).join(" ")}}/>
                     <div className={"mt-2"}>
                         <span>{moment(this.props.data.time).fromNow()}</span>
                         {
@@ -117,7 +119,10 @@ class Comment extends React.Component {
                                 :
                                 ""
                         }
-                        <span className={"pointer " + (this.state.commentlike > 0 ? "" : "ml-3")}>Reply</span>
+                        <span className={"pointer " + (this.state.commentlike > 0 ? "" : "ml-3")} onClick={() => {
+                            this.props.refs.comment.value += `${this.props.refs.comment.value.charAt(this.props.refs.comment.value.length - 1) === " " ? "" : " " }@${this.props.data.user.username} `
+                            this.props.refs.comment.focus()
+                        }}>Reply</span>
                     </div>
                 </div>
                 <div>

@@ -3,6 +3,7 @@ import axios from 'axios'
 import {api_url, profile_url} from "../global";
 import {connect} from "react-redux";
 import {MDBBtn} from "mdbreact";
+import Error404 from "./template/404";
 
 
 class Search extends React.Component {
@@ -58,6 +59,7 @@ class Search extends React.Component {
                     <div className="row">
                         <div className="col-lg-10" style={{margin:"auto"}}>
                             {
+                                this.state.data.length ?
                                 this.state.data.map(o => {
                                     return (
                                         <div className="search-container">
@@ -71,6 +73,8 @@ class Search extends React.Component {
                                         </div>
                                     )
                                 })
+                                    :
+                                    <Error404/>
                             }
                         </div>
                     </div>

@@ -19,6 +19,7 @@ import 'emoji-mart/css/emoji-mart.css'
 import {Picker} from 'emoji-mart'
 import Comment from './Comment'
 import PostVideo from "./postvideo";
+import ReactCursorPosition from 'react-cursor-position'
 import {api_url, post_url, profile_url} from "../../global";
 import {connect} from "react-redux";
 import {toast} from "react-toastify";
@@ -141,6 +142,16 @@ class Post extends React.Component {
             })
         }
     };
+    TaggedImg = props => {
+        return (
+            <img
+                onDoubleClick={this.togglelike}
+                className="d-block w-100"
+                src={this.state.postlikes < 0 ? props.o :post_url + props.o}
+                alt={`image ${props.id + 1}`}
+            />
+        )
+    }
     addEmoji = e => {
         let emoji = e.native;
         this.refs.comment.value += emoji
@@ -209,12 +220,14 @@ class Post extends React.Component {
                                         return (
                                             <MDBCarouselItem itemId={id + 1}>
                                                 <MDBView>
-                                                    <img
-                                                        onDoubleClick={this.togglelike}
-                                                        className="d-block w-100"
-                                                        src={this.state.postlikes < 0 ? o :post_url + o}
-                                                        alt={`image ${id + 1}`}
-                                                    />
+                                                    <ReactCursorPosition>
+                                                        <img
+                                                            onDoubleClick={this.togglelike}
+                                                            className="d-block w-100"
+                                                            src={this.state.postlikes < 0 ? o :post_url + o}
+                                                            alt={`image ${id + 1}`}
+                                                        />
+                                                    </ReactCursorPosition>
                                                 </MDBView>
                                             </MDBCarouselItem>
                                         )
@@ -283,11 +296,11 @@ class Post extends React.Component {
                                 <div id="comment-container" className={"mt-3"}>
                                     {this.state.showFullComments ?
                                         this.state.comments.map(o => {
-                                            return <Comment {...this.props} data={o} postid={this.props._id}/>
+                                            return <Comment {...this.props} refs={this.refs} data={o} postid={this.props._id}/>
                                         })
                                         :
                                         this.state.tempComments.map(o => {
-                                            return <Comment {...this.props} data={o} postid={this.props._id}/>
+                                            return <Comment {...this.props} refs={this.refs} data={o} postid={this.props._id}/>
                                         })
                                     }
                                     {this.props.loggedin ?

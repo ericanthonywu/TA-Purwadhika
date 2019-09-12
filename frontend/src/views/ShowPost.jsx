@@ -83,4 +83,10 @@ class ShowPost extends React.Component {
     }
 }
 
-export default ShowPost
+const mapToStateProps = state => {
+    return {
+        id: state.user._id
+    }
+}
+
+export default connect(mapToStateProps)(ShowPost)

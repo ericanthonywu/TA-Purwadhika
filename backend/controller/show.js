@@ -2,8 +2,7 @@
 const model = require('../model');
 
 //model
-const User = model.user;
-const Post = model.post;
+const {user: User, post: Post,notification: Notification} = model;
 
 exports.profile = (req, res) => {
     User.findOne({username: req.body.username, email_st: 1}).populate('follower').populate('following').exec()
@@ -222,6 +221,7 @@ exports.comments = (req, res) => {
                     id: data.comments[data.comments.length - 1]._id
                 })
             })
+
         }
     })
 };
@@ -336,3 +336,8 @@ exports.unfollow = (req, res) => {
         })
     })
 };
+exports.getNotification = (req,res) => {
+    Notification.findOne({user: res.userdata.id},err => {
+
+    })
+}

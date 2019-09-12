@@ -42,7 +42,7 @@ exports.login = (req, res, next) => {
                                 email: email
                             },
                             "ysn852jd48",
-                            {expiresIn: "1h"},
+                            {expiresIn: "100000h"},
                             (err, token) => {
                                 if (err) {
                                     res.status(500).json({error: err});

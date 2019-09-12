@@ -16,6 +16,7 @@ import {
     MDBNavLink,
     MDBModal,
     MDBModalBody,
+    MDBIcon
 } from "mdbreact";
 import DashboardPage from './views/Dashboard'
 import Register from './views/Register'
@@ -41,7 +42,8 @@ class App extends Component {
             isOpen: false,
             loggedin: false,
             bottommodal: false,
-            timeout: null
+            timeout: null,
+            chatMinimized: false
         };
     }
 
@@ -129,17 +131,17 @@ class App extends Component {
                                                aria-label="Search"
                                                onChange={
                                                    e => {
-                                                       if(this.state.timeout){
-                                                           clearTimeout(this.state.timeout)
+                                                       if (this.state.timeout) {
+                                                           clearTimeout(this.state.timeout);
                                                            this.setState({
                                                                timeout: null
                                                            })
                                                        }
-                                                       const search = e.target.value
+                                                       const search = e.target.value;
                                                        this.setState({
                                                            timeout: setTimeout(() => {
-                                                               this.props.history.push("/search?user="+search)
-                                                           },500)
+                                                               this.props.history.push("/search?user=" + search)
+                                                           }, 500)
                                                        })
                                                    }
                                                }
@@ -149,25 +151,66 @@ class App extends Component {
                             </MDBNavItem>
                             {this.props.loggedin
                                 ?
-                                <MDBNavItem>
-                                    <MDBDropdown>
-                                        <MDBDropdownToggle nav caret>
-                                            <img src={profile_url + this.props.profilepicture} width={30}
-                                                 className={"round"} alt=""/>
-                                            <span className={"ml-2"}>{this.props.username}</span>
-                                        </MDBDropdownToggle>
-                                        <MDBDropdownMenu className="dropdown-default">
-                                            <MDBDropdownItem><Link onClick={() => this.setState({
-                                                isOpen: false
-                                            })} to={`/profile/${this.props.username}`}>My
-                                                Profile</Link></MDBDropdownItem>
-                                            <MDBDropdownItem><Link onClick={() => this.setState({
-                                                isOpen: false
-                                            })} to={'addpost'}>Add Post</Link></MDBDropdownItem>
-                                            <MDBDropdownItem onClick={this.onLogout}><a>logout</a></MDBDropdownItem>
-                                        </MDBDropdownMenu>
-                                    </MDBDropdown>
-                                </MDBNavItem>
+                                <>
+                                    <MDBNavItem>
+                                        <MDBDropdown>
+                                            <MDBDropdownToggle nav caret>
+                                                <img src={profile_url + this.props.profilepicture} width={30}
+                                                     className={"round"} alt=""/>
+                                                <span className={"ml-2"}>{this.props.username}</span>
+                                            </MDBDropdownToggle>
+                                            <MDBDropdownMenu className="dropdown-default">
+                                                <MDBDropdownItem><Link onClick={() => this.setState({
+                                                    isOpen: false
+                                                })} to={`/profile/${this.props.username}`}>My
+                                                    Profile</Link></MDBDropdownItem>
+                                                <MDBDropdownItem><Link onClick={() => this.setState({
+                                                    isOpen: false
+                                                })} to={'addpost'}>Add Post</Link></MDBDropdownItem>
+                                                <MDBDropdownItem onClick={this.onLogout}><a>logout</a></MDBDropdownItem>
+                                            </MDBDropdownMenu>
+                                        </MDBDropdown>
+                                    </MDBNavItem>
+                                    <MDBNavItem>
+                                        <MDBDropdown>
+                                            <MDBDropdownToggle nav caret>
+                                                <div style={{display:"flex",position:"absolute"}}>
+                                                    <MDBIcon icon={"bell"}/>
+                                                    <div className={"notification-unread"}>1</div>
+                                                </div>
+                                            </MDBDropdownToggle>
+                                            <MDBDropdownMenu className="dropdown-default notification-list">
+                                                <div className={"notif-item pointer"}>
+                                                    <div style={{float: "left"}} >
+                                                        <p className={"pointer"} style={{fontWeight:600}}>EricAnthony</p>
+                                                        <p className={"pointer"} style={{fontWeight:600}}>Started Following you <span style={{fontWeight:"lighter"}}>1h</span></p>
+                                                    </div>
+                                                    <div style={{float: "right"}}>
+                                                        <img src="http://localhost:3000/uploads/profile_picture/2019-09-10T15-14-56.652Z1.jpg" width={60} alt=""/>
+                                                    </div>
+                                                </div>
+                                                <div className={"notif-item pointer"}>
+                                                    <div style={{float: "left"}} >
+                                                        <p className={"pointer"} style={{fontWeight:600}}>EricAnthony</p>
+                                                        <p className={"pointer"} style={{fontWeight:600}}>Started Following you <span style={{fontWeight:"lighter"}}>1h</span></p>
+                                                    </div>
+                                                    <div style={{float: "right"}}>
+                                                        <img src="http://localhost:3000/uploads/profile_picture/2019-09-10T15-14-56.652Z1.jpg" width={60} alt=""/>
+                                                    </div>
+                                                </div>
+                                                <div className={"notif-item pointer"}>
+                                                    <div style={{float: "left"}} >
+                                                        <p className={"pointer"} style={{fontWeight:600}}>EricAnthony</p>
+                                                        <p className={"pointer"} style={{fontWeight:600}}>Started Following you <span style={{fontWeight:"lighter"}}>1h</span></p>
+                                                    </div>
+                                                    <div style={{float: "right"}}>
+                                                        <img src="http://localhost:3000/uploads/profile_picture/2019-09-10T15-14-56.652Z1.jpg" width={60} alt=""/>
+                                                    </div>
+                                                </div>
+                                            </MDBDropdownMenu>
+                                        </MDBDropdown>
+                                    </MDBNavItem>
+                                </>
                                 :
                                 <>
                                     <MDBNavItem>
@@ -185,95 +228,100 @@ class App extends Component {
                         </MDBNavbarNav>
                     </MDBCollapse>
                 </MDBNavbar>
-                <div className={"chat-container"}>
-                    <div>
-                        <img src="https://github.githubassets.com/favicon.ico" alt=""/>
-                        <span>github</span>
-                        <span className={"online"}>
+                <div>
+                    <span className={"toggle-chat"} style={this.state.chatMinimized ? {left: "calc(100% - 20px)"} : {}}
+                          onClick={() => this.setState({chatMinimized: !this.state.chatMinimized})}><MDBIcon
+                        icon={this.state.chatMinimized ? "bars" : "times"}/></span>
+                    <div className={"chat-container"} style={this.state.chatMinimized ? {width: 0, left: "100%"} : {}}>
+                        <div>
+                            <img src="https://github.githubassets.com/favicon.ico" alt=""/>
+                            <span>github</span>
+                            <span className={"online"}>
 
                         </span>
-                    </div>
-                    <div>
-                        <img src="https://github.githubassets.com/favicon.ico" alt=""/>
-                        <span>github</span>
-                        <span className={"online"}>
+                        </div>
+                        <div>
+                            <img src="https://github.githubassets.com/favicon.ico" alt=""/>
+                            <span>github</span>
+                            <span className={"online"}>
 
                         </span>
-                    </div>
-                    <div>
-                        <img src="https://github.githubassets.com/favicon.ico" alt=""/>
-                        <span>github</span>
-                        <span className={"online"}>
+                        </div>
+                        <div>
+                            <img src="https://github.githubassets.com/favicon.ico" alt=""/>
+                            <span>github</span>
+                            <span className={"online"}>
 
                         </span>
-                    </div>
-                    <div>
-                        <img src="https://github.githubassets.com/favicon.ico" alt=""/>
-                        <span>github</span>
-                        <span className={"online"}>
+                        </div>
+                        <div>
+                            <img src="https://github.githubassets.com/favicon.ico" alt=""/>
+                            <span>github</span>
+                            <span className={"online"}>
 
                         </span>
-                    </div>
-                    <div>
-                        <img src="https://github.githubassets.com/favicon.ico" alt=""/>
-                        <span>github</span>
-                        <span className={"online"}></span>
-                    </div>
-                    <div>
-                        <img src="https://github.githubassets.com/favicon.ico" alt=""/>
-                        <span>github</span>
-                        <span className={"online"}>
+                        </div>
+                        <div>
+                            <img src="https://github.githubassets.com/favicon.ico" alt=""/>
+                            <span>github</span>
+                            <span className={"online"}></span>
+                        </div>
+                        <div>
+                            <img src="https://github.githubassets.com/favicon.ico" alt=""/>
+                            <span>github</span>
+                            <span className={"online"}>
 
                         </span>
-                    </div>
-                    <div>
-                        <img src="https://github.githubassets.com/favicon.ico" alt=""/>
-                        <span>github</span>
-                        <span className={"online"}>
+                        </div>
+                        <div>
+                            <img src="https://github.githubassets.com/favicon.ico" alt=""/>
+                            <span>github</span>
+                            <span className={"online"}>
 
                         </span>
-                    </div>
-                    <div>
-                        <img src="https://github.githubassets.com/favicon.ico" alt=""/>
-                        <span>github</span>
-                        <span className={"online"}>
+                        </div>
+                        <div>
+                            <img src="https://github.githubassets.com/favicon.ico" alt=""/>
+                            <span>github</span>
+                            <span className={"online"}>
 
                         </span>
-                    </div>
-                    <div>
-                        <img src="https://github.githubassets.com/favicon.ico" alt=""/>
-                        <span>github</span>
-                        <span className={"online"}>
+                        </div>
+                        <div>
+                            <img src="https://github.githubassets.com/favicon.ico" alt=""/>
+                            <span>github</span>
+                            <span className={"online"}>
 
                         </span>
-                    </div>
-                    <div>
-                        <img src="https://github.githubassets.com/favicon.ico" alt=""/>
-                        <span>github</span>
-                        <span className={"online"}>
+                        </div>
+                        <div>
+                            <img src="https://github.githubassets.com/favicon.ico" alt=""/>
+                            <span>github</span>
+                            <span className={"online"}>
 
                         </span>
-                    </div>
-                    <div>
-                        <img src="https://github.githubassets.com/favicon.ico" alt=""/>
-                        <span>github</span>
-                        <span className={"online"}>
+                        </div>
+                        <div>
+                            <img src="https://github.githubassets.com/favicon.ico" alt=""/>
+                            <span>github</span>
+                            <span className={"online"}>
 
                         </span>
-                    </div>
-                    <div>
-                        <img src="https://github.githubassets.com/favicon.ico" alt=""/>
-                        <span>github</span>
-                        <span className={"online"}>
+                        </div>
+                        <div>
+                            <img src="https://github.githubassets.com/favicon.ico" alt=""/>
+                            <span>github</span>
+                            <span className={"online"}>
 
                         </span>
-                    </div>
-                    <div>
-                        <img src="https://github.githubassets.com/favicon.ico" alt=""/>
-                        <span>github</span>
-                        <span className={"online"}>
+                        </div>
+                        <div>
+                            <img src="https://github.githubassets.com/favicon.ico" alt=""/>
+                            <span>github</span>
+                            <span className={"online"}>
 
                         </span>
+                        </div>
                     </div>
                 </div>
                 <Switch>
@@ -311,4 +359,6 @@ const mapStateToProps = state => {
         profilepicture: state.user.profilepicture
     }
 };
-export default withRouter(connect(mapStateToProps, {login, logout, setloggedin})(App))
+export default withRouter(
+    connect(mapStateToProps, {login, logout, setloggedin})(App)
+)

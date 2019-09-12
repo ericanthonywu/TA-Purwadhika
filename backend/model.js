@@ -67,9 +67,16 @@ const postSchema = new mongoose.Schema({
 exports.post = mongoose.model('post', postSchema);
 
 const notificationSchema = new mongoose.Schema({
-    notification: {type: String, required: true},
+    notification: [{
+        message: {type: String, required: true},
+        user: {type: mongoose.Schema.Types.ObjectId, ref:'user'},
+        post: {type: mongoose.Schema.Types.ObjectId, ref:'post',default: null},
+        comments: {type: mongoose.Schema.Types.ObjectId, ref:'post.comments'},
+        report: {type: Boolean, default: false},
+        read: {type: Boolean, default: false},
+        time: {type: Date, default: Date.now}
+    }],
     user: {type: mongoose.Schema.Types.ObjectId, ref: 'user'},
-    url: {type: String}
 }, {timestamps: true}).plugin(elastic_search,{
     hosts: [
         'localhost:9200'
