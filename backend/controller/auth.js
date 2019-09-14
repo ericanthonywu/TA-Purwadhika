@@ -7,7 +7,6 @@ const nodeMailer = require("nodemailer");
 
 exports.login = (req, res, next) => {
     const {password, email} = req.body;
-    console.log(req.body);
     if (password == null || email == null) {
         res.status(401).json({
             message: "Email / Password is Empty"
@@ -39,7 +38,8 @@ exports.login = (req, res, next) => {
                             {
                                 id: data._id,
                                 username: data.username,
-                                email: email
+                                email: email,
+                                profilepicture: data.profilepicture
                             },
                             "ysn852jd48",
                             {expiresIn: "100000h"},

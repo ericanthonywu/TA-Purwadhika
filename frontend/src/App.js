@@ -31,9 +31,13 @@ import {connect} from "react-redux";
 import {login, logout, setloggedin} from "./redux/actions";
 import ShowPost from "./views/ShowPost";
 import UpdateProfile from "./views/UpdateProfile";
-import {profile_url} from "./global";
+import {api_url, backend_url, base_url, post_url, profile_url} from "./global";
 import {toast, ToastContainer} from "react-toastify";
 import Search from "./views/Search";
+import socketio from "socket.io-client";
+import Axios from "axios";
+import moment from "moment";
+
 
 class App extends Component {
     constructor(a) {
@@ -43,7 +47,9 @@ class App extends Component {
             loggedin: false,
             bottommodal: false,
             timeout: null,
-            chatMinimized: false
+            chatMinimized: false,
+            notifications: [],
+            unReadNotification: 0
         };
     }
 
@@ -98,6 +104,29 @@ class App extends Component {
                 _id: localStorage.getItem('_id'),
                 profilepicture: localStorage.getItem('profile_picture')
             })
+            const socket = socketio(backend_url, {
+                query: {
+                    token: localStorage.getItem('token'),
+                }
+            });
+            Axios.post(`${api_url}notification`, {
+                token: localStorage.getItem('token')
+            }).then(res => {
+                this.setState({
+                    notifications: res.data.data
+                })
+            });
+            socket.on('newNotifications', notifications => {
+                if (notifications.user.username !== localStorage.getItem('username')) {
+                    const tempNotifications = this.state.notifications;
+                    tempNotifications.unshift(notifications)
+                    this.setState({
+                        notifications: tempNotifications,
+                        unReadNotification: this.state.unReadNotification + 1
+                    })
+                }
+            });
+
         } else {
             this.props.logout()
         }
@@ -174,39 +203,61 @@ class App extends Component {
                                     <MDBNavItem>
                                         <MDBDropdown>
                                             <MDBDropdownToggle nav caret>
-                                                <div style={{display:"flex",position:"absolute"}}>
+                                                <div style={{display: "flex", position: "absolute"}}
+                                                     onClick={() => {
+                                                         this.setState({unReadNotification: 0})
+                                                         Axios.post(`${api_url}readNotif`, {
+                                                             token: this.props.token
+                                                         }).catch(err => {
+                                                             if (err.statusCode == 419) {
+                                                                 toast.error("Session Expired")
+                                                                 this.props.logout()
+                                                             }
+                                                         })
+                                                     }}>
                                                     <MDBIcon icon={"bell"}/>
-                                                    <div className={"notification-unread"}>1</div>
+                                                    {
+                                                        this.state.unReadNotification ?
+                                                            <div
+                                                                className={"notification-unread"}>{this.state.unReadNotification}</div>
+                                                            :
+                                                            null
+                                                    }
                                                 </div>
                                             </MDBDropdownToggle>
                                             <MDBDropdownMenu className="dropdown-default notification-list">
-                                                <div className={"notif-item pointer"}>
-                                                    <div style={{float: "left"}} >
-                                                        <p className={"pointer"} style={{fontWeight:600}}>EricAnthony</p>
-                                                        <p className={"pointer"} style={{fontWeight:600}}>Started Following you <span style={{fontWeight:"lighter"}}>1h</span></p>
-                                                    </div>
-                                                    <div style={{float: "right"}}>
-                                                        <img src="http://localhost:3000/uploads/profile_picture/2019-09-10T15-14-56.652Z1.jpg" width={60} alt=""/>
-                                                    </div>
-                                                </div>
-                                                <div className={"notif-item pointer"}>
-                                                    <div style={{float: "left"}} >
-                                                        <p className={"pointer"} style={{fontWeight:600}}>EricAnthony</p>
-                                                        <p className={"pointer"} style={{fontWeight:600}}>Started Following you <span style={{fontWeight:"lighter"}}>1h</span></p>
-                                                    </div>
-                                                    <div style={{float: "right"}}>
-                                                        <img src="http://localhost:3000/uploads/profile_picture/2019-09-10T15-14-56.652Z1.jpg" width={60} alt=""/>
-                                                    </div>
-                                                </div>
-                                                <div className={"notif-item pointer"}>
-                                                    <div style={{float: "left"}} >
-                                                        <p className={"pointer"} style={{fontWeight:600}}>EricAnthony</p>
-                                                        <p className={"pointer"} style={{fontWeight:600}}>Started Following you <span style={{fontWeight:"lighter"}}>1h</span></p>
-                                                    </div>
-                                                    <div style={{float: "right"}}>
-                                                        <img src="http://localhost:3000/uploads/profile_picture/2019-09-10T15-14-56.652Z1.jpg" width={60} alt=""/>
-                                                    </div>
-                                                </div>
+                                                {
+                                                    this.state.notifications.map(o => {
+                                                        return (
+                                                            <div className={"notif-item pointer"}
+                                                                 style={!o.read ? {backgroundColor: "lightgrey"} : {}}>
+                                                                <div style={{float: "left"}}>
+                                                                    <a href={o.post ? base_url + "post/" + o.post._id : base_url + "profile/" + o.user.username}
+                                                                       target="_blank" style={{padding: 0}}>
+                                                                        <p className={"pointer"}
+                                                                           style={{fontWeight: 600}}>{o.user.username}</p>
+                                                                        <p className={"pointer"}
+                                                                           style={{fontWeight: 600}}>{o.message} <span
+                                                                            style={{fontWeight: "lighter"}}>{moment(o.time).fromNow()}</span>
+                                                                        </p>
+                                                                    </a>
+                                                                </div>
+                                                                <div style={{float: "right"}}>
+                                                                    {
+                                                                        o.post ?
+                                                                            <img src={post_url + o.post.image[0]}
+                                                                                 width={60}
+                                                                                 alt=""/>
+                                                                            :
+                                                                            <img
+                                                                                src={profile_url + o.user.profilepicture}
+                                                                                width={60} alt=""/>
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                        )
+                                                    })
+                                                }
                                             </MDBDropdownMenu>
                                         </MDBDropdown>
                                     </MDBNavItem>
@@ -356,7 +407,8 @@ const mapStateToProps = state => {
         token: state.user.token,
         username: state.user.username,
         loggedin: state.user.loggedin,
-        profilepicture: state.user.profilepicture
+        profilepicture: state.user.profilepicture,
+        userid: state.user._id
     }
 };
 export default withRouter(

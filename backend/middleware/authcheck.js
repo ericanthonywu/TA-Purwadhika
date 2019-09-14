@@ -8,24 +8,24 @@ exports.fileauthcheck = (req, res, next) => {
             if (req.files) {
                 const deldata = () => {
                     for (let i = 0; i < req.files.length; i++) {
-                        fs.unlink(path.join(__dirname, `../uploads/${req.dest}/${req.files[i].filename}`),() => {})
+                        fs.unlinkSync(path.join(__dirname, `../uploads/${req.dest}/${req.files[i].filename}`))
                     }
                 };
                 await deldata();
 
-                res.status(500).json({
+                res.status(419).json({
                     message: err.message,
                 });
                 return;
             } else if (req.file) {
                 fs.unlink(path.join(__dirname, `../uploads/${req.dest}/${req.file.filename}`), () => {
-                    res.status(500).json({
+                    res.status(419).json({
                         message: err.message,
                     })
                 });
                 return;
             } else {
-                res.status(500).json({
+                res.status(419).json({
                     message: err.message,
                 });
                 return;
@@ -39,7 +39,7 @@ exports.fileauthcheck = (req, res, next) => {
 exports.authcheck = (req, res, next) => {
     jwt.verify(req.body.token, "ysn852jd48", (err, data) => {
         if(err){
-            res.status(500).json({
+            res.status(419).json({
                 message: err.message,
             });
             return;
@@ -53,7 +53,7 @@ exports.dashboardcheck = (req, res, next) => {
     if(req.body.token) {
         jwt.verify(req.body.token, "ysn852jd48", (err, data) => {
             if(err){
-                return res.status(500).json({
+                return res.status(419).json({
                     message: err.message,
                 });
             }else {

@@ -2,7 +2,7 @@
 const model = require('../model');
 
 //model
-const {user: User, post: Post,notification: Notification} = model;
+const {user: User, post: Post, notification: Notification} = model;
 
 exports.profile = (req, res) => {
     User.findOne({username: req.body.username, email_st: 1}).populate('follower').populate('following').exec()
@@ -136,7 +136,6 @@ exports.addPost = (req, res) => {
             return res.status(500).json({err: err});
         }
         return res.status(200).json({
-            message: "Data Berhasil Masuk",
             id: data._id
         })
     });
@@ -148,7 +147,6 @@ exports.dashboard = (req, res) => {
         if (err) {
             return res.status(500).json({err: err});
         }
-
         Post.find(res.userdata ? {
             user: [...data.following, res.userdata.id]
         } : {}, [], {
@@ -177,10 +175,31 @@ exports.togglelike = (req, res) => {
                 $push: {
                     like: res.userdata.id
                 }
-            }, {}, err => {
-                res.status(200).json({
-                    message: "success",
-                    err: err
+            }, {}, (err, data) => {
+                User.findByIdAndUpdate(data.user, {
+                    $push: {
+                        notification: {
+                            $each: [{
+                                message: `like your posts`,
+                                post: req.body.id,
+                                user: res.userdata.id
+                            }],
+                            "$position": 0
+                        },
+                    }
+                }, {
+                    new: true
+                }, err => {
+                    const {io} = req;
+                    io.sockets.emit('newNotifications', {
+                        message: `like your posts`,
+                        post: data,
+                        user: res.userdata,
+                        time: Date.now()
+                    });
+                    res.status(err ? 500 : 202).json(err ? {
+                        err: err
+                    } : {})
                 });
             });
             break;
@@ -210,16 +229,38 @@ exports.comments = (req, res) => {
                 comments: req.body.value
             }
         }
-    }, {}, (err, data) => {
+    }, {}, err => {
         if (err) {
             return res.status(500).json({
                 err: err
             })
         } else {
             Post.findById(req.body.id, {}, {}, (err, data) => {
-                return res.status(200).json({
-                    id: data.comments[data.comments.length - 1]._id
-                })
+                if (err) console.error(err)
+                User.findByIdAndUpdate(data.user, {
+                    $push: {
+                        notification: {
+                            $each: [{
+                                message: `comment on your posts`,
+                                post: req.body.id,
+                                user: res.userdata.id,
+                            }],
+                            "$position": 0
+                        }
+                    }
+                }, {'new': true}).exec(err => {
+                    if (err) console.error(err)
+                    const {io} = req;
+                    io.sockets.emit('newNotifications', {
+                        message: `comment on your posts`,
+                        post: data,
+                        user: res.userdata,
+                        time: Date.now()
+                    });
+                    return res.status(200).json({
+                        id: data.comments[data.comments.length - 1]._id
+                    })
+                });
             })
 
         }
@@ -235,15 +276,38 @@ exports.toogleCommentLike = (req, res) => {
                 $push: { //$set nimpa, $push push aray, $pull delete array
                     "comments.$.like": res.userdata.id
                 }
-            }, err => {
+            }, (err, data) => {
                 if (err) {
                     res.status(500).json({
                         err: err
                     })
                 } else {
-                    res.status(200).json({
-                        message: "success",
-                    });
+                    Post.findById(req.body.postid,(err,data) => {
+                        User.findByIdAndUpdate(data.user, {
+                            $push: {
+                                notification: {
+                                    $each: [{
+                                        message: `like your comment `,
+                                        post: data,
+                                        user: res.userdata,
+                                    }],
+                                    "$position": 0
+                                },
+
+                            }
+                        }, {'new': true}).exec(err => {
+                            const {io} = req;
+                            io.sockets.emit('newNotifications', {
+                                message: `like your comment `,
+                                post: data,
+                                user: res.userdata,
+                                time: Date.now()
+                            });
+                            res.status(err ? 500 : 202).json(err ? {
+                                err: err
+                            } : {})
+                        });
+                    })
                 }
             });
             break;
@@ -285,59 +349,94 @@ exports.showPost = (req, res) => {
     })
 };
 exports.follow = (req, res) => {
-    User.findByIdAndUpdate(req.body.userTarget,{
-        $push:{
+    const {io} = req;
+    User.findByIdAndUpdate(req.body.userTarget, {
+        $push: {
             follower: res.userdata.id
         }
-    },{
-        "new":true
-    },(err,data) => {
-        if(err){
+    }, {
+        "new": true
+    }, err => {
+        if (err) {
             res.status(500).json({
                 err: err
             })
         }
-        User.findByIdAndUpdate(res.userdata.id,{
-            $push:{
+        User.findByIdAndUpdate(res.userdata.id, {
+            $push: {
                 following: req.body.userTarget
             }
-        },{
-            "new":true
-        },(err,data) => {
-            res.status(err ? 500 : 200).json(err ? {
-                err: err
-            } : {})
+        }, {
+            "new": true
+        }, err => {
+            User.findByIdAndUpdate(req.body.userTarget, {
+                $push: {
+                    notification: {
+                        $each: [{
+                            message: `started following you`,
+                            user: res.userdata.id
+                        }],
+                        "$position": 0
+                    },
+                }
+            }, {'new': true}, err => {
+                io.sockets.emit('newNotifications', {
+                    message: `started following you`,
+                    user: res.userdata,
+                    time: Date.now()
+                })
+                res.status(err ? 500 : 202).json(err ? {
+                    err: err
+                } : {})
+            })
         })
     })
 };
 exports.unfollow = (req, res) => {
-    User.findByIdAndUpdate(req.body.userTarget,{
-        $pull:{
+    User.findByIdAndUpdate(req.body.userTarget, {
+        $pull: {
             follower: res.userdata.id
         }
-    },{
-        "new":true
-    },(err,data) => {
-        if(err){
-            res.status(500).json({
+    }, {
+        "new": true
+    }, err => {
+        if (err) {
+            return res.status(500).json({
                 err: err
             })
         }
-        User.findByIdAndUpdate(res.userdata.id,{
-            $pull:{
+        User.findByIdAndUpdate(res.userdata.id, {
+            $pull: {
                 following: req.body.userTarget
             }
-        },{
-            "new":true
-        },(err,data) => {
+        }, {
+            "new": true
+        }, err => {
             res.status(err ? 500 : 200).json(err ? {
                 err: err
             } : {})
         })
     })
 };
-exports.getNotification = (req,res) => {
-    Notification.findOne({user: res.userdata.id},err => {
-
+exports.getNotification = (req, res) => {
+    User.findById(res.userdata.id).select('notification').populate('user', 'username profilepicture').populate('notification.post', 'image').populate('notification.user', 'username').exec((err, data) => {
+        if (err) {
+            res.status(500).json({
+                err: err
+            })
+        } else {
+            res.status(200).json({
+                data: data.notification
+            })
+        }
+    })
+}
+exports.readNotif = (req,res) => {
+    User.findOneAndUpdate({_id:res.userdata.id,"notification.read":false},{
+        $set:{
+            "notification.$[].read":true //https://jira.mongodb.org/browse/SERVER-1243
+        }
+    },{new:true},err => {
+        res.status(err ? 500 : 200).json(err ? {err: err}: {})
     })
 }

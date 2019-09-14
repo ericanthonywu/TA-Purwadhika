@@ -8,21 +8,17 @@ const app = express();
 const io = require('socket.io')();
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
-//model
-const model = require('./model');
-const Post = model.post;
-const User = model.user;
 app.io = io;
 
 io.on("connection", socket => {
     const {token} = socket.handshake.query;
-    let userdata = {};
     if(token) {
         jwt.verify(token, "ysn852jd48", (err, data) => {
             if (err) {
                 io.sockets.emit('error',"error");
+            }else {
+
             }
-            userdata = err ? null : data;
         })
     }
 
@@ -32,7 +28,7 @@ io.on("connection", socket => {
     })
 });
 
-app.use((req, res, next) => {
+app.use((req, res, next) => { //global socket io
     req.io = io;
     next()
 });

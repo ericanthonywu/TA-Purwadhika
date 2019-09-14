@@ -58,6 +58,8 @@ router.post('/showProfile', authMiddleware.authcheck, showController.showProfile
 router.post('/follow', authMiddleware.authcheck, showController.follow);
 router.post('/unfollow', authMiddleware.authcheck, showController.unfollow);
 router.post('/updateProfile',uploadUser.single('file'), authMiddleware.fileauthcheck, showController.updateProfile);
+router.post('/notification',authMiddleware.authcheck,showController.getNotification);
+router.post('/readNotif',authMiddleware.authcheck,showController.readNotif);
 
 //post route
 router.post('/addpost',uploadPost.array('image', 10), authMiddleware.fileauthcheck, showController.addPost);
@@ -65,5 +67,6 @@ router.post('/tooglelike',authMiddleware.authcheck,showController.togglelike);
 router.post('/comments',authMiddleware.authcheck,showController.comments);
 router.post('/toogleCommentLike',authMiddleware.authcheck,showController.toogleCommentLike);
 router.post('/showPost',showController.showPost);
+
 
 module.exports = router;
