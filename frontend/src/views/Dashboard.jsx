@@ -36,7 +36,7 @@ class Dashboard extends React.Component {
         })
         axios.post(`${api_url}dashboard`, {
             token: localStorage.getItem('token'),
-            offset: this.state.pagination
+            offset: 0
         }).then(res => {
             this.setState({
                 loading: false,
@@ -62,10 +62,32 @@ class Dashboard extends React.Component {
 
     infiniteScroll = (e) => {
         // console.log(e.target.scrollingElement.)
-        if ((e.target.scrollingElement.scrollHeight - e.target.scrollingElement.scrollTop) === e.target.scrollingElement.clientHeight) { //Mentok di bawah
-            this.setState({
-                pagination: this.state.pagination + 10
-            });
+        if(e.target.scrollingElement) {
+            if ((e.target.scrollingElement.scrollHeight - e.target.scrollingElement.scrollTop) === e.target.scrollingElement.clientHeight) { //Mentok di bawah
+                this.setState({
+                    pagination: this.state.pagination + 10
+                },() => {
+                    axios.post(`${api_url}dashboard`, {
+                        token: localStorage.getItem('token'),
+                        offset: this.state.pagination
+                    }).then(res => {
+                        this.setState({
+                            loading: false,
+                            post: [...this.state.post,res.data.post]
+                        });
+                    }).catch(err => {
+                        if(err.statusCode == 419){
+                            toast.error('Session Expired');
+                            setTimeout(async () => {
+                                await this.props.logout();
+                                this.props.history.push('/login');
+                            },1000);
+                        }else {
+                            toast.error('Error Connection, Please try again');
+                        }
+                    });
+                });
+            }
         }
 
     };
