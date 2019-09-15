@@ -176,7 +176,7 @@ exports.togglelike = (req, res) => {
                     like: res.userdata.id
                 }
             }, {}, (err, data) => {
-                if (data.user !== res.userdata.id) {
+                if (data.user != res.userdata.id) {
                     User.findByIdAndUpdate(data.user, {
                         $push: {
                             notification: {
@@ -243,7 +243,7 @@ exports.comments = (req, res) => {
         } else {
             Post.findById(req.body.id, {}, {}, (err, data) => {
                 if (err) console.error(err)
-                if (data.user !== res.userdata.id) {
+                if (data.user != res.userdata.id) {
                     User.findByIdAndUpdate(data.user, {
                         $push: {
                             notification: {
@@ -258,15 +258,52 @@ exports.comments = (req, res) => {
                     }, {'new': true}).exec(err => {
                         if (err) console.error(err)
                         const {io} = req;
-                        io.sockets.emit('newNotifications', {
-                            message: `comment on your posts`,
-                            post: data,
-                            user: res.userdata,
-                            time: Date.now(),
-                            type: 'comment post'
-                        });
+                        User.findById(data.user,(err,user) => {
+                            io.sockets.emit('newNotifications', {
+                                message: `comment on your posts`,
+                                post: data,
+                                user: res.userdata,
+                                time: Date.now(),
+                                to: user,
+                                type: 'comment post'
+                            });
+                        })
                     });
                 }
+                req.body.value.split(" ").forEach(o => {
+                    if(o.charAt(0) === "@"){
+                        User.findOne({
+                            username: o.replace("@",""),
+                            email_st:1
+                        },(err,userTagged) => {
+                            if(userTagged && (res.userdata.id != userTagged._id)) {
+                                User.findByIdAndUpdate(userTagged._id, {
+                                    $push: {
+                                        notification: {
+                                            $each: [{
+                                                message: `mentioned you in comments`,
+                                                post: req.body.id,
+                                                user: res.userdata.id,
+                                            }],
+                                            "$position": 0
+                                        }
+                                    }
+                                }, {'new': true}).exec(err => {
+                                    if (err) console.error(err)
+                                    const {io} = req;
+                                    io.sockets.emit('newNotifications', {
+                                        message: `mentioned you in comments`,
+                                        post: data,
+                                        user: res.userdata,
+                                        time: Date.now(),
+                                        to:userTagged,
+                                        type: 'tag comment post'
+                                    });
+                                });
+                            }
+                        })
+                    }
+                })
                 return res.status(200).json({
                     id: data.comments[data.comments.length - 1]._id
                 })

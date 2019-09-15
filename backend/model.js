@@ -55,13 +55,6 @@ const postSchema = new mongoose.Schema({
         comments: {type: String},
         like: [{type: mongoose.Schema.Types.ObjectId, ref: 'user'}],
         time: {type: Date, default: Date.now},
-        reply: [{
-            id: {type: mongoose.Schema.Types.ObjectId},
-            user: {type: mongoose.Schema.Types.ObjectId, ref: 'user'},
-            comments: {type: String},
-            like: [{type: mongoose.Schema.Types.ObjectId, ref: 'user'}],
-            time: {type: Date, default: Date.now},
-        }]
     }],
     caption: {type: String},
     user: {type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true},

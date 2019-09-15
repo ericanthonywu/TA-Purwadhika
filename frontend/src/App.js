@@ -130,7 +130,7 @@ class App extends Component {
                             })
                         }
                     }else{
-                        if (notifications.to.username !== localStorage.getItem('username')) {
+                        if (notifications.to.username == localStorage.getItem('username')) {
                             const tempNotifications = this.state.notifications;
                             tempNotifications.unshift(notifications)
                             this.setState({
@@ -266,7 +266,7 @@ class App extends Component {
                                                                         </p>
                                                                     </a>
                                                                 </div>
-                                                                <div style={{float: "right"}}>
+                                                                <div style={{float: "right",position:"absolute",left:"calc(100% - 60px)"}}>
                                                                     {
                                                                         o.post ?
                                                                             <img src={post_url + o.post.image[0]}

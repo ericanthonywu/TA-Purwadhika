@@ -20,7 +20,7 @@ import {Picker} from 'emoji-mart'
 import Comment from './Comment'
 import PostVideo from "./postvideo";
 import ReactCursorPosition from 'react-cursor-position'
-import {api_url, post_url, profile_url} from "../../global";
+import {api_url, base_url, post_url, profile_url} from "../../global";
 import {connect} from "react-redux";
 import {toast} from "react-toastify";
 import moment from "moment";
@@ -282,7 +282,12 @@ class Post extends React.Component {
                                     null
                                 }
                                 <div className={"img_desc normalweight"}><span
-                                    className={"bolder pointer normalweight"} onClick={() => this.props.history.push("/profile/"+this.props.postusername)}>{this.props.postusername}</span> {this.props.postcaption}
+                                    className={"bolder pointer normalweight"} onClick={() => this.props.history.push("/profile/"+this.props.postusername)}>{this.props.postusername}</span> &nbsp;
+                                    <span dangerouslySetInnerHTML={{__html: this.props.postcaption.split(" ").map(o => {
+                                        return o.charAt(0) === "@" ? `<a href="${base_url}profile/${o.substring(1)}" target="_blank" style="color:blue"> ${o} </a>` : o
+                                    }).join(" ")}}>
+
+                                </span>
                                 </div>
                                 {
                                     !this.state.showFullComments && this.props.totalcomment > 0 ? <div onClick={() => this.setState({
