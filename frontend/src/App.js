@@ -113,17 +113,41 @@ class App extends Component {
                 token: localStorage.getItem('token')
             }).then(res => {
                 this.setState({
-                    notifications: res.data.data
+                    notifications: res.data.data,
+                    unReadNotification: res.data.unRead
                 })
             });
             socket.on('newNotifications', notifications => {
-                if (notifications.user.username !== localStorage.getItem('username')) {
-                    const tempNotifications = this.state.notifications;
-                    tempNotifications.unshift(notifications)
-                    this.setState({
-                        notifications: tempNotifications,
-                        unReadNotification: this.state.unReadNotification + 1
-                    })
+                console.log(notifications)
+                if(notifications.to){
+                    if(notifications.type == "comment like") {
+                        if (notifications.to.username == localStorage.getItem('username')) {
+                            const tempNotifications = this.state.notifications;
+                            tempNotifications.unshift(notifications)
+                            this.setState({
+                                notifications: tempNotifications,
+                                unReadNotification: this.state.unReadNotification + 1
+                            })
+                        }
+                    }else{
+                        if (notifications.to.username !== localStorage.getItem('username')) {
+                            const tempNotifications = this.state.notifications;
+                            tempNotifications.unshift(notifications)
+                            this.setState({
+                                notifications: tempNotifications,
+                                unReadNotification: this.state.unReadNotification + 1
+                            })
+                        }
+                    }
+                }else {
+                    if (notifications.user.username == localStorage.getItem('username')) {
+                        const tempNotifications = this.state.notifications;
+                        tempNotifications.unshift(notifications)
+                        this.setState({
+                            notifications: tempNotifications,
+                            unReadNotification: this.state.unReadNotification + 1
+                        })
+                    }
                 }
             });
 
@@ -251,6 +275,7 @@ class App extends Component {
                                                                             :
                                                                             <img
                                                                                 src={profile_url + o.user.profilepicture}
+                                                                                style={{borderRadius: '50%'}}
                                                                                 width={60} alt=""/>
                                                                     }
                                                                 </div>

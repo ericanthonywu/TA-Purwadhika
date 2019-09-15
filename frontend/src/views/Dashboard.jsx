@@ -71,10 +71,12 @@ class Dashboard extends React.Component {
                         token: localStorage.getItem('token'),
                         offset: this.state.pagination
                     }).then(res => {
-                        this.setState({
-                            loading: false,
-                            post: [...this.state.post,res.data.post]
-                        });
+                        if(res.data.post.length) {
+                            this.setState({
+                                loading: false,
+                                post: [...this.state.post, res.data.post]
+                            });
+                        }
                     }).catch(err => {
                         if(err.statusCode == 419){
                             toast.error('Session Expired');

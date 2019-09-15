@@ -27,7 +27,7 @@ class Comment extends React.Component {
                 })
                 axios.post(`${api_url}toogleCommentLike`, {
                     token: this.props.token,
-                    id: this.props._id,
+                    id: this.props.data._id,
                     postid: this.props.postid,
                     action: "remove"
                 }).catch(err => {
@@ -54,7 +54,7 @@ class Comment extends React.Component {
                 })
                 axios.post(`${api_url}toogleCommentLike`, {
                     token: this.props.token,
-                    id: this.props._id,
+                    id: this.props.data._id,
                     postid: this.props.postid,
                     action: "add"
                 }).catch(err => {

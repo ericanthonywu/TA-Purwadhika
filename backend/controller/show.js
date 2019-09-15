@@ -176,31 +176,37 @@ exports.togglelike = (req, res) => {
                     like: res.userdata.id
                 }
             }, {}, (err, data) => {
-                User.findByIdAndUpdate(data.user, {
-                    $push: {
-                        notification: {
-                            $each: [{
+                if (data.user !== res.userdata.id) {
+                    User.findByIdAndUpdate(data.user, {
+                        $push: {
+                            notification: {
+                                $each: [{
+                                    message: `like your posts`,
+                                    post: req.body.id,
+                                    user: res.userdata.id
+                                }],
+                                "$position": 0
+                            },
+                        }
+                    }, {
+                        new: true
+                    }, err => {
+                        const {io} = req;
+                        User.findById(data.user,(err,user) => {
+                            io.sockets.emit('newNotifications', {
                                 message: `like your posts`,
-                                post: req.body.id,
-                                user: res.userdata.id
-                            }],
-                            "$position": 0
-                        },
-                    }
-                }, {
-                    new: true
-                }, err => {
-                    const {io} = req;
-                    io.sockets.emit('newNotifications', {
-                        message: `like your posts`,
-                        post: data,
-                        user: res.userdata,
-                        time: Date.now()
+                                post: data,
+                                user: res.userdata,
+                                to: user,
+                                type:'post',
+                                time: Date.now()
+                            });
+                        })
                     });
-                    res.status(err ? 500 : 202).json(err ? {
-                        err: err
-                    } : {})
-                });
+                }
+                res.status(err ? 500 : 202).json(err ? {
+                    err: err
+                } : {})
             });
             break;
         case "remove":
@@ -237,30 +243,33 @@ exports.comments = (req, res) => {
         } else {
             Post.findById(req.body.id, {}, {}, (err, data) => {
                 if (err) console.error(err)
-                User.findByIdAndUpdate(data.user, {
-                    $push: {
-                        notification: {
-                            $each: [{
-                                message: `comment on your posts`,
-                                post: req.body.id,
-                                user: res.userdata.id,
-                            }],
-                            "$position": 0
+                if (data.user !== res.userdata.id) {
+                    User.findByIdAndUpdate(data.user, {
+                        $push: {
+                            notification: {
+                                $each: [{
+                                    message: `comment on your posts`,
+                                    post: req.body.id,
+                                    user: res.userdata.id,
+                                }],
+                                "$position": 0
+                            }
                         }
-                    }
-                }, {'new': true}).exec(err => {
-                    if (err) console.error(err)
-                    const {io} = req;
-                    io.sockets.emit('newNotifications', {
-                        message: `comment on your posts`,
-                        post: data,
-                        user: res.userdata,
-                        time: Date.now()
+                    }, {'new': true}).exec(err => {
+                        if (err) console.error(err)
+                        const {io} = req;
+                        io.sockets.emit('newNotifications', {
+                            message: `comment on your posts`,
+                            post: data,
+                            user: res.userdata,
+                            time: Date.now(),
+                            type: 'comment post'
+                        });
                     });
-                    return res.status(200).json({
-                        id: data.comments[data.comments.length - 1]._id
-                    })
-                });
+                }
+                return res.status(200).json({
+                    id: data.comments[data.comments.length - 1]._id
+                })
             })
 
         }
@@ -271,42 +280,49 @@ exports.toogleCommentLike = (req, res) => {
         case "add":
             Post.findOneAndUpdate({
                 _id: req.body.postid,
-                'comments.id': req.body.id
+                'comments._id': req.body.id
             }, {
                 $push: { //$set nimpa, $push push aray, $pull delete array
                     "comments.$.like": res.userdata.id
                 }
-            }, (err, data) => {
+            }, err => {
                 if (err) {
                     res.status(500).json({
                         err: err
                     })
                 } else {
-                    Post.findById(req.body.postid,(err,data) => {
-                        User.findByIdAndUpdate(data.user, {
-                            $push: {
-                                notification: {
-                                    $each: [{
-                                        message: `like your comment `,
-                                        post: data,
-                                        user: res.userdata,
-                                    }],
-                                    "$position": 0
-                                },
+                    Post.findById(req.body.postid).populate("comments.user").exec((err, data) => {
+                        const userCommentData = data.comments.filter(o => {
+                            return o._id == req.body.id
+                        })[0].user
+                        if(res.userdata.id != userCommentData._id) {
+                            User.findByIdAndUpdate(userCommentData._id, {
+                                $push: {
+                                    notification: {
+                                        $each: [{
+                                            message: `like your comment `,
+                                            post: req.body.postid,
+                                            user: res.userdata.id,
+                                        }],
+                                        "$position": 0
+                                    },
 
-                            }
-                        }, {'new': true}).exec(err => {
-                            const {io} = req;
-                            io.sockets.emit('newNotifications', {
-                                message: `like your comment `,
-                                post: data,
-                                user: res.userdata,
-                                time: Date.now()
+                                }
+                            }, {'new': true}).exec(err => {
+                                const {io} = req;
+                                io.sockets.emit('newNotifications', {
+                                    message: `like your comment `,
+                                    post: data,
+                                    user: res.userdata,
+                                    to: userCommentData,
+                                    type:'comment like',
+                                    time: Date.now()
+                                });
                             });
-                            res.status(err ? 500 : 202).json(err ? {
-                                err: err
-                            } : {})
-                        });
+                        }
+                        res.status(err ? 500 : 202).json(err ? {
+                            err: err
+                        } : {})
                     })
                 }
             });
@@ -314,7 +330,7 @@ exports.toogleCommentLike = (req, res) => {
         case "remove":
             Post.findOneAndUpdate({
                 _id: req.body.postid,
-                'comments.id': req.body.id
+                'comments._id': req.body.id
             }, {
                 $pull: {
                     "comments.$.like": res.userdata.id
@@ -369,26 +385,32 @@ exports.follow = (req, res) => {
         }, {
             "new": true
         }, err => {
-            User.findByIdAndUpdate(req.body.userTarget, {
-                $push: {
-                    notification: {
-                        $each: [{
+            if(req.body.userTarget !== res.userdata.id) {
+                User.findByIdAndUpdate(req.body.userTarget, {
+                    $push: {
+                        notification: {
+                            $each: [{
+                                message: `started following you`,
+                                user: res.userdata.id
+                            }],
+                            "$position": 0
+                        },
+                    }
+                }, {'new': true}, err => {
+                    User.findById(req.body.userTarget, (err, data) => {
+                        io.sockets.emit('newNotifications', {
                             message: `started following you`,
-                            user: res.userdata.id
-                        }],
-                        "$position": 0
-                    },
-                }
-            }, {'new': true}, err => {
-                io.sockets.emit('newNotifications', {
-                    message: `started following you`,
-                    user: res.userdata,
-                    time: Date.now()
+                            user: res.userdata,
+                            time: Date.now(),
+                            type:'follow',
+                            to: data
+                        })
+                    });
                 })
-                res.status(err ? 500 : 202).json(err ? {
-                    err: err
-                } : {})
-            })
+            }
+            res.status(err ? 500 : 202).json(err ? {
+                err: err
+            } : {})
         })
     })
 };
@@ -419,24 +441,34 @@ exports.unfollow = (req, res) => {
     })
 };
 exports.getNotification = (req, res) => {
-    User.findById(res.userdata.id).select('notification').populate('user', 'username profilepicture').populate('notification.post', 'image').populate('notification.user', 'username').exec((err, data) => {
-        if (err) {
-            res.status(500).json({
-                err: err
-            })
-        } else {
-            res.status(200).json({
-                data: data.notification
-            })
-        }
+    User.findById(res.userdata.id).select('notification').populate('notification.post', 'image').populate('notification.user', {
+        username: 1,
+        profilepicture: 1
     })
+        .exec((err, data) => {
+            if (err) {
+                res.status(500).json({
+                    err: err
+                })
+            } else {
+                User.count({
+                    _id: res.userdata.id,
+                    "notification.read": false
+                }, (err, count) => {
+                    res.status(200).json({
+                        data: data.notification,
+                        unRead: count
+                    })
+                })
+            }
+        })
 }
-exports.readNotif = (req,res) => {
-    User.findOneAndUpdate({_id:res.userdata.id,"notification.read":false},{
-        $set:{
-            "notification.$[].read":true //https://jira.mongodb.org/browse/SERVER-1243
+exports.readNotif = (req, res) => {
+    User.findOneAndUpdate({_id: res.userdata.id, "notification.read": false}, {
+        $set: {
+            "notification.$[].read": true //https://jira.mongodb.org/browse/SERVER-1243
         }
-    },{new:true},err => {
-        res.status(err ? 500 : 200).json(err ? {err: err}: {})
+    }, {new: true}, err => {
+        res.status(err ? 500 : 200).json(err ? {err: err} : {})
     })
 }
