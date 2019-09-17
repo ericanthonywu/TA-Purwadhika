@@ -42,6 +42,9 @@ const userSchema = new mongoose.Schema({
 }).plugin(elastic_search,{
     hosts: [
         'localhost:9200'
+    ],
+    populate:[
+        {path:'follower',select:''}
     ]
 });
 
@@ -67,3 +70,14 @@ const postSchema = new mongoose.Schema({
 });
 
 exports.post = mongoose.model('post', postSchema);
+
+const chatSchema = new mongoose.Schema({
+    participans:[{type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true}],
+    message:[{
+        sender: {type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true},
+        message: {type: String,required: true},
+        read: {type: Boolean, default: false},
+        time: {type: Date, default: Date.now()}
+    }]
+});
+exports.chat = mongoose.model('chat',chatSchema);

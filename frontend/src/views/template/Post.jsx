@@ -142,16 +142,6 @@ class Post extends React.Component {
             })
         }
     };
-    TaggedImg = props => {
-        return (
-            <img
-                onDoubleClick={this.togglelike}
-                className="d-block w-100"
-                src={this.state.postlikes < 0 ? props.o :post_url + props.o}
-                alt={`image ${props.id + 1}`}
-            />
-        )
-    }
     addEmoji = e => {
         let emoji = e.native;
         this.refs.comment.value += emoji
@@ -283,8 +273,15 @@ class Post extends React.Component {
                                 }
                                 <div className={"img_desc normalweight"}><span
                                     className={"bolder pointer normalweight"} onClick={() => this.props.history.push("/profile/"+this.props.postusername)}>{this.props.postusername}</span> &nbsp;
-                                    <span dangerouslySetInnerHTML={{__html: this.props.postcaption.split(" ").map(o => {
-                                        return o.charAt(0) === "@" ? `<a href="${base_url}profile/${o.substring(1)}" target="_blank" style="color:blue"> ${o} </a>` : o
+                                    <span style={{whiteSpace:"pre-line"}} dangerouslySetInnerHTML={{__html: this.props.postcaption.split(" ").map(o => {
+                                        switch (o.charAt(0)) {
+                                            case "@":
+                                                return `<a href="${base_url}profile/${o.substring(1)}" target="_blank" style="color:blue"> ${o} </a>`
+                                            case "#":
+                                                return `<a href="${base_url}hashtag/${o.substring(1)}" target="_blank" style="color:blue"> ${o} </a>`
+                                            default:
+                                                return o
+                                        }
                                     }).join(" ")}}>
 
                                 </span>

@@ -2,7 +2,7 @@
 const model = require('../model');
 
 //model
-const {user: User, post: Post, notification: Notification} = model;
+const {user: User, post: Post, chat: Chat} = model;
 
 exports.profile = (req, res) => {
     User.findOne({username: req.body.username, email_st: 1}).populate('follower').populate('following').exec()
@@ -66,6 +66,7 @@ exports.searchUser = (req, res) => {
     //         data: data
     //     })
     // })
+
     User.search({
         bool: {
             must: { //required
@@ -135,6 +136,40 @@ exports.addPost = (req, res) => {
         if (err) {
             return res.status(500).json({err: err});
         }
+        caption.split(" ").forEach(o => {
+            if (o.charAt(0) === "@") {
+                User.findOne({
+                    username: o.replace("@", ""),
+                    email_st: 1
+                }, (err, userTagged) => {
+                    if (userTagged && (res.userdata.id != userTagged._id)) {
+                        User.findByIdAndUpdate(userTagged._id, {
+                            $push: {
+                                notification: {
+                                    $each: [{
+                                        message: `mentioned you in post`,
+                                        post: data._id,
+                                        user: res.userdata.id,
+                                    }],
+                                    "$position": 0
+                                }
+                            }
+                        }, {'new': true}).exec(err => {
+                            if (err) console.error(err);
+                            const {io} = req;
+                            io.sockets.emit('newNotifications', {
+                                message: `mentioned you in post`,
+                                post: data,
+                                user: res.userdata,
+                                time: Date.now(),
+                                to: userTagged,
+                                type: 'tag comment post'
+                            });
+                        });
+                    }
+                })
+            }
+        });
         return res.status(200).json({
             id: data._id
         })
@@ -192,13 +227,13 @@ exports.togglelike = (req, res) => {
                         new: true
                     }, err => {
                         const {io} = req;
-                        User.findById(data.user,(err,user) => {
+                        User.findById(data.user, (err, user) => {
                             io.sockets.emit('newNotifications', {
                                 message: `like your posts`,
                                 post: data,
                                 user: res.userdata,
                                 to: user,
-                                type:'post',
+                                type: 'post',
                                 time: Date.now()
                             });
                         })
@@ -242,7 +277,7 @@ exports.comments = (req, res) => {
             })
         } else {
             Post.findById(req.body.id, {}, {}, (err, data) => {
-                if (err) console.error(err)
+                if (err) console.error(err);
                 if (data.user != res.userdata.id) {
                     User.findByIdAndUpdate(data.user, {
                         $push: {
@@ -256,9 +291,9 @@ exports.comments = (req, res) => {
                             }
                         }
                     }, {'new': true}).exec(err => {
-                        if (err) console.error(err)
+                        if (err) console.error(err);
                         const {io} = req;
-                        User.findById(data.user,(err,user) => {
+                        User.findById(data.user, (err, user) => {
                             io.sockets.emit('newNotifications', {
                                 message: `comment on your posts`,
                                 post: data,
@@ -271,12 +306,12 @@ exports.comments = (req, res) => {
                     });
                 }
                 req.body.value.split(" ").forEach(o => {
-                    if(o.charAt(0) === "@"){
+                    if (o.charAt(0) === "@") {
                         User.findOne({
-                            username: o.replace("@",""),
-                            email_st:1
-                        },(err,userTagged) => {
-                            if(userTagged && (res.userdata.id != userTagged._id)) {
+                            username: o.replace("@", ""),
+                            email_st: 1
+                        }, (err, userTagged) => {
+                            if (userTagged && (res.userdata.id != userTagged._id)) {
                                 User.findByIdAndUpdate(userTagged._id, {
                                     $push: {
                                         notification: {
@@ -289,21 +324,21 @@ exports.comments = (req, res) => {
                                         }
                                     }
                                 }, {'new': true}).exec(err => {
-                                    if (err) console.error(err)
+                                    if (err) console.error(err);
                                     const {io} = req;
                                     io.sockets.emit('newNotifications', {
                                         message: `mentioned you in comments`,
                                         post: data,
                                         user: res.userdata,
                                         time: Date.now(),
-                                        to:userTagged,
+                                        to: userTagged,
                                         type: 'tag comment post'
                                     });
                                 });
                             }
                         })
                     }
-                })
+                });
                 return res.status(200).json({
                     id: data.comments[data.comments.length - 1]._id
                 })
@@ -331,8 +366,8 @@ exports.toogleCommentLike = (req, res) => {
                     Post.findById(req.body.postid).populate("comments.user").exec((err, data) => {
                         const userCommentData = data.comments.filter(o => {
                             return o._id == req.body.id
-                        })[0].user
-                        if(res.userdata.id != userCommentData._id) {
+                        })[0].user;
+                        if (res.userdata.id != userCommentData._id) {
                             User.findByIdAndUpdate(userCommentData._id, {
                                 $push: {
                                     notification: {
@@ -352,7 +387,7 @@ exports.toogleCommentLike = (req, res) => {
                                     post: data,
                                     user: res.userdata,
                                     to: userCommentData,
-                                    type:'comment like',
+                                    type: 'comment like',
                                     time: Date.now()
                                 });
                             });
@@ -422,7 +457,7 @@ exports.follow = (req, res) => {
         }, {
             "new": true
         }, err => {
-            if(req.body.userTarget !== res.userdata.id) {
+            if (req.body.userTarget !== res.userdata.id) {
                 User.findByIdAndUpdate(req.body.userTarget, {
                     $push: {
                         notification: {
@@ -439,7 +474,7 @@ exports.follow = (req, res) => {
                             message: `started following you`,
                             user: res.userdata,
                             time: Date.now(),
-                            type:'follow',
+                            type: 'follow',
                             to: data
                         })
                     });
@@ -488,7 +523,7 @@ exports.getNotification = (req, res) => {
                     err: err
                 })
             } else {
-                User.count({
+                User.countDocuments({
                     _id: res.userdata.id,
                     "notification.read": false
                 }, (err, count) => {
@@ -499,7 +534,7 @@ exports.getNotification = (req, res) => {
                 })
             }
         })
-}
+};
 exports.readNotif = (req, res) => {
     User.findOneAndUpdate({_id: res.userdata.id, "notification.read": false}, {
         $set: {
@@ -508,4 +543,97 @@ exports.readNotif = (req, res) => {
     }, {new: true}, err => {
         res.status(err ? 500 : 200).json(err ? {err: err} : {})
     })
-}
+};
+exports.showChat = (req, res) => {
+    User.findOne({username: req.body.username}, (err, data) => {
+        if (data) {
+            Chat.findOne({
+                $and: [{
+                    participans: data._id,
+                }, {
+                    participans: res.userdata.id,
+                }]
+            }).populate("message.sender").populate("participans").exec((err, chat) => {
+                res.status(err ? 500 : 200).json(err ? {err: err} : {
+                    data: chat
+                })
+            })
+        } else {
+            res.status(404).json({err: "user not found"})
+        }
+    });
+};
+exports.sendChat = (req, res) => {
+    const {io} = req;
+    User.findOne({username: req.body.username}, (err, data) => {
+        if (data) {
+            Chat.findOne({
+                $and: [{
+                    participans: data._id,
+                }, {
+                    participans: res.userdata.id,
+                }]
+            }, (err, chatcheck) => {
+                if (chatcheck) {
+                    Chat.findOneAndUpdate({
+                        $and: [{
+                            participans: data._id,
+                        }, {
+                            participans: res.userdata.id,
+                        }]
+                    }, {
+                        $push: {
+                            message: {
+                                sender: res.userdata.id,
+                                message: req.body.msg
+                            }
+                        }
+                    }, err => {
+                        res.status(err ? 500 : 200).json(err ? {err: err} : {});
+                        if (!err) {
+                            io.sockets.emit('newChat', {
+                                to: data,
+                                from: res.userdata,
+                                chat: {
+                                    message: req.body.msg,
+                                    sender: res.userdata,
+                                    read: false
+                                }
+                            })
+                        }
+                    })
+                } else {
+                    new Chat({
+                        participans: [data._id, res.userdata.id],
+                        message: {
+                            sender: res.userdata.id,
+                            message: req.body.msg
+                        }
+                    }).save(err => {
+                        io.sockets.emit('newChat', {
+                            to: data,
+                            from: res.userdata,
+                            chat: {
+                                message: req.body.msg,
+                                sender: res.userdata,
+                                read: false
+                            }
+                        });
+                        res.status(err ? 500 : 200).json(err ? {err: err} : {});
+                    })
+                }
+            });
+        } else {
+            res.status(404).json({err: "user not found"})
+        }
+    });
+};
+exports.getChat = (req, res) => {
+    Chat.find({
+        participans: res.userdata.id
+    }).populate("participans").exec((err, data) => {
+        res.status(err ? 500 : 200).json(err ? {err: err} : {
+            data: data
+        })
+    })
+};

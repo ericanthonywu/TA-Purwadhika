@@ -68,5 +68,9 @@ router.post('/comments',authMiddleware.authcheck,showController.comments);
 router.post('/toogleCommentLike',authMiddleware.authcheck,showController.toogleCommentLike);
 router.post('/showPost',showController.showPost);
 
+//chat route
+router.post('/sendChat',authMiddleware.authcheck,showController.sendChat);
+router.post('/showChat',authMiddleware.authcheck,showController.showChat);
+router.post('/getChat',authMiddleware.authcheck,showController.getChat);
 
 module.exports = router;

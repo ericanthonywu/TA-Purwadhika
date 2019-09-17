@@ -38,6 +38,7 @@ class Login extends React.Component {
             localStorage.setItem('username', res.data.username);
             localStorage.setItem('profile_picture', res.data.profile_picture);
             localStorage.setItem('_id', res.data._id);
+            localStorage.setItem('chatMinimized',false);
             this.props.login({
                 token: res.data._token,
                 username: res.data.username,

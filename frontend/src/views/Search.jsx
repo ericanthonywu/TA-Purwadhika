@@ -67,6 +67,26 @@ class Search extends React.Component {
                                                 <img src={profile_url+o._source.profilepicture} width={"100%"} alt=""/>
                                             </div>
                                             <div className="user-desc">
+                                                {
+                                                    o._source.username === this.props.username
+                                                        ?
+                                                        <MDBBtn className={"waves-effect"} outline
+                                                                color={"elegant"} onClick={() => this.props.history.push('/updateProfile')}> Edit
+                                                            Profile </MDBBtn>
+                                                        :
+                                                        o._source.follower.length && o._source.follower.some(e => e._id === this.props.userid) ?
+                                                            <MDBBtn className={"waves-effect"} outline
+                                                                    color={"primary"} onClick={() => this.props.history.push('/profile/'+o._source.username)}> Following </MDBBtn> :
+                                                            (
+                                                                o._source.user && o._source.user.following.some(e => e._id === this.props.userid)
+                                                                    ?
+                                                                    <MDBBtn className={"waves-effect"}
+                                                                            color={"primary"} onClick={() => this.props.history.push('/profile/'+o._source.username)}>Follow Back</MDBBtn>
+                                                                    :
+                                                                    <MDBBtn className={"waves-effect"}
+                                                                            color={"primary"} onClick={() => this.props.history.push('/profile/'+o._source.username)}> Follow </MDBBtn>
+                                                            )
+                                                }
                                                 <p onClick={() => this.props.history.push('/profile/'+o._source.username)}>{o._source.username}</p>
                                                 <p onClick={() => this.props.history.push('/profile/'+o._source.username)}>{o._source.nickname} </p>
                                             </div>
@@ -86,7 +106,8 @@ class Search extends React.Component {
 
 const mapToStateProps = state => {
     return {
-        token: state.user.token
+        token: state.user.token,
+        username: state.user.username
     }
 };
-export default Search
+export default connect(mapToStateProps)(Search)

@@ -77,8 +77,7 @@ class Profile extends React.Component {
                         this.state.user.following.some(e => e._id === this.props.userid)
                             ?
                             <MDBBtn className={"waves-effect"}
-                                    color={"primary"} onClick={this.follow}> Following
-                                You </MDBBtn>
+                                    color={"primary"} onClick={this.follow}>Follow Back</MDBBtn>
                             :
                             <MDBBtn className={"waves-effect"}
                                     color={"primary"} onClick={this.follow}> Follow </MDBBtn>

@@ -2,10 +2,9 @@ const model = require("../model");
 const bcrypt = require("bcryptjs");
 const user = model.user;
 const jwt = require("jsonwebtoken");
-const app = require("express")();
 const nodeMailer = require("nodemailer");
 
-exports.login = (req, res, next) => {
+exports.login = (req, res) => {
     const {password, email} = req.body;
     if (password == null || email == null) {
         res.status(401).json({
@@ -83,7 +82,7 @@ function makeid(length) {
     return result;
 }
 
-exports.register =  (req, res, next) => {
+exports.register =  (req, res) => {
     const {username, password, email} = req.body;
     if (!username || !password || !email) {
         res.status(401).json({
@@ -404,16 +403,7 @@ exports.register =  (req, res, next) => {
         });
     }
 };
-exports.getlogin = (req, res) => {
-    const io = req.io;
-    io.emit("emit", {
-        user: "Eric",
-        msg: "Hello world"
-    });
-
-    res.send("socket io cek");
-};
-exports.verify = (req, res, next) => {
+exports.verify = (req, res) => {
     user.findOneAndUpdate(
         {token: req.params.token},
         {email_st: 1,token:null},
@@ -433,14 +423,14 @@ exports.checkemail = (req, res, next) => {
         });
     });
 };
-exports.checkusername = (req, res, next) => {
+exports.checkusername = (req, res) => {
     user.count({username: req.body.username}, (err, c) => {
         res.status(c ? 500 : 200).send({
             message: c ? "Username tersedia" : ""
         });
     });
 };
-exports.checktoken = (req, res, next) => {
+exports.checktoken = (req, res) => {
     jwt.verify(req.body.token, "ysn852jd48", (err, data) => {
         if (err) {
             res.status(500).send({

@@ -16,7 +16,8 @@ import {
     MDBNavLink,
     MDBModal,
     MDBModalBody,
-    MDBIcon
+    MDBIcon,
+    MDBInput,
 } from "mdbreact";
 import DashboardPage from './views/Dashboard'
 import Register from './views/Register'
@@ -47,9 +48,10 @@ class App extends Component {
             loggedin: false,
             bottommodal: false,
             timeout: null,
-            chatMinimized: false,
+            chatMinimized: localStorage.getItem('chatMinimized'),
             notifications: [],
-            unReadNotification: 0
+            unReadNotification: 0,
+            listChat: []
         };
     }
 
@@ -103,7 +105,7 @@ class App extends Component {
                 token: localStorage.getItem('token'),
                 _id: localStorage.getItem('_id'),
                 profilepicture: localStorage.getItem('profile_picture')
-            })
+            });
             const socket = socketio(backend_url, {
                 query: {
                     token: localStorage.getItem('token'),
@@ -114,40 +116,38 @@ class App extends Component {
             }).then(res => {
                 this.setState({
                     notifications: res.data.data,
-                    unReadNotification: res.data.unRead
+                    unReadNotification: res.data.unRead,
+                })
+            });
+            Axios.post(`${api_url}getChat`, {
+                token: localStorage.getItem('token')
+            }).then(res => {
+                let tempData = [];
+                res.data.data.forEach(o => {
+                    o.participans.forEach(data => {
+                        if (data._id !== localStorage.getItem('_id')) {
+                            tempData.push(data)
+                        }
+                    })
+                });
+                this.setState({
+                    listChat: tempData
                 })
             });
             socket.on('newNotifications', notifications => {
-                console.log(notifications)
-                if(notifications.to){
-                    if(notifications.type == "comment like") {
-                        if (notifications.to.username == localStorage.getItem('username')) {
-                            const tempNotifications = this.state.notifications;
-                            tempNotifications.unshift(notifications)
-                            this.setState({
-                                notifications: tempNotifications,
-                                unReadNotification: this.state.unReadNotification + 1
-                            })
-                        }
-                    }else{
-                        if (notifications.to.username == localStorage.getItem('username')) {
-                            const tempNotifications = this.state.notifications;
-                            tempNotifications.unshift(notifications)
-                            this.setState({
-                                notifications: tempNotifications,
-                                unReadNotification: this.state.unReadNotification + 1
-                            })
-                        }
-                    }
-                }else {
-                    if (notifications.user.username == localStorage.getItem('username')) {
-                        const tempNotifications = this.state.notifications;
-                        tempNotifications.unshift(notifications)
-                        this.setState({
-                            notifications: tempNotifications,
-                            unReadNotification: this.state.unReadNotification + 1
-                        })
-                    }
+                if (notifications.to.username == localStorage.getItem('username')) {
+                    const tempNotifications = this.state.notifications;
+                    tempNotifications.unshift(notifications);
+                    this.setState({
+                        notifications: tempNotifications,
+                        unReadNotification: this.state.unReadNotification + 1
+                    })
+                }
+            });
+            socket.on('newChat', chat => {
+                if (chat.to._id == this.props.userid && base_url+"chat/"+chat.from.username != window.location.href) {
+                    console.log(base_url+"/chat/"+chat.from.username , window.location.href)
+                    toast.info(`${chat.from.username} sends you a message`)
                 }
             });
 
@@ -215,11 +215,13 @@ class App extends Component {
                                             <MDBDropdownMenu className="dropdown-default">
                                                 <MDBDropdownItem><Link onClick={() => this.setState({
                                                     isOpen: false
-                                                })} to={`/profile/${this.props.username}`}>My
+                                                })} to={{
+                                                    pathname:`/profile/${this.props.username}`
+                                                }}>My
                                                     Profile</Link></MDBDropdownItem>
                                                 <MDBDropdownItem><Link onClick={() => this.setState({
                                                     isOpen: false
-                                                })} to={'addpost'}>Add Post</Link></MDBDropdownItem>
+                                                })} to={"/addpost"}>Add Post</Link></MDBDropdownItem>
                                                 <MDBDropdownItem onClick={this.onLogout}><a>logout</a></MDBDropdownItem>
                                             </MDBDropdownMenu>
                                         </MDBDropdown>
@@ -229,12 +231,12 @@ class App extends Component {
                                             <MDBDropdownToggle nav caret>
                                                 <div style={{display: "flex", position: "absolute"}}
                                                      onClick={() => {
-                                                         this.setState({unReadNotification: 0})
+                                                         this.setState({unReadNotification: 0});
                                                          Axios.post(`${api_url}readNotif`, {
                                                              token: this.props.token
                                                          }).catch(err => {
                                                              if (err.statusCode == 419) {
-                                                                 toast.error("Session Expired")
+                                                                 toast.error("Session Expired");
                                                                  this.props.logout()
                                                              }
                                                          })
@@ -266,7 +268,11 @@ class App extends Component {
                                                                         </p>
                                                                     </a>
                                                                 </div>
-                                                                <div style={{float: "right",position:"absolute",left:"calc(100% - 60px)"}}>
+                                                                <div style={{
+                                                                    float: "right",
+                                                                    position: "absolute",
+                                                                    left: "calc(100% - 60px)"
+                                                                }}>
                                                                     {
                                                                         o.post ?
                                                                             <img src={post_url + o.post.image[0]}
@@ -306,98 +312,26 @@ class App extends Component {
                 </MDBNavbar>
                 <div>
                     <span className={"toggle-chat"} style={this.state.chatMinimized ? {left: "calc(100% - 20px)"} : {}}
-                          onClick={() => this.setState({chatMinimized: !this.state.chatMinimized})}><MDBIcon
+                          onClick={() => this.setState({chatMinimized: !this.state.chatMinimized},() => {
+                              localStorage.setItem('chatMinimized',this.state.chatMinimized)
+                          })}><MDBIcon
                         icon={this.state.chatMinimized ? "bars" : "times"}/></span>
                     <div className={"chat-container"} style={this.state.chatMinimized ? {width: 0, left: "100%"} : {}}>
                         <div>
-                            <img src="https://github.githubassets.com/favicon.ico" alt=""/>
-                            <span>github</span>
-                            <span className={"online"}>
-
-                        </span>
+                            <MDBInput type={"text"} ref={"finduser"} labelClass={"colorwhite"} label={"Find User ..."} style={{width:140}}/>
+                            <MDBBtn type={"button"} onClick={() => this.props.history.push("/chat/"+this.refs.finduser.value)} gradient={"aqua"}>Start Chat</MDBBtn>
                         </div>
-                        <div>
-                            <img src="https://github.githubassets.com/favicon.ico" alt=""/>
-                            <span>github</span>
-                            <span className={"online"}>
-
-                        </span>
-                        </div>
-                        <div>
-                            <img src="https://github.githubassets.com/favicon.ico" alt=""/>
-                            <span>github</span>
-                            <span className={"online"}>
-
-                        </span>
-                        </div>
-                        <div>
-                            <img src="https://github.githubassets.com/favicon.ico" alt=""/>
-                            <span>github</span>
-                            <span className={"online"}>
-
-                        </span>
-                        </div>
-                        <div>
-                            <img src="https://github.githubassets.com/favicon.ico" alt=""/>
-                            <span>github</span>
-                            <span className={"online"}></span>
-                        </div>
-                        <div>
-                            <img src="https://github.githubassets.com/favicon.ico" alt=""/>
-                            <span>github</span>
-                            <span className={"online"}>
-
-                        </span>
-                        </div>
-                        <div>
-                            <img src="https://github.githubassets.com/favicon.ico" alt=""/>
-                            <span>github</span>
-                            <span className={"online"}>
-
-                        </span>
-                        </div>
-                        <div>
-                            <img src="https://github.githubassets.com/favicon.ico" alt=""/>
-                            <span>github</span>
-                            <span className={"online"}>
-
-                        </span>
-                        </div>
-                        <div>
-                            <img src="https://github.githubassets.com/favicon.ico" alt=""/>
-                            <span>github</span>
-                            <span className={"online"}>
-
-                        </span>
-                        </div>
-                        <div>
-                            <img src="https://github.githubassets.com/favicon.ico" alt=""/>
-                            <span>github</span>
-                            <span className={"online"}>
-
-                        </span>
-                        </div>
-                        <div>
-                            <img src="https://github.githubassets.com/favicon.ico" alt=""/>
-                            <span>github</span>
-                            <span className={"online"}>
-
-                        </span>
-                        </div>
-                        <div>
-                            <img src="https://github.githubassets.com/favicon.ico" alt=""/>
-                            <span>github</span>
-                            <span className={"online"}>
-
-                        </span>
-                        </div>
-                        <div>
-                            <img src="https://github.githubassets.com/favicon.ico" alt=""/>
-                            <span>github</span>
-                            <span className={"online"}>
-
-                        </span>
-                        </div>
+                        {
+                            this.state.listChat.map(data => {
+                                return (
+                                    <div onClick={() => this.props.history.push('/chat/'+data.username)}>
+                                        <img width={60} src={profile_url + data.profilepicture} alt=""/>
+                                        <span>{data.username}</span>
+                                        <span></span>
+                                    </div>
+                                )
+                            })
+                        }
                     </div>
                 </div>
                 <Switch>
@@ -406,7 +340,7 @@ class App extends Component {
                     <Route path={'/register'} exact component={Register}/>
                     <Route path={'/profile/:profile'} component={withAuth(Profile)}/>
                     <Route path={'/addpost'} exact component={withAuth(AddPost)}/>
-                    <Route path={'/chat'} exact component={Chat}/>
+                    <Route path={'/chat/:username'} exact component={Chat}/>
                     <Route path={'/post/:postid'} component={ShowPost}/>
                     <Route path={'/updateProfile'} exact component={withAuth(UpdateProfile)}/>
                     <Route path={'/search'} component={Search}/>
