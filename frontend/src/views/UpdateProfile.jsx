@@ -47,7 +47,6 @@ class UpdateProfile extends React.Component {
                     isLoading: false,
                     bio: res.data.data.bio
                 });
-                console.log(res.data.data)
             }).catch(err => {
                 this.setState({
                     isLoading: false

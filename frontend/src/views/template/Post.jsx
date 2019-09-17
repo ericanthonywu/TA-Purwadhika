@@ -277,8 +277,8 @@ class Post extends React.Component {
                                         switch (o.charAt(0)) {
                                             case "@":
                                                 return `<a href="${base_url}profile/${o.substring(1)}" target="_blank" style="color:blue"> ${o} </a>`
-                                            case "#":
-                                                return `<a href="${base_url}hashtag/${o.substring(1)}" target="_blank" style="color:blue"> ${o} </a>`
+                                            // case "#":
+                                            //     return `<a href="${base_url}hashtag/${o.substring(1)}" target="_blank" style="color:blue"> ${o} </a>`
                                             default:
                                                 return o
                                         }
@@ -316,6 +316,25 @@ class Post extends React.Component {
                                                     <Picker set='emojione' title={"Choose Sticker"}
                                                             onSelect={this.addEmoji}/>
                                                 </div>}
+                                                <div className={"autocomplete"}>
+                                                    <div>
+                                                        <img src="http://localhost:3000/uploads/profile_picture/2019-09-17T11-03-31.701Z1.jpg" className={"mr-2"} width={30} alt=""/>
+                                                        <span>ericanthony</span>
+                                                    </div>
+                                                    <div>
+                                                        <img src="http://localhost:3000/uploads/profile_picture/2019-09-17T11-03-31.701Z1.jpg" className={"mr-2"} width={30} alt=""/>
+                                                        <span>ericanthony</span>
+                                                    </div>
+                                                    <div>
+                                                        <img src="http://localhost:3000/uploads/profile_picture/2019-09-17T11-03-31.701Z1.jpg" className={"mr-2"} width={30} alt=""/>
+                                                        <span>ericanthony</span>
+                                                    </div><div>
+                                                    <img src="http://localhost:3000/uploads/profile_picture/2019-09-17T11-03-31.701Z1.jpg" className={"mr-2"} width={30} alt=""/>
+                                                    <span>ericanthony</span>
+                                                </div>
+
+
+                                                </div>
                                                 <textarea style={{paddingTop: 0}}
                                                           className={"md-textarea comment-textarea form-control"}
                                                           id={"usercomment"}
