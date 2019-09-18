@@ -58,15 +58,73 @@ class Chat extends React.Component {
     componentDidUpdate(prevProps, prevState, snapshot) {
         if(prevProps.match.params !== this.props.match.params) {
             const {username} = this.props.match.params;
+            if(username == this.props.username){
+                this.setState({
+                    notFound: true
+                })
+            }else {
+                axios.post(`${api_url}showChat`, {
+                    token: localStorage.getItem('token'),
+                    username: username
+                }).then(res => {
+                    console.log(res);
+                    this.setState({
+                        chat: res.data.data.message,
+                        notFound: false
+                    });
+                }).catch(err => {
+                    if (err.response) {
+                        switch (err.response.status) {
+                            case 419:
+                                toast.error("Session Expired");
+                                this.props.logout();
+                                break;
+                            case 404:
+                                this.setState({
+                                    notFound: true
+                                });
+                                break;
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    componentDidMount() {
+        const {username} = this.props.match.params;
+        if(username == this.props.username){
+            this.setState({
+                notFound: true
+            })
+        }else {
+            const socket = socketio(backend_url, {
+                query: {
+                    token: localStorage.getItem('token'),
+                }
+            });
+            this.setState({
+                username: username
+            });
+            socket.on('newChat', chat => {
+                if (chat.to._id == this.props.id && chat.from.username == username) {
+                    this.setState({
+                        chat: [...this.state.chat, chat.chat]
+                    })
+                }
+            });
             axios.post(`${api_url}showChat`, {
                 token: localStorage.getItem('token'),
                 username: username
             }).then(res => {
                 console.log(res);
                 this.setState({
-                    chat: res.data.data.message,
-                    notFound: false
+                    chat: this.state.chat.length ? [...this.state.chat, res.data.data.message] : res.data.data.message
                 });
+                socket.emit('readChat', {
+                    read: localStorage.getItem('_id'),
+                    user: username
+                })
             }).catch(err => {
                 if (err.response) {
                     switch (err.response.status) {
@@ -83,53 +141,6 @@ class Chat extends React.Component {
                 }
             });
         }
-    }
-
-    componentDidMount() {
-        const {location} = this.props;
-        const {username} = this.props.match.params;
-        const socket = socketio(backend_url, {
-            query: {
-                token: localStorage.getItem('token'),
-            }
-        });
-        this.setState({
-            username: username
-        });
-        socket.on('newChat', chat => {
-            if (chat.to._id == this.props.id && chat.from.username == username) {
-                this.setState({
-                    chat: [...this.state.chat, chat.chat]
-                })
-            }
-        });
-        axios.post(`${api_url}showChat`, {
-            token: localStorage.getItem('token'),
-            username: username
-        }).then(res => {
-            console.log(res);
-            this.setState({
-                chat: this.state.chat.length ? [...this.state.chat, res.data.data.message] : res.data.data.message
-            });
-            socket.emit('readChat', {
-                read: localStorage.getItem('_id'),
-                user: username
-            })
-        }).catch(err => {
-            if(err.response) {
-                switch (err.response.status) {
-                    case 419:
-                        toast.error("Session Expired");
-                        this.props.logout();
-                        break;
-                    case 404:
-                        this.setState({
-                            notFound: true
-                        });
-                        break;
-                }
-            }
-        });
     }
 
     addEmoji = e => {

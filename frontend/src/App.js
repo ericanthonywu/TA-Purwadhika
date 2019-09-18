@@ -51,7 +51,8 @@ class App extends Component {
             chatMinimized: localStorage.getItem('chatMinimized'),
             notifications: [],
             unReadNotification: 0,
-            listChat: []
+            listChat: [],
+            search: null,
         };
     }
 
@@ -153,6 +154,21 @@ class App extends Component {
 
         } else {
             this.props.logout()
+        }
+    }
+    searchUser = e => {
+        if(e.target.value.length) {
+            Axios.post(`${api_url}searchUser`, {
+                param: e.target.value
+            }).then(res => {
+                this.setState({
+                    search: res.data.data !== null ? res.data.data.filter(o => o._source.username !== this.props.username) : [],
+                })
+            })
+        }else{
+            this.setState({
+                search: []
+            })
         }
     }
 
@@ -318,8 +334,26 @@ class App extends Component {
                         icon={this.state.chatMinimized ? "bars" : "times"}/></span>
                     <div className={"chat-container"} style={this.state.chatMinimized ? {width: 0, left: "100%"} : {}}>
                         <div>
-                            <MDBInput type={"text"} ref={"finduser"} labelClass={"colorwhite"} label={"Find User ..."} style={{width:140}}/>
-                            <MDBBtn type={"button"} onClick={() => this.props.history.push("/chat/"+this.refs.finduser.value)} gradient={"aqua"}>Start Chat</MDBBtn>
+                            <MDBInput type={"text"} ref={"finduser"} onChange={this.searchUser} labelClass={"colorwhite"} label={"Find User ..."} style={{width:140}}/>
+                        </div>
+                        <div style={{backgroundColor:"white",color:"black"}}>
+                            {
+                                this.state.search ?
+                                    this.state.search.map(o => {
+                                        return (
+                                            <div onClick={() => this.props.history.push(`/chat/${o._source.username}`)}>
+                                                <img
+                                                    src={profile_url + o._source.profilepicture}
+                                                    className={"mr-2"} width={30}
+                                                    alt={o._source.username + "'s photo"}/>
+                                                <span>{o._source.username}</span>
+                                                <span></span>
+                                            </div>
+                                        )
+                                    })
+                                    :
+                                    null
+                            }
                         </div>
                         {
                             this.state.listChat.map(data => {
