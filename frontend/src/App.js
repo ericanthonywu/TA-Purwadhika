@@ -147,7 +147,6 @@ class App extends Component {
             });
             socket.on('newChat', chat => {
                 if (chat.to._id == this.props.userid && base_url+"chat/"+chat.from.username != window.location.href) {
-                    console.log(base_url+"/chat/"+chat.from.username , window.location.href)
                     toast.info(`${chat.from.username} sends you a message`)
                 }
             });

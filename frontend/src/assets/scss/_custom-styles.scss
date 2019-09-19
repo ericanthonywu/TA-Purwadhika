@@ -9,6 +9,10 @@
   display: inline-block;
 }
 
+body{
+  background-color: #ececec;
+}
+
 .username_dashboard {
   top: 50%;
   position: inherit;
@@ -468,8 +472,9 @@
   height: 100%;
   overflow: hidden;
   box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
-  background-color: gray;
-  color: white;
+  background-color: transparent;
+  border-left: 1px solid darkgray;
+  color: black;
   top: 75px;
   left: calc(100% - 210px);
   width: 210px;
@@ -606,6 +611,11 @@
     word-break: break-all;
     white-space: pre-line;
     width: fit-content;
+
+    span{
+      float: right;
+      font-size: small;
+    }
   }
   .sender div{
     float: right;

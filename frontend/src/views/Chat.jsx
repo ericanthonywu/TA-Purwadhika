@@ -1,6 +1,6 @@
 import React from 'react'
 import socketio from 'socket.io-client'
-import {api_url, backend_url} from "../global";
+import {api_url, backend_url, base_url} from "../global";
 import axios from 'axios'
 import {connect} from "react-redux";
 import {MDBInput, MDBBtn, MDBCol, MDBIcon} from "mdbreact";
@@ -56,13 +56,18 @@ class Chat extends React.Component {
     };
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        if(prevProps.match.params !== this.props.match.params) {
+        if (prevProps.match.params !== this.props.match.params) {
             const {username} = this.props.match.params;
-            if(username == this.props.username){
+            if (username == this.props.username) {
                 this.setState({
                     notFound: true
                 })
-            }else {
+            } else {
+                axios.post(`${api_url}updateChat`, {
+                    to: this.props.id,
+                    username: username,
+                    token: this.props.token
+                });
                 axios.post(`${api_url}showChat`, {
                     token: localStorage.getItem('token'),
                     username: username
@@ -93,11 +98,11 @@ class Chat extends React.Component {
 
     componentDidMount() {
         const {username} = this.props.match.params;
-        if(username == this.props.username){
+        if (username == this.props.username) {
             this.setState({
                 notFound: true
             })
-        }else {
+        } else {
             const socket = socketio(backend_url, {
                 query: {
                     token: localStorage.getItem('token'),
@@ -106,10 +111,38 @@ class Chat extends React.Component {
             this.setState({
                 username: username
             });
+            axios.post(`${api_url}updateChat`, {
+                token: localStorage.getItem('token'),
+                username: username
+            });
             socket.on('newChat', chat => {
                 if (chat.to._id == this.props.id && chat.from.username == username) {
+                    if (base_url + "chat/" + chat.from.username == window.location.href) {
+                        axios.post(`${api_url}updateChat`, {
+                            token: this.props.token || localStorage.getItem('token'),
+                            username: username
+                        }).then(res => {
+
+                        })
+                    }
                     this.setState({
                         chat: [...this.state.chat, chat.chat]
+                    })
+                }
+            });
+            socket.on('readChat', chat => {
+                if (chat.to._id == this.props.id && chat.from.username == username) {
+                    const temparr = this.state.chat
+                    temparr.map(o => {
+                        if(o) {
+                            if (o.sender.username == this.props.username) {
+                                o.read = true
+                            }
+                        }
+                    });
+                    console.log(temparr,this.state.chat)
+                    this.setState({
+                        chat:temparr
                     })
                 }
             });
@@ -117,14 +150,9 @@ class Chat extends React.Component {
                 token: localStorage.getItem('token'),
                 username: username
             }).then(res => {
-                console.log(res);
                 this.setState({
                     chat: this.state.chat.length ? [...this.state.chat, res.data.data.message] : res.data.data.message
                 });
-                socket.emit('readChat', {
-                    read: localStorage.getItem('_id'),
-                    user: username
-                })
             }).catch(err => {
                 if (err.response) {
                     switch (err.response.status) {
@@ -178,20 +206,25 @@ class Chat extends React.Component {
                         <Error404/>
                         :
                         <MDBCol size={4} style={{paddingTop: 100, margin: "auto"}}>
-                            <img src={""}/>
+                            {/*<img src={""}/>*/}
                             <div className={"show-chat"}>
                                 {
-                                    this.state.chat.map((o) => {
-                                        return (
+                                    this.state.chat ?
+                                    this.state.chat.map(o => {
+                                        return o ? (
                                             <div
                                                 className={o.sender.username != this.props.username ? "receiver" : "sender"}>
-                                                <div>{o.message}</div>
+                                                <div>{o.message}<br/>
+                                                    <span>{moment(o.time).fromNow()} {o.sender.username == this.props.username ? (o.read ? "Read" : "Delivered") : null}</span>
+                                                </div>
                                             </div>
-                                        )
+                                        ) : null
                                     })
+                                        :
+                                        null
                                 }
                             </div>
-                            <div style={{display: "flex", marginTop: 20}}>
+                            <div style={{display: "flex", marginTop: this.state.chat}}>
                                 <div className="md-form usercomment w-100">
                                     {this.state.showsticker && <div className={"emoji-container"}>
                                         <Picker set='emojione' title={"Choose Sticker"}

@@ -596,6 +596,7 @@ exports.sendChat = (req, res) => {
                                 from: res.userdata,
                                 chat: {
                                     message: req.body.msg,
+                                    time: Date.now(),
                                     sender: res.userdata,
                                     read: false
                                 }
@@ -637,3 +638,28 @@ exports.getChat = (req, res) => {
         })
     })
 };
+exports.updateChat = (req, res) => {
+    const {io} = req;
+    console.log(req.body)
+    User.findOne({username: req.body.username}, (err, data) => {
+        Chat.findOneAndUpdate({
+            $and: [{
+                participans: data._id,
+            }, {
+                participans: res.userdata.id,
+            }, {
+                "message.sender": res.userdata.id // eric jwancok by:tmangowal, the king of prank
+            }]
+        }, {
+            $set: {
+                "message.$[].read": true //https://jira.mongodb.org/browse/SERVER-1243
+            }
+        }, (err, chatcheck) => {
+            io.sockets.emit('readChat',{
+                to: data,
+                from: res.userdata,
+            })
+            res.status(err ? 500 : 200).json(err ? {err: err} : {})
+        })
+    });
+}

@@ -72,5 +72,6 @@ router.post('/showPost',showController.showPost);
 router.post('/sendChat',authMiddleware.authcheck,showController.sendChat);
 router.post('/showChat',authMiddleware.authcheck,showController.showChat);
 router.post('/getChat',authMiddleware.authcheck,showController.getChat);
+router.post('/updateChat',authMiddleware.authcheck,showController.updateChat);
 
 module.exports = router;
