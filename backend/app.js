@@ -21,11 +21,6 @@ io.on("connection", socket => {
             }
         })
     }
-
-    socket.on('send chat',msg => {
-        io.sockets.emit('show chat',msg);
-        console.log(msg)
-    })
 });
 
 app.use((req, res, next) => { //global socket io
@@ -34,7 +29,7 @@ app.use((req, res, next) => { //global socket io
 });
 
 const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
+const adminRouter = require('./routes/admin');
 
 
 // view engine setup
@@ -53,7 +48,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static('uploads')); //ngasih akses folder uploads
 
 app.use('/web', indexRouter);
-app.use('/mobile', usersRouter);
+app.use('/admin', adminRouter);
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {

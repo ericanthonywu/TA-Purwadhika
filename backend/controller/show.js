@@ -640,7 +640,7 @@ exports.getChat = (req, res) => {
 };
 exports.updateChat = (req, res) => {
     const {io} = req;
-    console.log(req.body)
+    console.log(req.body);
     User.findOne({username: req.body.username}, (err, data) => {
         Chat.findOneAndUpdate({
             $and: [{
@@ -654,12 +654,12 @@ exports.updateChat = (req, res) => {
             $set: {
                 "message.$[].read": true //https://jira.mongodb.org/browse/SERVER-1243
             }
-        }, (err, chatcheck) => {
-            io.sockets.emit('readChat',{
+        }, err => {
+            io.sockets.emit('readChat', {
                 to: data,
                 from: res.userdata,
-            })
+            });
             res.status(err ? 500 : 200).json(err ? {err: err} : {})
         })
     });
-}
+};

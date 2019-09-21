@@ -18,15 +18,14 @@ const userSchema = new mongoose.Schema({
     email_st: {type: Number, default: 0},
     nickname: {type: String},
     profilepicture: {type: String, default: "default.jpg"},
-    token: {type: String, unique: true, select: false},
     follower: [{type: mongoose.Schema.Types.ObjectId, ref: 'user'}],
     following: [{type: mongoose.Schema.Types.ObjectId, ref: 'user'}],
     bio: {type: String},
     notification: [{
         id: {type: mongoose.Schema.Types.ObjectId},
         message: {type: String, required: true},
-        user: {type: mongoose.Schema.Types.ObjectId, ref:'user',default: null},
-        post: {type: mongoose.Schema.Types.ObjectId, ref:'post',default: null},
+        user: {type: mongoose.Schema.Types.ObjectId, ref: 'user', default: null},
+        post: {type: mongoose.Schema.Types.ObjectId, ref: 'post', default: null},
         report: {type: Boolean, default: false},
         read: {type: Boolean, default: false},
         time: {type: Date, default: Date.now}
@@ -39,12 +38,12 @@ const userSchema = new mongoose.Schema({
         username: 5,
         nickname: 1
     }
-}).plugin(elastic_search,{
+}).plugin(elastic_search, {
     hosts: [
         'localhost:9200'
     ],
-    populate:[
-        {path:'follower',select:''}
+    populate: [
+        {path: 'follower', select: ''}
     ]
 });
 
@@ -63,7 +62,7 @@ const postSchema = new mongoose.Schema({
     user: {type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true},
     like: [{type: mongoose.Schema.Types.ObjectId, ref: 'user'}],
     status: {type: Number, default: 0}
-}, {timestamps: true}).plugin(elastic_search,{
+}, {timestamps: true}).plugin(elastic_search, {
     hosts: [
         'localhost:9200'
     ]
@@ -72,13 +71,21 @@ const postSchema = new mongoose.Schema({
 exports.post = mongoose.model('post', postSchema);
 
 const chatSchema = new mongoose.Schema({
-    participans:[{type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true}],
-    message:[{
+    participans: [{type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true}],
+    message: [{
         sender: {type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true},
-        message: {type: String,required: true},
+        message: {type: String, required: true},
         read: {type: Boolean, default: false},
         time: {type: Date, default: Date.now()}
     }]
 });
 
-exports.chat = mongoose.model('chat',chatSchema);
+exports.chat = mongoose.model('chat', chatSchema);
+
+const adminSchema = new mongoose.Schema({
+    username: {type: String, required: true},
+    password: {type: String, required: true,select: false},
+    role: {type: Number, required: true},
+},{timestamps: true});
+
+exports.admin = mongoose.model('admin',adminSchema);
