@@ -14,6 +14,13 @@ import {
 import Axios from "axios";
 import {api_url, profile_url} from "../global";
 import Datatable from 'react-data-table-component'
+import Swal from 'sweetalert2'
+import withReactContent from 'sweetalert2-react-content'
+import {toast} from "react-toastify";
+import DatePicker from 'react-date-picker'
+import moment from "moment";
+
+const swal = withReactContent(Swal);
 
 class UserPage extends React.Component {
     constructor(props) {
@@ -21,15 +28,20 @@ class UserPage extends React.Component {
         this.state = {
             data: [],
             loading: true,
-            blockModal: false,
+            modal: false,
             username: "",
-            id:""
+            id: "",
+            suspendName: ""
         }
     }
 
     componentDidMount() {
+        this.refreshTable();
+    };
+
+    refreshTable = () => {
         Axios.post(`${api_url}users`, {
-            token: this.props.token
+            token: this.props.token || localStorage.getItem('token')
         }).then(res => {
             const data = res.data.data;
             data.forEach((o, id) => {
@@ -41,35 +53,98 @@ class UserPage extends React.Component {
             })
         });
     };
-    toggleBlockModal = () => {
-        this.setState({
-            blockModal: !this.state.blockModal
-        });
-    }
-    toggleSuspendModal = () => {
-        this.setState({
-            suspendModal: !this.state.suspendModal
-        });
-    }
+    action = rows => <>
+        <MDBBtn size={"sm"} gradient={"frozen-dreams"} onClick={() => {
+            swal.fire({
+                title: `Apakah anda yakin akan ${rows.status !== 1 ? "block" : "unblock"} ${rows.username}?`,
+                text: `Anda bisa ${rows.status !== 1 ? "unblock" : "block"} ${rows.username} kembali`,
+                type: 'warning',
+                showCancelButton: true,
+                confirmButtonText: `Ya, ${rows.status !== 1 ? "Block" : "Unblock"} saja!`,
+                cancelButtonText: 'Batalkan',
+                reverseButtons: true
+            }).then(res => {
+                if (res.value) {
+                    Axios.post(`${api_url}blockUsers`, {
+                        token: this.props.token,
+                        id: rows._id,
+                        status: rows.status
+                    }).then(res => {
+                        swal.fire(
+                            `Sukses! User ${rows.username} telah di block`,
+                            '',
+                            'success'
+                        );
+                        this.refreshTable()
+                    }).catch(err => {
+                        if (err.status == 419) {
+                            toast.error("Session Expired");
+                            this.props.history.push('/')
+                        }
+                        console.log(err)
+                    })
+                }
+            })
+        }}> {rows.status == 1 ? "unblock" : "block"} </MDBBtn>
+        <MDBBtn size={"sm"} gradient={"sunny-morning"} onClick={() => {
+            this.setState({
+                modal: true,
+                suspendName: rows.username,
+                suspendId: rows._id
+            })
+        }}> {rows.status == 2 ? "unsuspend" : "suspend"}</MDBBtn>
+    </>;
+
+    changeSuspendTime = date => {
+        this.setState({suspendTime: date})
+    };
+
+    toggle = () => this.setState({
+        modal: !this.state.modal,
+        suspendName: this.state.modal ? this.state.suspendName : "",
+        suspendId: this.state.modal ? this.state.suspendId : "",
+        time: this.state.modal ? this.state.time : "",
+    });
+
+    suspendUser = () => {
+        Axios.post(`${api_url}suspendUser`, {
+            token: this.props.token,
+            user: this.state.suspendId,
+            time: this.state.suspendTime
+        }).then(res => {
+            swal.fire(`Sukses! User ${this.state.suspendName} telah di suspend!`, '', 'success');
+            this.setState({
+                suspendName: "",
+                suspendId: "",
+                time: "",
+                modal: false
+            },() => this.refreshTable())
+        }).catch(err => {
+            if(err.response.status == 419){
+                toast.error("Session Expired")
+            }
+        })
+    };
 
     render() {
         return (
             <MDBCard>
-                <MDBContainer>
-                    <MDBBtn onClick={this.toggleBlockModal}>Modal</MDBBtn>
-                    <MDBModal isOpen={this.state.blockModal} toggle={this.toggleBlockModal}>
-                        <MDBModalHeader toggle={this.toggleBlockModal}>Block Users {this.state.username} ?</MDBModalHeader>
-                        <MDBModalBody>
-                            (...)
-                        </MDBModalBody>
-                        <MDBModalFooter>
-                            <MDBBtn color="secondary" onClick={this.toggleBlockModal}>Close</MDBBtn>
-                            <MDBBtn color="primary">Save changes</MDBBtn>
-                        </MDBModalFooter>
-                    </MDBModal>
-                </MDBContainer>
                 <MDBCardBody>
                     <MDBCardTitle>Users Data</MDBCardTitle>
+                    <MDBModal isOpen={this.state.modal} toggle={this.toggle}>
+                        <MDBModalHeader toggle={this.toggle}>Suspend {this.state.suspendName}</MDBModalHeader>
+                        <MDBModalBody>
+                            <DatePicker
+                                format={"d MMM y"}
+                                value={this.state.suspendTime}
+                                onChange={this.changeSuspendTime}
+                            />
+                        </MDBModalBody>
+                        <MDBModalFooter>
+                            <MDBBtn color="secondary" onClick={this.toggle}>Close</MDBBtn>
+                            <MDBBtn color="primary" onClick={this.suspendUser}>Save changes</MDBBtn>
+                        </MDBModalFooter>
+                    </MDBModal>
                     <Datatable
                         columns={[
                             {
@@ -98,10 +173,7 @@ class UserPage extends React.Component {
                                 name: 'Action',
                                 selector: '_id',
                                 width: "300px",
-                                cell: rows => <>
-                                    <MDBBtn size={"sm"} gradient={"frozen-dreams"} onClick={() => this.setState({blockModal:true,username: rows.username,id: rows._id})}>Block</MDBBtn>
-                                    <MDBBtn size={"sm"} gradient={"sunny-morning"}>Suspend</MDBBtn>
-                                </>
+                                cell: this.action
                             },
                         ]}
                         data={this.state.data}
@@ -121,7 +193,6 @@ class UserPage extends React.Component {
                         }
                         pagination
                     />
-                    {/*<MDBDataTable data={this.state.data} hover autoWidth responsive/>*/}
                 </MDBCardBody>
             </MDBCard>
         );

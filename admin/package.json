@@ -9,6 +9,7 @@
     "node-sass": "^4.12.0",
     "react": "^16.9.0",
     "react-data-table-component": "^3.5.0",
+    "react-date-picker": "^7.8.2",
     "react-dom": "^16.9.0",
     "react-redux": "^7.1.1",
     "react-router-dom": "^5.0.1",
@@ -17,7 +18,9 @@
     "redux": "^4.0.4",
     "redux-thunk": "^2.3.0",
     "socket.io-client": "^2.2.0",
-    "styled-components": "^4.3.2"
+    "styled-components": "^4.3.2",
+    "sweetalert2": "^8.17.6",
+    "sweetalert2-react-content": "^1.1.0"
   },
   "scripts": {
     "start": "set PORT=3002 && react-scripts start",

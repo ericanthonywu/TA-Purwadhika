@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const user = model.user;
 const jwt = require("jsonwebtoken");
 const nodeMailer = require("nodemailer");
+const moment = require('moment');
 
 exports.login = (req, res) => {
     const {password, email} = req.body;
@@ -24,59 +25,114 @@ exports.login = (req, res) => {
                 });
                 return;
             }
-            bcrypt.compare(password, data.password, (err, check) => {
-                if (err) {
-                    res.status(500).json({
-                        error: err
-                    });
-                    return;
-                }
-                if (check) {
-                    if (data.email_st == 1) {
-                        jwt.sign(
-                            {
-                                id: data._id,
-                                username: data.username,
-                                email: email,
-                                profilepicture: data.profilepicture
-                            },
-                            "ysn852jd48",
-                            {expiresIn: "100000h"},
-                            (err, token) => {
-                                if (err) {
-                                    res.status(500).json({error: err});
-                                } else {
-                                    res.status(200).json({
-                                        _token: token,
-                                        username: data.username,
-                                        _id: data._id,
-                                        profile_picture: data.profilepicture
-                                    });
-                                }
-
+            switch (data.status) {
+                case 1:
+                    res.status(401).json({msg: "You've Been Blocked!"});
+                    break;
+                case 2:
+                    if(!moment.now().isAfter(data.suspendTime)){
+                        res.status(401).json({msg: "Your account has been suspended for a period time"});
+                    }else {
+                        bcrypt.compare(password, data.password, (err, check) => {
+                            if (err) {
+                                res.status(500).json({
+                                    error: err
+                                });
+                                return;
                             }
-                        );
-                        return;
+                            if (check) {
+                                if (data.email_st == 1) {
+                                    jwt.sign(
+                                        {
+                                            id: data._id,
+                                            username: data.username,
+                                            email: email,
+                                            profilepicture: data.profilepicture
+                                        },
+                                        "ysn852jd48",
+                                        {expiresIn: "100000h"},
+                                        (err, token) => {
+                                            if (err) {
+                                                res.status(500).json({error: err});
+                                            } else {
+                                                res.status(200).json({
+                                                    _token: token,
+                                                    username: data.username,
+                                                    _id: data._id,
+                                                    profile_picture: data.profilepicture
+                                                });
+                                            }
+
+                                        }
+                                    );
+                                    return;
+                                }
+                                res.status(401).json({
+                                    message: "Please Verify Your Email"
+                                });
+                                return;
+                            }
+                            res.status(401).json({
+                                message: "Password Incorrect"
+                            })
+                        })
                     }
-                    res.status(401).json({
-                        message: "Please Verify Your Email"
-                    });
-                    return;
-                }
-                res.status(401).json({
-                    message: "Password Incorrect"
-                })
-            })
+                    break
+                default:
+                    bcrypt.compare(password, data.password, (err, check) => {
+                        if (err) {
+                            res.status(500).json({
+                                error: err
+                            });
+                            return;
+                        }
+                        if (check) {
+                            if (data.email_st == 1) {
+                                jwt.sign(
+                                    {
+                                        id: data._id,
+                                        username: data.username,
+                                        email: email,
+                                        profilepicture: data.profilepicture
+                                    },
+                                    "ysn852jd48",
+                                    {expiresIn: "100000h"},
+                                    (err, token) => {
+                                        if (err) {
+                                            res.status(500).json({error: err});
+                                        } else {
+                                            res.status(200).json({
+                                                _token: token,
+                                                username: data.username,
+                                                _id: data._id,
+                                                profile_picture: data.profilepicture
+                                            });
+                                        }
+
+                                    }
+                                );
+                                return;
+                            }
+                            res.status(401).json({
+                                message: "Please Verify Your Email"
+                            });
+                            return;
+                        }
+                        res.status(401).json({
+                            message: "Password Incorrect"
+                        })
+                    })
+            }
         })
     }
 };
 
 function makeid(length) {
-    var result = "";
-    var characters =
+    let result = "";
+    const characters =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    var charactersLength = characters.length;
-    for (var i = 0; i < length; i++) {
+    const charactersLength = characters.length;
+    for (let i = 0; i < length; i++) {
         result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
     return result;
@@ -87,11 +143,7 @@ exports.register =  (req, res) => {
     if (!username || !password || !email) {
         res.status(401).json({
             error: "Username or Password or Email is empty",
-            debug: {
-                username: username,
-                password: password,
-                email: email
-            }
+            debug: req.body
         });
     } else {
         bcrypt.genSalt(10, (err, salt) => {

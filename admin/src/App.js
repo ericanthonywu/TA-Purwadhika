@@ -20,6 +20,7 @@ import {
     MDBNavItem,
     MDBNavLink
 } from "mdbreact";
+import PostPage from "./views/PostPage";
 
 class App extends React.Component {
     state = {
@@ -158,6 +159,7 @@ class App extends React.Component {
                                         <>
                                             <Route path={'/dashboard'} exact component={DashboardPage}/>
                                             <Route path={'/user'} exact component={UserPage}/>
+                                            <Route path={'/post'} exact component={PostPage}/>
                                         </>
                                         :
                                         null

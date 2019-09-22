@@ -21,6 +21,8 @@ const userSchema = new mongoose.Schema({
     follower: [{type: mongoose.Schema.Types.ObjectId, ref: 'user'}],
     following: [{type: mongoose.Schema.Types.ObjectId, ref: 'user'}],
     bio: {type: String},
+    status: {type: Number, default:0},
+    suspendTime: {type: Date},
     notification: [{
         id: {type: mongoose.Schema.Types.ObjectId},
         message: {type: String, required: true},
@@ -61,7 +63,7 @@ const postSchema = new mongoose.Schema({
     caption: {type: String},
     user: {type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true},
     like: [{type: mongoose.Schema.Types.ObjectId, ref: 'user'}],
-    status: {type: Number, default: 0}
+    ban: {type: Boolean, default: false}
 }, {timestamps: true}).plugin(elastic_search, {
     hosts: [
         'localhost:9200'
