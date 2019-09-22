@@ -12,7 +12,7 @@ import {
     MDBRow
 } from "mdbreact";
 import {Link} from "react-router-dom";
-import {toast, ToastContainer} from 'react-toastify';
+import {toast} from 'react-toastify';
 import axios from "axios"
 import {connect} from "react-redux";
 import {login} from "../redux/actions";

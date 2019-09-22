@@ -27,11 +27,11 @@ exports.login = (req, res) => {
             }
             switch (data.status) {
                 case 1:
-                    res.status(401).json({msg: "You've Been Blocked!"});
+                    res.status(401).json({message: "You've Been Blocked!"});
                     break;
                 case 2:
                     if(!moment.now().isAfter(data.suspendTime)){
-                        res.status(401).json({msg: "Your account has been suspended for a period time"});
+                        res.status(401).json({message: "Your account has been suspended for a period time"});
                     }else {
                         bcrypt.compare(password, data.password, (err, check) => {
                             if (err) {

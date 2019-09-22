@@ -151,17 +151,22 @@ class App extends Component {
                 }
             });
             socket.on('block', data => {
-                if (data.to == localStorage.getItem('_id')) {
-                    toast.error("Your account has been blocked");
-                    this.props.logout();
-                    this.props.history.push('/')
-                }
+                // alert(data.to == localStorage.getItem('_id'))
+                setTimeout(() => {
+                    if (data.to == localStorage.getItem('_id')) {
+                        toast.error("Your account has been blocked");
+                        this.props.logout();
+                        this.props.history.push('/')
+                    }
+                })
             });
             socket.on('suspend', data => {
-                if (data.to == localStorage.getItem('_id')) {
-                    toast.error("Your account has been suspended");
-                    this.props.logout()
-                }
+                setTimeout(() => {
+                    if (data.to == localStorage.getItem('_id')) {
+                        toast.error("Your account has been suspended");
+                        this.props.logout()
+                    }
+                })
             })
 
         } else {

@@ -71,7 +71,7 @@ class UserPage extends React.Component {
                         status: rows.status
                     }).then(res => {
                         swal.fire(
-                            `Sukses! User ${rows.username} telah di block`,
+                            `Sukses! User ${rows.username} telah di ${rows.status !== 1 ? "Block" : "Unblock"}`,
                             '',
                             'success'
                         );
