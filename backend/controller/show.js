@@ -5,7 +5,7 @@ const model = require('../model');
 const {user: User, post: Post, chat: Chat} = model;
 
 exports.profile = (req, res) => {
-    User.findOne({username: req.body.username, email_st: 1}).populate('follower').populate('following').exec()
+    User.findOne({username: req.body.username, email_st: 1}).populate('follower').populate('following')
         .then(data => {
             if (data) {
                 Post.find({user: data._id}, [], {
@@ -13,10 +13,10 @@ exports.profile = (req, res) => {
                         createdAt: -1 //Sort by Date Added DESC
                     }
                 })
-                    .populate("user")
-                    .populate("comments.user")
-                    .populate("comments.like")
-                    .populate('like')
+                    .populate("user","username profilepicture")
+                    .populate("comments.user","username profilepicture")
+                    .populate("comments.like","username profilepicture")
+                    .populate('like',"username profilepicture")
                     .exec()
                     .then(post => {
                         res.status(200).json({
@@ -43,17 +43,7 @@ exports.profile = (req, res) => {
 
 };
 exports.showProfile = (req, res) => {
-    User.findById(res.userdata.id).exec((err, data) => {
-        if (err) {
-            res.status(500).json({
-                err: err
-            })
-        } else {
-            res.status(200).json({
-                data: data
-            })
-        }
-    })
+    User.findById(res.userdata.id).select("email nickname bio").then(data => res.status(200).json({data: data}))
 };
 
 exports.searchUser = (req, res) => {
@@ -113,7 +103,7 @@ exports.updateProfile = (req, res) => {
     }
     User.findByIdAndUpdate(res.userdata.id, updatedData, {
         'new': true
-    }, (err, data) => {
+    }, err => {
         if (err) {
             res.status(500).json({
                 err: err
@@ -190,7 +180,7 @@ exports.dashboard = (req, res) => {
             sort: {
                 createdAt: -1 //Sort by Date Added DESC
             }
-        }).populate("user").populate("comments.user").populate("comments.like").populate('like').exec((err, post) => {
+        }).populate("user","username profilepicture").populate("comments.user","username profilepicture").populate("comments.like","username profilepicture").populate('like',"username profilepicture").exec((err, post) => {
             if (err) {
                 return res.status(500).json({
                     err: err
@@ -227,7 +217,7 @@ exports.togglelike = (req, res) => {
                         new: true
                     }, err => {
                         const {io} = req;
-                        User.findById(data.user, (err, user) => {
+                        User.findById(data.user).select("username").then(user => {
                             io.sockets.emit('newNotifications', {
                                 message: `like your posts`,
                                 post: data,
@@ -250,9 +240,8 @@ exports.togglelike = (req, res) => {
                     like: res.userdata.id
                 }
             }, {}, err => {
-                res.status(200).json({
+                res.status(err ? 500 : 200).json(err ? {err: err} : {
                     message: "success",
-                    err: err
                 });
             });
             break;
@@ -276,8 +265,7 @@ exports.comments = (req, res) => {
                 err: err
             })
         } else {
-            Post.findById(req.body.id, {}, {}, (err, data) => {
-                if (err) console.error(err);
+            Post.findById(req.body.id).select("user").then(data => {
                 if (data.user != res.userdata.id) {
                     User.findByIdAndUpdate(data.user, {
                         $push: {
@@ -290,10 +278,9 @@ exports.comments = (req, res) => {
                                 "$position": 0
                             }
                         }
-                    }, {'new': true}).exec(err => {
-                        if (err) console.error(err);
+                    }, {'new': true}).then(() => {
                         const {io} = req;
-                        User.findById(data.user, (err, user) => {
+                        User.findById(data.user).select("username").then(user => {
                             io.sockets.emit('newNotifications', {
                                 message: `comment on your posts`,
                                 post: data,
@@ -310,7 +297,7 @@ exports.comments = (req, res) => {
                         User.findOne({
                             username: o.replace("@", ""),
                             email_st: 1
-                        }, (err, userTagged) => {
+                        }).select("username").then(userTagged => {
                             if (userTagged && (res.userdata.id != userTagged._id)) {
                                 User.findByIdAndUpdate(userTagged._id, {
                                     $push: {
@@ -323,8 +310,7 @@ exports.comments = (req, res) => {
                                             "$position": 0
                                         }
                                     }
-                                }, {'new': true}).exec(err => {
-                                    if (err) console.error(err);
+                                }, {'new': true}).then(() => {
                                     const {io} = req;
                                     io.sockets.emit('newNotifications', {
                                         message: `mentioned you in comments`,
@@ -343,7 +329,6 @@ exports.comments = (req, res) => {
                     id: data.comments[data.comments.length - 1]._id
                 })
             })
-
         }
     })
 };
@@ -363,7 +348,7 @@ exports.toogleCommentLike = (req, res) => {
                         err: err
                     })
                 } else {
-                    Post.findById(req.body.postid).populate("comments.user").exec((err, data) => {
+                    Post.findById(req.body.postid).populate("comments.user","username profilepicture").then(data => {
                         const userCommentData = data.comments.filter(o => {
                             return o._id == req.body.id
                         })[0].user;
@@ -380,7 +365,7 @@ exports.toogleCommentLike = (req, res) => {
                                     },
 
                                 }
-                            }, {'new': true}).exec(err => {
+                            }, {'new': true}).then(() => {
                                 const {io} = req;
                                 io.sockets.emit('newNotifications', {
                                     message: `like your comment `,
@@ -426,7 +411,7 @@ exports.toogleCommentLike = (req, res) => {
     }
 };
 exports.showPost = (req, res) => {
-    Post.findById(req.body.id).populate("user").populate("comments.user").populate("comments.like").populate('like').exec().then(data => {
+    Post.findById(req.body.id).populate("user").populate("comments.user","username profilepicture").populate("comments.like","username profilepicture").populate('like','username profilepicture').then(data => {
         res.status(200).json({
             post: data
         })
@@ -469,7 +454,7 @@ exports.follow = (req, res) => {
                         },
                     }
                 }, {'new': true}, err => {
-                    User.findById(req.body.userTarget, (err, data) => {
+                    User.findById(req.body.userTarget).select("username").then(data => {
                         io.sockets.emit('newNotifications', {
                             message: `started following you`,
                             user: res.userdata,
@@ -513,10 +498,7 @@ exports.unfollow = (req, res) => {
     })
 };
 exports.getNotification = (req, res) => {
-    User.findById(res.userdata.id).select('notification').populate('notification.post', 'image').populate('notification.user', {
-        username: 1,
-        profilepicture: 1
-    })
+    User.findById(res.userdata.id).select('notification').populate('notification.post', 'image').populate('notification.user', "username profilepicture")
         .exec((err, data) => {
             if (err) {
                 res.status(500).json({
@@ -545,7 +527,7 @@ exports.readNotif = (req, res) => {
     })
 };
 exports.showChat = (req, res) => {
-    User.findOne({username: req.body.username}, (err, data) => {
+    User.findOne({username: req.body.username}).then(data => {
         if (data) {
             Chat.findOne({
                 $and: [{
@@ -553,7 +535,7 @@ exports.showChat = (req, res) => {
                 }, {
                     participans: res.userdata.id,
                 }]
-            }).populate("message.sender").populate("participans").exec((err, chat) => {
+            }).populate("message.sender","username").populate("participans","username").exec((err, chat) => {
                 res.status(err ? 500 : 200).json(err ? {err: err} : {
                     data: chat
                 })
@@ -565,15 +547,15 @@ exports.showChat = (req, res) => {
 };
 exports.sendChat = (req, res) => {
     const {io} = req;
-    User.findOne({username: req.body.username}, (err, data) => {
+    User.findOne({username: req.body.username}).select("username").then(data => {
         if (data) {
-            Chat.findOne({
+            Chat.countDocuments({
                 $and: [{
                     participans: data._id,
                 }, {
                     participans: res.userdata.id,
                 }]
-            }, (err, chatcheck) => {
+            }).then(chatcheck => {
                 if (chatcheck) {
                     Chat.findOneAndUpdate({
                         $and: [{
@@ -632,7 +614,7 @@ exports.sendChat = (req, res) => {
 exports.getChat = (req, res) => {
     Chat.find({
         participans: res.userdata.id
-    }).populate("participans").exec((err, data) => {
+    }).populate("participans","username").exec((err, data) => {
         res.status(err ? 500 : 200).json(err ? {err: err} : {
             data: data
         })
@@ -641,7 +623,7 @@ exports.getChat = (req, res) => {
 exports.updateChat = (req, res) => {
     const {io} = req;
     console.log(req.body);
-    User.findOne({username: req.body.username}, (err, data) => {
+    User.findOne({username: req.body.username}).select("username").then(data => {
         Chat.findOneAndUpdate({
             $and: [{
                 participans: data._id,

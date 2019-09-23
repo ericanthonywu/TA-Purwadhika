@@ -153,7 +153,7 @@ class App extends Component {
             socket.on('block', data => {
                 // alert(data.to == localStorage.getItem('_id'))
                 setTimeout(() => {
-                    if (data.to == localStorage.getItem('_id')) {
+                    if (data.to == (this.props.userid || localStorage.getItem('_id'))) {
                         toast.error("Your account has been blocked");
                         this.props.logout();
                         this.props.history.push('/')
