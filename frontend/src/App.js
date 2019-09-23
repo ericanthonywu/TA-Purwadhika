@@ -136,7 +136,7 @@ class App extends Component {
                 })
             });
             socket.on('newNotifications', notifications => {
-                if (notifications.to.username == localStorage.getItem('username')) {
+                if (notifications.to.username == (this.props.username || localStorage.getItem('username'))) {
                     const tempNotifications = this.state.notifications;
                     tempNotifications.unshift(notifications);
                     this.setState({
@@ -292,15 +292,28 @@ class App extends Component {
                                                             <div className={"notif-item pointer"}
                                                                  style={!o.read ? {backgroundColor: "lightgrey"} : {}}>
                                                                 <div style={{float: "left"}}>
-                                                                    <a href={o.post ? base_url + "post/" + o.post._id : base_url + "profile/" + o.user.username}
-                                                                       target="_blank" style={{padding: 0}}>
-                                                                        <p className={"pointer"}
-                                                                           style={{fontWeight: 600}}>{o.user.username}</p>
-                                                                        <p className={"pointer"}
-                                                                           style={{fontWeight: 600}}>{o.message} <span
-                                                                            style={{fontWeight: "lighter"}}>{moment(o.time).fromNow()}</span>
-                                                                        </p>
-                                                                    </a>
+                                                                    {
+                                                                        o.report
+                                                                            ?
+                                                                            <a style={{padding: 0}}>
+                                                                                <p className={"pointer"}
+                                                                                   style={{fontWeight: 600}}>Warning</p>
+                                                                                <p className={"pointer"}
+                                                                                   style={{fontWeight: 600}}>{o.message} <span
+                                                                                    style={{fontWeight: "lighter"}}>{moment(o.time).fromNow()}</span>
+                                                                                </p>
+                                                                            </a>
+                                                                            :
+                                                                            <a href={o.post ? base_url + "post/" + o.post._id : base_url + "profile/" + o.user.username}
+                                                                               target="_blank" style={{padding: 0}}>
+                                                                                <p className={"pointer"}
+                                                                                   style={{fontWeight: 600}}>{o.user.username}</p>
+                                                                                <p className={"pointer"}
+                                                                                   style={{fontWeight: 600}}>{o.message} <span
+                                                                                    style={{fontWeight: "lighter"}}>{moment(o.time).fromNow()}</span>
+                                                                                </p>
+                                                                            </a>
+                                                                    }
                                                                 </div>
                                                                 <div style={{
                                                                     float: "right",

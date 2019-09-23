@@ -8,7 +8,7 @@ exports.profile = (req, res) => {
     User.findOne({username: req.body.username, email_st: 1}).populate('follower').populate('following')
         .then(data => {
             if (data) {
-                Post.find({user: data._id}, [], {
+                Post.find({user: data._id,ban: false}, [], {
                     sort: {
                         createdAt: -1 //Sort by Date Added DESC
                     }
@@ -17,7 +17,6 @@ exports.profile = (req, res) => {
                     .populate("comments.user","username profilepicture")
                     .populate("comments.like","username profilepicture")
                     .populate('like',"username profilepicture")
-                    .exec()
                     .then(post => {
                         res.status(200).json({
                             user: data,
@@ -173,8 +172,9 @@ exports.dashboard = (req, res) => {
             return res.status(500).json({err: err});
         }
         Post.find(res.userdata ? {
-            user: [...data.following, res.userdata.id]
-        } : {}, [], {
+            user: [...data.following, res.userdata.id],
+            ban: false
+        } : {ban: false}, [], {
             skip: offset, // Starting Row
             limit: 10, // Ending Row
             sort: {
@@ -265,7 +265,7 @@ exports.comments = (req, res) => {
                 err: err
             })
         } else {
-            Post.findById(req.body.id).select("user").then(data => {
+            Post.findById(req.body.id).select("user comments image").then(data => {
                 if (data.user != res.userdata.id) {
                     User.findByIdAndUpdate(data.user, {
                         $push: {
@@ -411,10 +411,14 @@ exports.toogleCommentLike = (req, res) => {
     }
 };
 exports.showPost = (req, res) => {
-    Post.findById(req.body.id).populate("user").populate("comments.user","username profilepicture").populate("comments.like","username profilepicture").populate('like','username profilepicture').then(data => {
-        res.status(200).json({
-            post: data
-        })
+    Post.findById(req.body.id).populate("user","username profilepicture").populate("comments.user","username profilepicture").populate("comments.like","username profilepicture").populate('like','username profilepicture').then(data => {
+        if(!data.ban) {
+            res.status(200).json({
+                post: data
+            })
+        }else{
+            res.status(404).json({})
+        }
     }).catch(err => {
         res.status(500).json({
             err: err

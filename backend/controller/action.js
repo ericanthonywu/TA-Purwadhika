@@ -33,12 +33,27 @@ exports.hidePost = (req, res) => {
     }).then(() => {
         Post.findById(req.body.post).select("user").populate("user","username").then(post => {
             const {io} = req;
-            io.sockets.emit('newNotifications', {
-                message: `post has been removed`,
-                time: Date.now(),
-                to: post.user,
-                type: 'tag comment post'
-            });
+            if(req.body.ban) {
+                User.findByIdAndUpdate(post.user,{
+                    $push: {
+                        $each: [{
+                            message: `Post has been removed`,
+                            post: req.body.id,
+                            report: true
+                        }],
+                        "$position": 0
+                    }
+                });
+                io.sockets.emit('newNotifications', {
+                    message: `post has been removed`,
+                    time: Date.now(),
+                    to: post.user,
+                    user: {
+                        username: res.userdata.username
+                    },
+                    type: 'tag comment post'
+                });
+            }
         });
         res.status(200).json({})
     }).catch(err => res.status(500).json({err: err}))
