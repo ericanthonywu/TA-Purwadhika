@@ -108,7 +108,6 @@ exports.login = (req, res) => {
                                                 profile_picture: data.profilepicture
                                             });
                                         }
-
                                     }
                                 );
                                 return;

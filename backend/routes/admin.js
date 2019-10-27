@@ -18,4 +18,6 @@ router.post('/suspendUser', authMiddleware.authcheck, actionController.suspendUs
 router.post('/posts', authMiddleware.authcheck, tableController.post);
 router.post('/hidePost', authMiddleware.authcheck, actionController.hidePost);
 
+router.post('/report', authMiddleware.authcheck, tableController.report);
+
 module.exports = router;

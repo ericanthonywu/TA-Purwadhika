@@ -11,6 +11,7 @@ import {
     MDBDropdownMenu,
     MDBDropdownToggle,
     MDBIcon, MDBModal, MDBModalBody, MDBModalFooter, MDBModalHeader,
+    MDBInput,
     MDBRow,
     MDBView
 } from "mdbreact";
@@ -39,7 +40,10 @@ class Post extends React.Component {
             likeslist: props.likeslist,
             searchValue: null,
             search: null,
-            searchLoading: false
+            searchLoading: false,
+            reportModal: false,
+            radio: 0,
+            reportOther: ""
         };
     }
 
@@ -100,9 +104,7 @@ class Post extends React.Component {
                     console.log(err);
                     this.setState({
                         postlikes: this.state.postlikes - 1,
-                        likeslist: likelist.filter(o => {
-                            return o === this.props.id
-                        })
+                        likeslist: likelist.filter(o => o === this.props.id)
                     })
                 })
             }
@@ -198,10 +200,187 @@ class Post extends React.Component {
             showsticker: !this.state.showsticker
         })
     };
+    report = e => this.setState({reportModal: true});
+
+    toggleRepost = () => this.setState({reportModal: !this.state.reportModal});
+
+    onClick = nr => {
+        this.setState({
+            radio: nr
+        });
+    };
+    sendReport = e => {
+        if (this.state.radio || (this.state.radio === 11 && !this.state.reportOther)) {
+            let radioMeans = '';
+            switch (this.state.radio) {
+                case 1:
+                    radioMeans = "Its spam or inappropriate";
+                    break;
+                case 2:
+                    radioMeans = "Nudity or pornography";
+                    break;
+                case 3:
+                    radioMeans = "Hate speech or symbols";
+                    break;
+                case 4:
+                    radioMeans = "Violence or threat violence";
+                    break;
+                case 5:
+                    radioMeans = "Sale or promotion of firearms";
+                    break;
+                case 6:
+                    radioMeans = "Sale or promotion of drugs";
+                    break;
+                case 7:
+                    radioMeans = "Harassment or bullying";
+                    break;
+                case 8:
+                    radioMeans = "Intellectual property violation";
+                    break;
+                case 9:
+                    radioMeans = "Self injury";
+                    break;
+                case 10:
+                    radioMeans = "False Information";
+                    break;
+                case 11:
+                    radioMeans = this.state.reportOther;
+                    break
+            }
+            axios.post(`${api_url}reportPost`, {
+                token: this.props.token || localStorage.getItem('token'),
+                report: radioMeans,
+                postId: this.props._id
+            }).then(r => toast.success("Post reported! ")).catch(err => toast.error("You already report this post"))
+            this.setState({
+                reportModal: false
+            })
+        }
+    };
 
     render() {
         return (
             <div style={this.props.style}>
+                <MDBModal isOpen={this.state.reportModal} toggle={() => this.toggleRepost()}>
+                    <MDBModalHeader toggle={this.toggle}>Report Post</MDBModalHeader>
+                    <MDBModalBody className={"text-left"}>
+                        <MDBContainer>
+                            What are your reason for reporting this post?
+                            <div className="custom-control custom-radio">
+                                <input type="radio" className="custom-control-input" id="ck1"
+                                       name="report" onClick={this.onClick(1)}
+                                       checked={this.state.radio === 1 ? "checked" : ""}/>
+                                <label className="custom-control-label" htmlFor="ck1">
+                                    Its spam or inappropriate
+                                </label>
+                            </div>
+                            <div className="custom-control custom-radio">
+                                <input type="radio" className="custom-control-input" id="ck2"
+                                       name="report" onClick={this.onClick(2)}
+                                       checked={this.state.radio === 2 ? "checked" : ""}/>
+                                <label className="custom-control-label" htmlFor="ck2">
+                                    Nudity or pornography
+                                </label>
+                            </div>
+                            <div className="custom-control custom-radio">
+                                <input type="radio" className="custom-control-input" id="ck3"
+                                       name="report" onClick={this.onClick(3)}
+                                       checked={this.state.radio === 3 ? "checked" : ""}/>
+                                <label className="custom-control-label" htmlFor="ck3">
+                                    Hate speech or symbols
+                                </label>
+                            </div>
+                            <div className="custom-control custom-radio">
+                                <input type="radio" className="custom-control-input" id="ck4"
+                                       name="report" onClick={this.onClick(4)}
+                                       checked={this.state.radio === 4 ? "checked" : ""}/>
+                                <label className="custom-control-label" htmlFor="ck4">
+                                    Violence or threat violence
+                                </label>
+                            </div>
+                            <div className="custom-control custom-radio">
+                                <input type="radio" className="custom-control-input" id="ck5"
+                                       name="report" onClick={this.onClick(5)}
+                                       checked={this.state.radio === 5 ? "checked" : ""}/>
+                                <label className="custom-control-label" htmlFor="ck5">
+                                    Sale or promotion of firearms
+                                </label>
+                            </div>
+                            <div className="custom-control custom-radio">
+                                <input type="radio" className="custom-control-input" id="ck6"
+                                       name="report" onClick={this.onClick(6)}
+                                       checked={this.state.radio === 6 ? "checked" : ""}/>
+                                <label className="custom-control-label" htmlFor="ck6">
+                                    Sale or promotion of drugs
+                                </label>
+                            </div>
+                            <div className="custom-control custom-radio">
+                                <input type="radio" className="custom-control-input" id="ck7"
+                                       name="report" onClick={this.onClick(7)}
+                                       checked={this.state.radio === 7 ? "checked" : ""}/>
+                                <label className="custom-control-label" htmlFor="ck7">
+                                    Harassment or bullying
+                                </label>
+                            </div>
+                            <div className="custom-control custom-radio">
+                                <input type="radio" className="custom-control-input" id="ck8"
+                                       name="report" onClick={this.onClick(8)}
+                                       checked={this.state.radio === 8 ? "checked" : ""}/>
+                                <label className="custom-control-label" htmlFor="ck8">
+                                    Intellectual property violation
+                                </label>
+                            </div>
+                            <div className="custom-control custom-radio">
+                                <input type="radio" className="custom-control-input" id="ck9"
+                                       name="report" onClick={this.onClick(9)}
+                                       checked={this.state.radio === 9 ? "checked" : ""}/>
+                                <label className="custom-control-label" htmlFor="ck9">
+                                    Self injury
+                                </label>
+                            </div>
+                            <div className="custom-control custom-radio">
+                                <input type="radio" className="custom-control-input" id="ck10"
+                                       name="report" onClick={this.onClick(10)}
+                                       checked={this.state.radio === 10 ? "checked" : ""}/>
+                                <label className="custom-control-label" htmlFor="ck10">
+                                    False Information
+                                </label>
+                            </div>
+                            <div className="custom-control custom-radio">
+                                <input type="radio" className="custom-control-input" id="ck11"
+                                       name="report" onClick={this.onClick(11)}
+                                       checked={this.state.radio === 11 ? "checked" : ""}/>
+                                <label className="custom-control-label" htmlFor="ck11">
+                                    Others
+                                </label>
+                            </div>
+                            {
+                                this.state.radio === 11 ?
+                                    <div className="md-form form-group">
+                                        <div className="md-form">
+                                        <textarea style={{paddingTop: 12}}
+                                                  className={"md-textarea form-control"}
+                                                  onBlur={e => !e.target.value.length && this.refs.report.classList.remove('active')}
+                                                  onFocus={() => this.refs.report.classList.add('active')}
+                                                  id={"report"}
+                                                  onChange={e => this.setState({reportOther: e.target.value})}
+                                                  value={this.state.caption}
+                                        >
+                                                {this.state.reportOther}
+                                            </textarea>
+                                            <label htmlFor="report" ref={"report"}>Spesify Your Report here</label>
+                                        </div>
+                                    </div>
+                                    :
+                                    ""
+                            }
+                        </MDBContainer>
+                    </MDBModalBody>
+                    <MDBModalFooter>
+                        <MDBBtn color="secondary" onClick={() => this.toggleRepost()}>Close</MDBBtn>
+                        <MDBBtn color="primary" onClick={this.sendReport}>Send Report</MDBBtn>
+                    </MDBModalFooter>
+                </MDBModal>
                 <MDBContainer>
                     <MDBRow>
                         <MDBCol size="12" className={"w-100"}>
@@ -218,11 +397,11 @@ class Post extends React.Component {
                             </div>
                             <div className={"float-right con-moreinfo"}>
                                 <MDBDropdown>
-                                    <MDBDropdownToggle caret color="primary">
+                                    <MDBDropdownToggle caret color="primary" className={"more-button"}>
                                         <span className={"more-info"}>More</span>
                                     </MDBDropdownToggle>
                                     <MDBDropdownMenu right basic>
-                                        <MDBDropdownItem>Report</MDBDropdownItem>
+                                        <MDBDropdownItem onClick={this.report}>Report</MDBDropdownItem>
                                         <MDBDropdownItem onClick={async () => {
                                             await navigator.clipboard.writeText(`${window.location.origin}/post/${this.props._id}`);
                                             toast.success('Copied!')

@@ -7,7 +7,7 @@ export const base_url = window.location.origin + "/";
 export const post_url = `${backend_url}uploads/post/`;
 export const profile_url = `${backend_url}uploads/profile_picture/`;
 
-function truncateToDecimals(num, dec = 2) {
+function truncateToDecimals(num, dec) {
     const calcDec = Math.pow(10, dec);
     return Math.trunc(num * calcDec) / calcDec;
 }

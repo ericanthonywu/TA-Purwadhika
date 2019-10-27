@@ -50,28 +50,30 @@ router.post('/checktoken', authController.checktoken);
 router.post('/searchUser', showController.searchUser);
 
 //dashboard route
-router.post('/dashboard',authMiddleware.dashboardcheck,showController.dashboard);
+router.post('/dashboard', authMiddleware.dashboardcheck, showController.dashboard);
 
 //profile route
 router.post('/getprofile', authMiddleware.authcheck, showController.profile);
 router.post('/showProfile', authMiddleware.authcheck, showController.showProfile);
 router.post('/follow', authMiddleware.authcheck, showController.follow);
 router.post('/unfollow', authMiddleware.authcheck, showController.unfollow);
-router.post('/updateProfile',uploadUser.single('file'), authMiddleware.fileauthcheck, showController.updateProfile);
-router.post('/notification',authMiddleware.authcheck,showController.getNotification);
-router.post('/readNotif',authMiddleware.authcheck,showController.readNotif);
+router.post('/updateProfile', uploadUser.single('file'), authMiddleware.fileauthcheck, showController.updateProfile);
+router.post('/notification', authMiddleware.authcheck, showController.getNotification);
+router.post('/readNotif', authMiddleware.authcheck, showController.readNotif);
+router.post('/reportUser', authMiddleware.authcheck, showController.reportUser);
 
 //post route
-router.post('/addpost',uploadPost.array('image', 10), authMiddleware.fileauthcheck, showController.addPost);
-router.post('/tooglelike',authMiddleware.authcheck,showController.togglelike);
-router.post('/comments',authMiddleware.authcheck,showController.comments);
-router.post('/toogleCommentLike',authMiddleware.authcheck,showController.toogleCommentLike);
-router.post('/showPost',showController.showPost);
+router.post('/addpost', uploadPost.array('image', 10), authMiddleware.fileauthcheck, showController.addPost);
+router.post('/tooglelike', authMiddleware.authcheck, showController.togglelike);
+router.post('/comments', authMiddleware.authcheck, showController.comments);
+router.post('/toogleCommentLike', authMiddleware.authcheck, showController.toogleCommentLike);
+router.post('/showPost', showController.showPost);
+router.post('/reportPost', authMiddleware.authcheck, showController.reportPost);
 
 //chat route
-router.post('/sendChat',authMiddleware.authcheck,showController.sendChat);
-router.post('/showChat',authMiddleware.authcheck,showController.showChat);
-router.post('/getChat',authMiddleware.authcheck,showController.getChat);
-router.post('/updateChat',authMiddleware.authcheck,showController.updateChat);
+router.post('/sendChat', authMiddleware.authcheck, showController.sendChat);
+router.post('/showChat', authMiddleware.authcheck, showController.showChat);
+router.post('/getChat', authMiddleware.authcheck, showController.getChat);
+router.post('/updateChat', authMiddleware.authcheck, showController.updateChat);
 
 module.exports = router;

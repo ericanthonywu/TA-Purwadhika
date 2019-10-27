@@ -21,8 +21,12 @@ const userSchema = new mongoose.Schema({
     follower: [{type: mongoose.Schema.Types.ObjectId, ref: 'user'}],
     following: [{type: mongoose.Schema.Types.ObjectId, ref: 'user'}],
     bio: {type: String},
-    status: {type: Number, default:0},
+    status: {type: Number, default: 0},
     suspendTime: {type: Date},
+    report: [{
+        user: {type: mongoose.Schema.Types.ObjectId, ref: 'user'},
+        report: {type: String}
+    }],
     notification: [{
         id: {type: mongoose.Schema.Types.ObjectId},
         message: {type: String, required: true},
@@ -63,7 +67,7 @@ const postSchema = new mongoose.Schema({
     caption: {type: String},
     user: {type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true},
     like: [{type: mongoose.Schema.Types.ObjectId, ref: 'user'}],
-    ban: {type: Boolean, default: false}
+    ban: {type: Boolean, default: false},
 }, {timestamps: true}).plugin(elastic_search, {
     hosts: [
         'localhost:9200'
@@ -71,6 +75,15 @@ const postSchema = new mongoose.Schema({
 });
 
 exports.post = mongoose.model('post', postSchema);
+
+const reportSchema = new mongoose.Schema({
+    postId: {type: mongoose.Schema.Types.ObjectId, ref: 'post'},
+    userId: {type: mongoose.Schema.Types.ObjectId, ref: 'user'},
+    reportedBy: {type: mongoose.Schema.Types.ObjectId, ref: 'user'},
+    reason: {type: String}
+})
+
+exports.report = mongoose.model('report',reportSchema);
 
 const chatSchema = new mongoose.Schema({
     participans: [{type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true}],
@@ -86,8 +99,8 @@ exports.chat = mongoose.model('chat', chatSchema);
 
 const adminSchema = new mongoose.Schema({
     username: {type: String, required: true},
-    password: {type: String, required: true,select: false},
+    password: {type: String, required: true, select: false},
     role: {type: Number, required: true},
-},{timestamps: true});
+}, {timestamps: true});
 
-exports.admin = mongoose.model('admin',adminSchema);
+exports.admin = mongoose.model('admin', adminSchema);

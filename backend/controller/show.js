@@ -1,22 +1,19 @@
-//add-on
-const model = require('../model');
-
 //model
-const {user: User, post: Post, chat: Chat} = model;
+const {user: User, post: Post, chat: Chat, report: Report} = require('../model');
 
 exports.profile = (req, res) => {
     User.findOne({username: req.body.username, email_st: 1}).populate('follower').populate('following')
         .then(data => {
             if (data) {
-                Post.find({user: data._id,ban: false}, [], {
+                Post.find({user: data._id, ban: false}, [], {
                     sort: {
                         createdAt: -1 //Sort by Date Added DESC
                     }
                 })
-                    .populate("user","username profilepicture")
-                    .populate("comments.user","username profilepicture")
-                    .populate("comments.like","username profilepicture")
-                    .populate('like',"username profilepicture")
+                    .populate("user", "username profilepicture")
+                    .populate("comments.user", "username profilepicture")
+                    .populate("comments.like", "username profilepicture")
+                    .populate('like', "username profilepicture")
                     .then(post => {
                         res.status(200).json({
                             user: data,
@@ -180,7 +177,7 @@ exports.dashboard = (req, res) => {
             sort: {
                 createdAt: -1 //Sort by Date Added DESC
             }
-        }).populate("user","username profilepicture").populate("comments.user","username profilepicture").populate("comments.like","username profilepicture").populate('like',"username profilepicture").exec((err, post) => {
+        }).populate("user", "username profilepicture").populate("comments.user", "username profilepicture").populate("comments.like", "username profilepicture").populate('like', "username profilepicture").exec((err, post) => {
             if (err) {
                 return res.status(500).json({
                     err: err
@@ -348,7 +345,7 @@ exports.toogleCommentLike = (req, res) => {
                         err: err
                     })
                 } else {
-                    Post.findById(req.body.postid).populate("comments.user","username profilepicture").then(data => {
+                    Post.findById(req.body.postid).populate("comments.user", "username profilepicture").then(data => {
                         const userCommentData = data.comments.filter(o => {
                             return o._id == req.body.id
                         })[0].user;
@@ -411,12 +408,12 @@ exports.toogleCommentLike = (req, res) => {
     }
 };
 exports.showPost = (req, res) => {
-    Post.findById(req.body.id).populate("user","username profilepicture").populate("comments.user","username profilepicture").populate("comments.like","username profilepicture").populate('like','username profilepicture').then(data => {
-        if(!data.ban) {
+    Post.findById(req.body.id).populate("user", "username profilepicture").populate("comments.user", "username profilepicture").populate("comments.like", "username profilepicture").populate('like', 'username profilepicture').then(data => {
+        if (!data.ban) {
             res.status(200).json({
                 post: data
             })
-        }else{
+        } else {
             res.status(404).json({})
         }
     }).catch(err => {
@@ -503,23 +500,21 @@ exports.unfollow = (req, res) => {
 };
 exports.getNotification = (req, res) => {
     User.findById(res.userdata.id).select('notification').populate('notification.post', 'image').populate('notification.user', "username profilepicture")
-        .exec((err, data) => {
-            if (err) {
-                res.status(500).json({
-                    err: err
-                })
-            } else {
-                User.countDocuments({
-                    _id: res.userdata.id,
-                    "notification.read": false
-                }, (err, count) => {
-                    res.status(200).json({
-                        data: data.notification,
-                        unRead: count
-                    })
-                })
-            }
+        .then(data => {
+        User.countDocuments({
+            _id: res.userdata.id,
+            "notification.read": false
+        }, (err, count) => {
+            res.status(200).json({
+                data: data.notification,
+                unRead: count
+            })
         })
+    }).catch(err =>
+        res.status(500).json({
+            err: err
+        })
+    )
 };
 exports.readNotif = (req, res) => {
     User.findOneAndUpdate({_id: res.userdata.id, "notification.read": false}, {
@@ -539,11 +534,9 @@ exports.showChat = (req, res) => {
                 }, {
                     participans: res.userdata.id,
                 }]
-            }).populate("message.sender","username").populate("participans","username").exec((err, chat) => {
-                res.status(err ? 500 : 200).json(err ? {err: err} : {
-                    data: chat
-                })
-            })
+            }).populate("message.sender", "username").populate("participans", "username")
+                .then(chat => res.status(200).json({data: chat}))
+                .catch(err => res.status(500).json(err))
         } else {
             res.status(404).json({err: "user not found"})
         }
@@ -575,7 +568,7 @@ exports.sendChat = (req, res) => {
                             }
                         }
                     }, err => {
-                        res.status(err ? 500 : 200).json(err ? {err: err} : {});
+                        res.status(err ? 500 : 200).json(err || {});
                         if (!err) {
                             io.sockets.emit('newChat', {
                                 to: data,
@@ -618,15 +611,10 @@ exports.sendChat = (req, res) => {
 exports.getChat = (req, res) => {
     Chat.find({
         participans: res.userdata.id
-    }).populate("participans","username").exec((err, data) => {
-        res.status(err ? 500 : 200).json(err ? {err: err} : {
-            data: data
-        })
-    })
+    }).populate("participans", "username").select("message").then(data => res.status(200).json({data:data})).catch(err => res.status(500).json(err))
 };
 exports.updateChat = (req, res) => {
     const {io} = req;
-    console.log(req.body);
     User.findOne({username: req.body.username}).select("username").then(data => {
         Chat.findOneAndUpdate({
             $and: [{
@@ -645,7 +633,43 @@ exports.updateChat = (req, res) => {
                 to: data,
                 from: res.userdata,
             });
-            res.status(err ? 500 : 200).json(err ? {err: err} : {})
+            res.status(err ? 500 : 200).json(err || {})
         })
     });
+};
+
+exports.reportPost = (req, res) => {
+    const {report, postId} = req.body;
+    Report.countDocuments({
+        postId: postId,
+        reportedBy: res.userdata.id
+    }).then(count => {
+        if (count) {
+            res.status(403).json({})
+        } else {
+            new Report({
+                postId: postId,
+                reason: report,
+                reportedBy: res.userdata.id
+            }).save(err => res.status(err ? 500 : 200).json(err || {}))
+        }
+    });
+
+};
+exports.reportUser = (req, res) => {
+    const {report, userId} = req.body;
+    Report.countDocuments({
+        userId: userId,
+        reportedBy: res.userdata.id
+    }).then(count => {
+        if (count) {
+            res.status(403).json({})
+        } else {
+            new Report({
+                userId: userId,
+                reason: report,
+                reportedBy: res.userdata.id
+            }).save(err => res.status(err ? 500 : 200).json(err || {}))
+        }
+    })
 };
