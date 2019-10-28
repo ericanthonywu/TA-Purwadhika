@@ -5,14 +5,14 @@ import {
     MDBCard,
     MDBCardBody,
     MDBCardText,
-    MDBCardTitle,
+    MDBCardTitle, MDBCarousel, MDBCarouselInner, MDBCarouselItem,
     MDBContainer,
     MDBDataTable,
     MDBModal, MDBModalBody, MDBModalFooter,
-    MDBModalHeader
+    MDBModalHeader, MDBView
 } from "mdbreact";
 import Axios from "axios";
-import {api_url, profile_url} from "../global";
+import {api_url, frontend_url, post_url, profile_url} from "../global";
 import Datatable from 'react-data-table-component'
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
@@ -53,25 +53,25 @@ class ReportPage extends React.Component {
             })
         });
     };
-    action = rows => <>
+    action = rows => rows.userId ? <>
         <MDBBtn size={"sm"} gradient={"frozen-dreams"} onClick={() => {
             swal.fire({
-                title: `Apakah anda yakin akan ${rows.status !== 1 ? "block" : "unblock"} ${rows.username}?`,
-                text: `Anda bisa ${rows.status !== 1 ? "unblock" : "block"} ${rows.username} kembali`,
+                title: `Apakah anda yakin akan ${rows.userId.status !== 1 ? "block" : "unblock"} ${rows.userId.username}?`,
+                text: `Anda bisa ${rows.userId.status !== 1 ? "unblock" : "block"} ${rows.userId.username} kembali`,
                 type: 'warning',
                 showCancelButton: true,
-                confirmButtonText: `Ya, ${rows.status !== 1 ? "Block" : "Unblock"} saja!`,
+                confirmButtonText: `Ya, ${rows.userId.status !== 1 ? "Block" : "Unblock"} saja!`,
                 cancelButtonText: 'Batalkan',
                 reverseButtons: true
             }).then(res => {
                 if (res.value) {
                     Axios.post(`${api_url}blockUsers`, {
                         token: this.props.token,
-                        id: rows._id,
-                        status: rows.status
+                        id: rows.userId._id,
+                        status: rows.userId.status
                     }).then(res => {
                         swal.fire(
-                            `Sukses! User ${rows.username} telah di ${rows.status !== 1 ? "Block" : "Unblock"}`,
+                            `Sukses! User ${rows.userId.username} telah di ${rows.userId.status !== 1 ? "Block" : "Unblock"}`,
                             '',
                             'success'
                         );
@@ -85,15 +85,37 @@ class ReportPage extends React.Component {
                     })
                 }
             })
-        }}> {rows.status == 1 ? "unblock" : "block"} </MDBBtn>
+        }}> {rows.userId.status == 1 ? "unblock" : "block"} </MDBBtn>
         <MDBBtn size={"sm"} gradient={"sunny-morning"} onClick={() => {
             this.setState({
                 modal: true,
                 suspendName: rows.username,
                 suspendId: rows._id
             })
-        }}> {rows.status == 2 ? "unsuspend" : "suspend"}</MDBBtn>
-    </>;
+        }}> {rows.userId.status == 2 ? "unsuspend" : "suspend"}</MDBBtn>
+    </> : <MDBBtn onClick={() => {
+        swal.fire({
+            title: `Apakah anda yakin akan ${!rows.postId.ban ? "hide" : "unhide"} post ini?`,
+            text: `Anda bisa ${rows.postId.ban ? "unhide" : "hide"} post ini kembali`,
+            type: 'warning',
+            showCancelButton: true,
+            confirmButtonText: `Ya, ${!rows.postId.ban ? "Hide" : "Unhide"} saja!`,
+            cancelButtonText: 'Batalkan',
+            reverseButtons: true
+        }).then(res => {
+            if (res.value) {
+                Axios.post(`${api_url}hidePost`, {
+                    token: this.props.token,
+                    post: rows.postId._id,
+                    ban: !rows.postId.ban
+                }).then(res => {
+                    console.log(rows);
+                    swal.fire(`Success! Post telah di hide!`, '', 'success');
+                    this.refreshTable()
+                })
+            }
+        })
+    }} color={"red"}>{!rows.postId.ban ? "Hide" : "Unhide"} Posts</MDBBtn>;
 
     changeSuspendTime = date => {
         this.setState({suspendTime: date})
@@ -118,9 +140,9 @@ class ReportPage extends React.Component {
                 suspendId: "",
                 time: "",
                 modal: false
-            },() => this.refreshTable())
+            }, () => this.refreshTable())
         }).catch(err => {
-            if(err.response.status == 419){
+            if (err.response.status == 419) {
                 toast.error("Session Expired")
             }
         })
@@ -154,20 +176,61 @@ class ReportPage extends React.Component {
                                 width: "60px"
                             },
                             {
-                                name: 'Post',
-                                selector: 'profilepicture',
-                                width: "100px",
-                                cell: row => <img width={60} src={profile_url + row.profilepicture} alt=""/>
+                                name: 'Report Type',
+                                selector: 'postId',
+                                sortable: true,
+                                cell: row => row.postId ? "post" : "user"
                             },
                             {
-                                name: 'Email',
-                                selector: 'email',
-                                sortable: true,
+                                name: 'Report',
+                                selector: 'postId',
+                                cell: row => row.postId ? <div style={{display: "block"}}><MDBCarousel
+                                    activeItem={1}
+                                    length={row.postId.image.length}
+                                    showControls={row.postId.image.length > 1}
+                                    showIndicators={row.postId.image.length > 1}
+                                    className="z-depth-1"
+                                    interval={false}
+                                    slide
+                                >
+                                    <MDBCarouselInner>
+                                        {
+                                            row.postId.image.map((o, id) => {
+                                                return (
+                                                    <MDBCarouselItem itemId={id + 1}>
+                                                        <MDBView>
+                                                            <img
+                                                                className="d-block w-100"
+                                                                src={post_url + o}
+                                                                alt={`image ${id + 1}`}
+                                                            />
+                                                        </MDBView>
+                                                    </MDBCarouselItem>
+                                                )
+                                            })
+                                        }
+                                    </MDBCarouselInner>
+                                </MDBCarousel>
+                                    <p>Caption : {row.postId.caption}</p>
+                                    <p>Posted By :
+                                        <a href={`${frontend_url}profile/${row.postId.user.username}`}
+                                           target={"_blank"}>
+                                            <img src={profile_url + row.postId.user.profilepicture} width={60}
+                                                 alt={row.postId.user.profilepicture}/> {row.postId.user.username}
+                                        </a>
+                                    </p>
+                                    <p><a href={`${frontend_url}post/${row.postId._id}`} target={'_blank'}>Post Url</a>
+                                    </p>
+                                </div> : <a href={`${frontend_url}profile/${row.userId.username}`}><img
+                                    src={profile_url + row.userId.profilepicture} alt={row.userId.profilepicture}
+                                    width={60}/> {row.userId.username} </a>
                             },
                             {
-                                name: 'Username',
-                                selector: 'username',
-                                sortable: true,
+                                name: 'Reporter',
+                                selector: 'reportedBy',
+                                cell: row => <a href={`${frontend_url}profile/${row.reportedBy.username}`}><img
+                                    src={profile_url + row.reportedBy.profilepicture}
+                                    alt={row.reportedBy.profilepicture} width={60}/> {row.reportedBy.username} </a>
                             },
                             {
                                 name: 'Action',

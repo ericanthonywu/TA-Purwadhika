@@ -408,7 +408,13 @@ exports.toogleCommentLike = (req, res) => {
     }
 };
 exports.showPost = (req, res) => {
-    Post.findById(req.body.id).populate("user", "username profilepicture").populate("comments.user", "username profilepicture").populate("comments.like", "username profilepicture").populate('like', 'username profilepicture').then(data => {
+    Post.findById(req.body.id)
+        .populate("user", "username profilepicture")
+        .populate("comments.user", "username profilepicture")
+        .populate("comments.like", "username profilepicture")
+        .populate('like', 'username profilepicture')
+        .select("image like ban caption user comments")
+        .then(data => {
         if (!data.ban) {
             res.status(200).json({
                 post: data
@@ -651,7 +657,7 @@ exports.reportPost = (req, res) => {
                 postId: postId,
                 reason: report,
                 reportedBy: res.userdata.id
-            }).save(err => res.status(err ? 500 : 200).json(err || {}))
+            }).save().then(() => res.status(200).json()).catch(err => res.status(500).json(err));
         }
     });
 

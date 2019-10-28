@@ -204,7 +204,7 @@ class Post extends React.Component {
 
     toggleRepost = () => this.setState({reportModal: !this.state.reportModal});
 
-    onClick = nr => {
+    onClick = nr => () => {
         this.setState({
             radio: nr
         });
