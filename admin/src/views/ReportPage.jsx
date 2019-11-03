@@ -12,7 +12,7 @@ import {
     MDBModalHeader, MDBView
 } from "mdbreact";
 import Axios from "axios";
-import {api_url, frontend_url, post_url, profile_url} from "../global";
+import {api_url, err, frontend_url, post_url, profile_url} from "../global";
 import Datatable from 'react-data-table-component'
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
@@ -51,7 +51,7 @@ class ReportPage extends React.Component {
                 data: data,
                 loading: false
             })
-        });
+        }).catch(err);
     };
     action = rows => rows.userId ? <>
         <MDBBtn size={"sm"} gradient={"frozen-dreams"} onClick={() => {
@@ -117,9 +117,7 @@ class ReportPage extends React.Component {
         })
     }} color={"red"}>{!rows.postId.ban ? "Hide" : "Unhide"} Posts</MDBBtn>;
 
-    changeSuspendTime = date => {
-        this.setState({suspendTime: date})
-    };
+    changeSuspendTime = date => this.setState({suspendTime: date})
 
     toggle = () => this.setState({
         modal: !this.state.modal,
@@ -231,6 +229,10 @@ class ReportPage extends React.Component {
                                 cell: row => <a href={`${frontend_url}profile/${row.reportedBy.username}`}><img
                                     src={profile_url + row.reportedBy.profilepicture}
                                     alt={row.reportedBy.profilepicture} width={60}/> {row.reportedBy.username} </a>
+                            },
+                            {
+                                name: 'Reason',
+                                selector: 'reason',
                             },
                             {
                                 name: 'Action',

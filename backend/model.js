@@ -81,7 +81,7 @@ const reportSchema = new mongoose.Schema({
     userId: {type: mongoose.Schema.Types.ObjectId, ref: 'user'},
     reportedBy: {type: mongoose.Schema.Types.ObjectId, ref: 'user'},
     reason: {type: String}
-})
+},{timestamps: true});
 
 exports.report = mongoose.model('report',reportSchema);
 
@@ -104,3 +104,9 @@ const adminSchema = new mongoose.Schema({
 }, {timestamps: true});
 
 exports.admin = mongoose.model('admin', adminSchema);
+
+const loginSchema = new mongoose.Schema({
+    user: {type: mongoose.Schema.Types.ObjectId, ref: 'user'},
+}, {timestamps: true});
+
+exports.login = mongoose.model('login', loginSchema);

@@ -1,6 +1,7 @@
 const model = require("../model");
 const bcrypt = require("bcryptjs");
 const user = model.user;
+const Login = model.login;
 const jwt = require("jsonwebtoken");
 const nodeMailer = require("nodemailer");
 const moment = require('moment');
@@ -55,6 +56,8 @@ exports.login = (req, res) => {
                                             if (err) {
                                                 res.status(500).json({error: err});
                                             } else {
+
+                                                new Login({user: data._id}).save();
                                                 res.status(200).json({
                                                     _token: token,
                                                     username: data.username,
@@ -101,6 +104,7 @@ exports.login = (req, res) => {
                                         if (err) {
                                             res.status(500).json({error: err});
                                         } else {
+                                            new Login({user: data._id}).save()
                                             res.status(200).json({
                                                 _token: token,
                                                 username: data.username,

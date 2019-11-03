@@ -11,6 +11,8 @@ router.post('/login', authController.login);
 router.get('/migrate', authController.migrate);
 router.post('/checkToken', authController.checkToken);
 
+router.post('/dashboard', authMiddleware.authcheck, tableController.dashboard);
+
 router.post('/users', authMiddleware.authcheck, tableController.user);
 router.post('/blockUsers', authMiddleware.authcheck, actionController.blockUsers);
 router.post('/suspendUser', authMiddleware.authcheck, actionController.suspendUsers);

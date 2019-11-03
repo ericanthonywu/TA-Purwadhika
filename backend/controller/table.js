@@ -1,4 +1,4 @@
-const {user: User, post: Post, report: Report} = require('../model');
+const {user: User, post: Post, report: Report, login: Login} = require('../model');
 exports.user = (req, res) => {
     User.find().select('profilepicture email username status').then(data => {
         res.status(200).json({
@@ -40,3 +40,27 @@ exports.report = (req, res) => {
     }).populate("reportedBy", "username profilepicture")
         .then(data => res.status(200).json({data: data}))
 };
+
+exports.dashboard = (req,res) => {
+    Login.aggregate([
+        {
+            $group:
+                {
+                    _id:
+                        {
+                            day: { $dayOfMonth: "$createdAt" },
+                            month: { $month: "$createdAt" },
+                            year: { $year: "$createdAt" }
+                        },
+                    value: { $sum:1 },
+                    date: { $first: "$createdAt" }
+                }
+        },
+        {
+            $project:
+                {
+                    _id: 0 //ga ush munculin id
+                }
+        }
+    ]).then(data => res.status(200).json(data))
+}
