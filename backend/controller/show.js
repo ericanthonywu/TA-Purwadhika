@@ -1,5 +1,7 @@
 //model
-const {user: User, post: Post, chat: Chat, report: Report} = require('../model');
+const {user: User, post: Post, chat: Chat, report: Report, login: Login} = require('../model');
+
+const moment = require('moment');
 
 exports.profile = (req, res) => {
     User.findOne({username: req.body.username, email_st: 1}).populate('follower').populate('following')
@@ -163,6 +165,18 @@ exports.addPost = (req, res) => {
 };
 
 exports.dashboard = (req, res) => {
+    if (res.userdata) {
+        Login.find({
+            user: res.userdata.id, createdAt: {
+                $gte: moment().startOf("day"),
+                $lt: moment().endOf("day")
+            }
+        }).then(data => {
+            if(!data){
+                new Login({user: res.userdata.id}).save()
+            }
+        })
+    }
     const {offset} = req.body;
     User.findOne(res.userdata ? {_id: res.userdata.id} : {}, (err, data) => {
         if (err) {
@@ -415,14 +429,14 @@ exports.showPost = (req, res) => {
         .populate('like', 'username profilepicture')
         .select("image like ban caption user comments")
         .then(data => {
-        if (!data.ban) {
-            res.status(200).json({
-                post: data
-            })
-        } else {
-            res.status(404).json({})
-        }
-    }).catch(err => {
+            if (!data.ban) {
+                res.status(200).json({
+                    post: data
+                })
+            } else {
+                res.status(404).json({})
+            }
+        }).catch(err => {
         res.status(500).json({
             err: err
         })
@@ -507,16 +521,16 @@ exports.unfollow = (req, res) => {
 exports.getNotification = (req, res) => {
     User.findById(res.userdata.id).select('notification').populate('notification.post', 'image').populate('notification.user', "username profilepicture")
         .then(data => {
-        User.countDocuments({
-            _id: res.userdata.id,
-            "notification.read": false
-        }, (err, count) => {
-            res.status(200).json({
-                data: data.notification,
-                unRead: count
+            User.countDocuments({
+                _id: res.userdata.id,
+                "notification.read": false
+            }, (err, count) => {
+                res.status(200).json({
+                    data: data.notification,
+                    unRead: count
+                })
             })
-        })
-    }).catch(err =>
+        }).catch(err =>
         res.status(500).json({
             err: err
         })
@@ -617,7 +631,7 @@ exports.sendChat = (req, res) => {
 exports.getChat = (req, res) => {
     Chat.find({
         participans: res.userdata.id
-    }).populate("participans", "username").select("message").then(data => res.status(200).json({data:data})).catch(err => res.status(500).json(err))
+    }).populate("participans", "username").select("message").then(data => res.status(200).json({data: data})).catch(err => res.status(500).json(err))
 };
 exports.updateChat = (req, res) => {
     const {io} = req;

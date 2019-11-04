@@ -56,8 +56,6 @@ exports.login = (req, res) => {
                                             if (err) {
                                                 res.status(500).json({error: err});
                                             } else {
-
-                                                new Login({user: data._id}).save();
                                                 res.status(200).json({
                                                     _token: token,
                                                     username: data.username,
