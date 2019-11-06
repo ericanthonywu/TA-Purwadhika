@@ -45,7 +45,6 @@ router.get('/verify/:token', authController.verify);
 router.post('/register', authController.register);
 router.post('/checkemail', authController.checkemail);
 router.post('/checkusername', authController.checkusername);
-router.post('/checktoken', authController.checktoken);
 
 router.post('/searchUser', showController.searchUser);
 

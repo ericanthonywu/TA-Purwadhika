@@ -13,36 +13,16 @@ exports.login = (req, res) => {
             message: "Email / Password is Empty"
         });
     } else {
-        user.findOne({email: email}).select('+password').exec((err, data) => {
-            if (err) {
-                res.status(500).json({
-                    error: err
-                });
-                return;
-            }
-            if (data == null) {
-                res.status(401).json({
-                    message: "Email Not Found"
-                });
-                return;
-            }
-            switch (data.status) {
-                case 1:
-                    res.status(401).json({message: "You've Been Blocked!"});
-                    break;
-                case 2:
-                    if(!moment.now().isAfter(data.suspendTime)){
-                        res.status(401).json({message: "Your account has been suspended for a period time"});
-                    }else {
-                        bcrypt.compare(password, data.password, (err, check) => {
-                            if (err) {
-                                res.status(500).json({
-                                    error: err
-                                });
-                                return;
-                            }
+        user.findOne({email: email}).select('+password').then(data => {
+            if (data) {
+                switch (data.status) {
+                    case 1:
+                        res.status(401).json({message: "You've Been Blocked!"});
+                        break;
+                    default:
+                        bcrypt.compare(password, data.password).then(check => {
                             if (check) {
-                                if (data.email_st == 1) {
+                                if (data.email_st) {
                                     jwt.sign(
                                         {
                                             id: data._id,
@@ -50,7 +30,7 @@ exports.login = (req, res) => {
                                             email: email,
                                             profilepicture: data.profilepicture
                                         },
-                                        "ysn852jd48",
+                                        process.env.JWTSECRETKEY,
                                         {expiresIn: "100000h"},
                                         (err, token) => {
                                             if (err) {
@@ -63,7 +43,6 @@ exports.login = (req, res) => {
                                                     profile_picture: data.profilepicture
                                                 });
                                             }
-
                                         }
                                     );
                                     return;
@@ -76,55 +55,14 @@ exports.login = (req, res) => {
                             res.status(401).json({
                                 message: "Password Incorrect"
                             })
-                        })
-                    }
-                    break
-                default:
-                    bcrypt.compare(password, data.password, (err, check) => {
-                        if (err) {
-                            res.status(500).json({
-                                error: err
-                            });
-                            return;
-                        }
-                        if (check) {
-                            if (data.email_st == 1) {
-                                jwt.sign(
-                                    {
-                                        id: data._id,
-                                        username: data.username,
-                                        email: email,
-                                        profilepicture: data.profilepicture
-                                    },
-                                    "ysn852jd48",
-                                    {expiresIn: "100000h"},
-                                    (err, token) => {
-                                        if (err) {
-                                            res.status(500).json({error: err});
-                                        } else {
-                                            new Login({user: data._id}).save()
-                                            res.status(200).json({
-                                                _token: token,
-                                                username: data.username,
-                                                _id: data._id,
-                                                profile_picture: data.profilepicture
-                                            });
-                                        }
-                                    }
-                                );
-                                return;
-                            }
-                            res.status(401).json({
-                                message: "Please Verify Your Email"
-                            });
-                            return;
-                        }
-                        res.status(401).json({
-                            message: "Password Incorrect"
-                        })
-                    })
+                        }).catch(err => res.status(500).json({error: err}))
+                }
+            } else {
+                res.status(401).json({
+                    message: "Email Not Found"
+                });
             }
-        })
+        }).catch(err => res.status(500).json({error: err}))
     }
 };
 
@@ -139,7 +77,7 @@ function makeid(length) {
     return result;
 }
 
-exports.register =  (req, res) => {
+exports.register = (req, res) => {
     const {username, password, email} = req.body;
     if (!username || !password || !email) {
         res.status(401).json({
@@ -147,8 +85,8 @@ exports.register =  (req, res) => {
             debug: req.body
         });
     } else {
-        bcrypt.genSalt(10, (err, salt) => {
-            bcrypt.hash(password, salt, async (err, enc_password) => {
+        bcrypt.genSalt(10).then(salt => {
+            bcrypt.hash(password, salt).then(async enc_password => {
                 const token = makeid(50);
                 const userDoc = new user({
                     username: username,
@@ -178,8 +116,8 @@ exports.register =  (req, res) => {
                                         service: "Gmail",
                                         requireTLS: true,
                                         auth: {
-                                            user: "noreplyerictes@gmail.com",
-                                            pass: "ysn852jd48;"
+                                            user: process.env.EMAIL,
+                                            pass: process.env.EMAILPASSWORD
                                         }
                                     });
                                     const mailOption = {
@@ -452,22 +390,18 @@ exports.register =  (req, res) => {
                         }
                     }
                 );
-            });
-        });
+            }).catch(err => res.status(500).json(err))
+        }).catch(err => res.status(500).json(err));
     }
 };
 exports.verify = (req, res) => {
     user.findOneAndUpdate(
         {token: req.params.token},
-        {email_st: 1,token:null},
-        {'new':true} //based on https://stackoverflow.com/questions/33992359/mongoosastic-findoneandupdate-not-indexing-in-elasticsearch
-    ).select('+token').exec(err => {
-        if (err)
-            return res.status(500).json({
-                err: err
-            });
+        {email_st: 1, token: null},
+        {'new': true} //based on https://stackoverflow.com/questions/33992359/mongoosastic-findoneandupdate-not-indexing-in-elasticsearch
+    ).select('+token').then(() => {
         return res.status(200).render("email");
-    });
+    }).catch(err => res.status(500).json({err: err}));
 };
 exports.checkemail = (req, res, next) => {
     user.count({email: req.body.email}, (err, c) => {
@@ -477,32 +411,32 @@ exports.checkemail = (req, res, next) => {
     });
 };
 exports.checkusername = (req, res) => {
-    user.count({username: req.body.username}, (err, c) => {
+    user.count({username: req.body.username}).then(c => {
         res.status(c ? 500 : 200).send({
             message: c ? "Username tersedia" : ""
         });
-    });
+    }).catch(err => res.status(500).json({err: err}));
 };
-exports.checktoken = (req, res) => {
-    jwt.verify(req.body.token, "ysn852jd48", (err, data) => {
-        if (err) {
-            res.status(500).send({
-                err: err
-            });
-            return
-        }
-        user.findOne({_id: data.id}).exec((err,data) => {
-            jwt.sign({
-                    id: data._id,
-                    username: data.username,
-                    email: data.email
-                },
-                "ysn852jd48",
-                {expiresIn: "24h"}, (err, token) => {
-                    res.status(200).send({
-                        token: token
-                    })
-                })
-        });
-    })
-};
+// exports.checktoken = (req, res) => {
+//     jwt.verify(req.body.token, "ysn852jd48", (err, data) => {
+//         if (err) {
+//             res.status(500).send({
+//                 err: err
+//             });
+//             return
+//         }
+//         user.findOne({_id: data.id}).exec((err, data) => {
+//             jwt.sign({
+//                     id: data._id,
+//                     username: data.username,
+//                     email: data.email
+//                 },
+//                 "ysn852jd48",
+//                 {expiresIn: "24h"}, (err, token) => {
+//                     res.status(200).send({
+//                         token: token
+//                     })
+//                 })
+//         });
+//     })
+// };

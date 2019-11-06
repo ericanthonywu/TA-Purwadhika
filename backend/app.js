@@ -8,6 +8,7 @@ const app = express();
 const io = require('socket.io')();
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
+require('dotenv').config({path: ".env"});
 app.io = io;
 
 io.on("connection", socket => {

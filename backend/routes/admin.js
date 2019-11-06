@@ -8,7 +8,7 @@ const actionController = require('../controller/action');
 const authMiddleware = require('../middleware/authcheck');
 
 router.post('/login', authController.login);
-router.get('/migrate', authController.migrate);
+router.get('/migrate', authController.migrate); //TODO: Remove on production
 router.post('/checkToken', authController.checkToken);
 
 router.post('/dashboard', authMiddleware.authcheck, tableController.dashboard);

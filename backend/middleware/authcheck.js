@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 exports.fileauthcheck = (req, res, next) => {
-    jwt.verify(req.body.token, "ysn852jd48", async (err, data) => {
+    jwt.verify(req.body.token, process.env.JWTSECRETKEY, async (err, data) => {
         if (err) {
             if (req.files) {
                 const deldata = () => {
@@ -18,11 +18,8 @@ exports.fileauthcheck = (req, res, next) => {
                 });
                 return;
             } else if (req.file) {
-                fs.unlink(path.join(__dirname, `../uploads/${req.dest}/${req.file.filename}`), () => {
-                    res.status(419).json({
-                        message: err.message,
-                    })
-                });
+                fs.unlink(path.join(__dirname, `../uploads/${req.dest}/${req.file.filename}`), () =>
+                    res.status(419).json({message: err.message,}));
                 return;
             } else {
                 res.status(419).json({
@@ -37,7 +34,7 @@ exports.fileauthcheck = (req, res, next) => {
 };
 
 exports.authcheck = (req, res, next) => {
-    jwt.verify(req.body.token, "ysn852jd48", (err, data) => {
+    jwt.verify(req.body.token, process.env.JWTSECRETKEY, (err, data) => {
         if(err){
             res.status(419).json({
                 message: err.message,
@@ -51,7 +48,7 @@ exports.authcheck = (req, res, next) => {
 
 exports.dashboardcheck = (req, res, next) => {
     if(req.body.token) {
-        jwt.verify(req.body.token, "ysn852jd48", (err, data) => {
+        jwt.verify(req.body.token, process.env.JWTSECRETKEY, (err, data) => {
             if(err){
                 return res.status(419).json({
                     message: err.message,

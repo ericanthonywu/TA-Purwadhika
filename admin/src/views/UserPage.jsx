@@ -86,13 +86,13 @@ class UserPage extends React.Component {
                 }
             })
         }}> {rows.status == 1 ? "unblock" : "block"} </MDBBtn>
-        <MDBBtn size={"sm"} gradient={"sunny-morning"} onClick={() => {
-            this.setState({
-                modal: true,
-                suspendName: rows.username,
-                suspendId: rows._id
-            })
-        }}> {rows.status == 2 ? "unsuspend" : "suspend"}</MDBBtn>
+        {/*<MDBBtn size={"sm"} gradient={"sunny-morning"} onClick={() => {*/}
+        {/*    this.setState({*/}
+        {/*        modal: true,*/}
+        {/*        suspendName: rows.username,*/}
+        {/*        suspendId: rows._id*/}
+        {/*    })*/}
+        {/*}}> {rows.status == 2 ? "unsuspend" : "suspend"}</MDBBtn>*/}
     </>;
 
     changeSuspendTime = date => {

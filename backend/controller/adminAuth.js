@@ -20,7 +20,7 @@ exports.login = (req, res) => {
                         id: data._id,
                         role: data.role,
                         username: data.username
-                    }, "ysn852jd48", {expiresIn: "24h"}, (err, token) => {
+                    }, process.env.JWTSECRETKEY, {expiresIn: "24h"}, (err, token) => {
                         e(err);
                         res.status(200).json({
                             id: data._id,

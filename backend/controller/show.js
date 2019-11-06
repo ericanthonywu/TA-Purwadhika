@@ -166,8 +166,9 @@ exports.addPost = (req, res) => {
 
 exports.dashboard = (req, res) => {
     if (res.userdata) {
-        Login.find({
-            user: res.userdata.id, createdAt: {
+        Login.countDocuments({
+            user: res.userdata.id,
+            createdAt: {
                 $gte: moment().startOf("day"),
                 $lt: moment().endOf("day")
             }
