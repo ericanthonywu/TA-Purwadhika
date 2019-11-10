@@ -28,7 +28,8 @@ export default class Register extends React.Component {
             emailfeedback: "",
             usernamefeedback: "",
             passwordfeedback: "",
-            cpasswordfeedback: ""
+            cpasswordfeedback: "",
+            loading: false
         };
     }
 
@@ -47,6 +48,9 @@ export default class Register extends React.Component {
             this.validateinput(target, false)
         }
         if (valid) {
+            this.setState({
+                loading:true
+            })
             axios.post(`${api_url}register`, {
                 username: this.state.username,
                 email: this.state.email,
@@ -58,7 +62,7 @@ export default class Register extends React.Component {
                 },1000)
             }).catch(err => {
                 toast.error(err.response.data.message)
-            })
+            }).finally(() => this.setState({loading: false}))
         }
 
     };
@@ -301,7 +305,7 @@ export default class Register extends React.Component {
                                                 type="button"
                                                 onClick={this.submitHandler}
                                             >
-                                                Register
+                                                {this.state.loading ? "Loading ..." : "Register"}
                                             </MDBBtn>
                                         </div>
                                     </form>

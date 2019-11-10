@@ -51,6 +51,9 @@ router.post('/searchUser', showController.searchUser);
 //dashboard route
 router.post('/dashboard', authMiddleware.dashboardcheck, showController.dashboard);
 
+//explore route
+router.post("/explore", showController.explore)
+
 //profile route
 router.post('/getprofile', authMiddleware.authcheck, showController.profile);
 router.post('/showProfile', authMiddleware.authcheck, showController.showProfile);

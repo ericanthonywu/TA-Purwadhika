@@ -9,7 +9,7 @@ mongoose.connect('mongodb://localhost/sosmed', {
 }).then(r => {
     const db = mongoose.connection;
     db.on('error', console.error.bind(console, 'connection error:'));
-});
+}).catch(err => console.error(err));
 
 const userSchema = new mongoose.Schema({
     email: {type: String, required: true, unique: true},

@@ -632,7 +632,9 @@ exports.sendChat = (req, res) => {
 exports.getChat = (req, res) => {
     Chat.find({
         participans: res.userdata.id
-    }).populate("participans", "username").select("message").then(data => res.status(200).json({data: data})).catch(err => res.status(500).json(err))
+    }).populate("participans", "username").select("message")
+        .then(data => res.status(200).json({data: data}))
+        .catch(err => res.status(500).json(err))
 };
 exports.updateChat = (req, res) => {
     const {io} = req;
@@ -694,3 +696,21 @@ exports.reportUser = (req, res) => {
         }
     })
 };
+
+exports.explore = (req,res) => {
+    Post.aggregate([
+        {
+            $project:{
+                _id:1,
+                comments: {$size: '$comments'},
+                like: {$size: "$like"},
+                image: 1
+            }
+        },
+        {
+            $sort: {createdAt: -1}
+        }
+    ])
+        .then(data => res.status(200).json({data: data}))
+        .catch(err => res.status(500).json(err))
+}

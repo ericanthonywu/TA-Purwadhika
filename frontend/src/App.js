@@ -38,6 +38,7 @@ import Search from "./views/Search";
 import socketio from "socket.io-client";
 import Axios from "axios";
 import moment from "moment";
+import Explore from "./views/Explore";
 
 
 class App extends Component {
@@ -407,6 +408,7 @@ class App extends Component {
                 <Switch>
                     <Route path={'/'} exact component={DashboardPage}/>
                     <Route path={'/login'} exact component={Login}/>
+                    <Route path={'/explore'} exact component={Explore}/>
                     <Route path={'/register'} exact component={Register}/>
                     <Route path={'/profile/:profile'} component={withAuth(Profile)}/>
                     <Route path={'/addpost'} exact component={withAuth(AddPost)}/>
