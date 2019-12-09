@@ -173,7 +173,7 @@ exports.dashboard = (req, res) => {
                 $lt: moment().endOf("day")
             }
         }).then(data => {
-            if(!data){
+            if (!data) {
                 new Login({user: res.userdata.id}).save()
             }
         })
@@ -192,17 +192,21 @@ exports.dashboard = (req, res) => {
             sort: {
                 createdAt: -1 //Sort by Date Added DESC
             }
-        }).populate("user", "username profilepicture").populate("comments.user", "username profilepicture").populate("comments.like", "username profilepicture").populate('like', "username profilepicture").exec((err, post) => {
-            if (err) {
-                return res.status(500).json({
-                    err: err
-                })
-            } else {
-                return res.status(200).json({
-                    post: post
-                });
-            }
-        })
+        }).populate("user", "username profilepicture")
+            .populate("comments.user", "username profilepicture")
+            .populate("comments.like", "username profilepicture")
+            .populate('like', "username profilepicture")
+            .exec((err, post) => {
+                if (err) {
+                    return res.status(500).json({
+                        err: err
+                    })
+                } else {
+                    return res.status(200).json({
+                        post: post
+                    });
+                }
+            })
     })
 };
 exports.togglelike = (req, res) => {
@@ -484,12 +488,10 @@ exports.follow = (req, res) => {
                             type: 'follow',
                             to: data
                         })
-                    });
+                    }).catch(err => res.status(500).json(err));
                 })
             }
-            res.status(err ? 500 : 202).json(err ? {
-                err: err
-            } : {})
+            res.status(err ? 500 : 202).json(err || {})
         })
     })
 };
@@ -513,9 +515,7 @@ exports.unfollow = (req, res) => {
         }, {
             "new": true
         }, err => {
-            res.status(err ? 500 : 200).json(err ? {
-                err: err
-            } : {})
+            res.status(err ? 500 : 200).json(err || {})
         })
     })
 };
@@ -531,20 +531,15 @@ exports.getNotification = (req, res) => {
                     unRead: count
                 })
             })
-        }).catch(err =>
-        res.status(500).json({
-            err: err
-        })
+        }).catch(err => res.status(500).json({err: err})
     )
 };
 exports.readNotif = (req, res) => {
     User.findOneAndUpdate({_id: res.userdata.id, "notification.read": false}, {
-        $set: {
-            "notification.$[].read": true //https://jira.mongodb.org/browse/SERVER-1243
-        }
-    }, {new: true}, err => {
-        res.status(err ? 500 : 200).json(err ? {err: err} : {})
-    })
+            $set: {
+                "notification.$[].read": true //https://jira.mongodb.org/browse/SERVER-1243
+            }
+        }, {new: true}, err => res.status(err ? 500 : 200).json(err || {}))
 };
 exports.showChat = (req, res) => {
     User.findOne({username: req.body.username}).then(data => {
@@ -645,7 +640,7 @@ exports.updateChat = (req, res) => {
             }, {
                 participans: res.userdata.id,
             }, {
-                "message.sender": res.userdata.id // eric jwancok by:tmangowal, the king of prank
+                "message.sender": res.userdata.id
             }]
         }, {
             $set: {
@@ -697,20 +692,65 @@ exports.reportUser = (req, res) => {
     })
 };
 
-exports.explore = (req,res) => {
-    Post.aggregate([
-        {
-            $project:{
-                _id:1,
-                comments: {$size: '$comments'},
-                like: {$size: "$like"},
-                image: 1
+exports.explore = (req, res) => {
+    let aggregate = []
+    if (res.userdata) {
+        aggregate = [
+            {
+                $match: {
+                    user: {
+                        $not: res.userdata.id
+                    }
+                },
+                $project: {
+                    _id: 1,
+                    comments: {$size: '$comments'},
+                    like: {$size: "$like"},
+                    image: 1
+                }
+            },
+            {
+                $sort: {createdAt: -1}
             }
-        },
-        {
-            $sort: {createdAt: -1}
-        }
-    ])
+        ]
+    } else {
+        aggregate = [
+            {
+                $project: {
+                    _id: 1,
+                    comments: {$size: '$comments'},
+                    like: {$size: "$like"},
+                    image: 1
+                }
+            },
+            {
+                $sort: {createdAt: -1}
+            }
+        ]
+    }
+    Post.aggregate(aggregate)
         .then(data => res.status(200).json({data: data}))
         .catch(err => res.status(500).json(err))
+}
+
+exports.lastComments = (req, res) => {
+    let dataUser = {}
+    Post.find({}).populate("comments.user", "username").select("comments").then(data => {
+        data.forEach(post => {
+            post.comments.forEach(comments => {
+                if (typeof dataUser[comments.user.username] == "undefined") {
+                    dataUser[comments.user.username] = {
+                        time: moment(comments.time).format("H:m:s"),
+                        comments: comments.comments
+                    }
+                } else {
+                    if (dataUser[comments.user.username].time < moment(comments.time).format("H:m:s")) {
+                        dataUser[comments.user.username].time = moment(comments.time).format("H:m:s")
+                        dataUser[comments.user.username].comments = comments.comments
+                    }
+                }
+            })
+        })
+        res.status(200).json(dataUser)
+    }).catch(err => res.status(500).json(err))
 }

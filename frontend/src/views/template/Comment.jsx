@@ -109,7 +109,7 @@ class Comment extends React.Component {
                             return o.charAt(0) === "@" ? `<a href="${base_url}profile/${o.substring(1)}" target="_blank" style="color:blue"> ${o} </a>` : o
                         }).join(" ")}}/>
                     <div className={"mt-2"}>
-                        <span>{moment(this.props.data.time).fromNow()}</span>
+                        <span>{moment(this.props.data.time).format("H:m:s")}</span>
                         {
                             this.state.commentlike > 0 ?
                                 <span className={"mr-3 ml-3 pointer"} onClick={() => this.setState({

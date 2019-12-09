@@ -7,11 +7,15 @@ class Explore extends React.Component {
     state = {post: []}
 
     componentDidMount() {
-        Axios.post(`${api_url}explore`).then(data => {
-            this.setState({
-                post: data.data.data
-            })
-        }).catch(err => console.error(err))
+        if(localStorage.getItem('token')) {
+            Axios.post(`${api_url}explore`).then(data => {
+                this.setState({
+                    post: data.data.data
+                })
+            }).catch(err => console.error(err))
+        }else{
+            this.props.history.push('/login')
+        }
     }
 
     render() {

@@ -183,6 +183,10 @@ class Post extends React.Component {
             })
         }
     };
+    componentDidMount() {
+        console.log(this.props)
+    }
+
     addEmoji = e => {
         let emoji = e.native;
         this.refs.comment.value += emoji
@@ -387,7 +391,7 @@ class Post extends React.Component {
                             <div className={"float-left flex"}>
                                 <img src={profile_url + this.props.postprofilepicture}
                                      className="round mr-3"
-                                     alt="aligment" width={60}
+                                     alt="aligment" style={{width: 60,height: 60}}
                                      onClick={() => this.props.history.push("/profile/" + this.props.postusername)}/>
                                 <div className={"user-info"}>
                                     <span className={"bolder pointer"}
@@ -402,11 +406,12 @@ class Post extends React.Component {
                                     </MDBDropdownToggle>
                                     <MDBDropdownMenu right basic>
                                         <MDBDropdownItem onClick={this.report}>Report</MDBDropdownItem>
-                                        <MDBDropdownItem onClick={async () => {
-                                            await navigator.clipboard.writeText(`${window.location.origin}/post/${this.props._id}`);
-                                            toast.success('Copied!')
+                                        <MDBDropdownItem onClick={() => {
+                                            console.log(this.props._id)
+                                            navigator.clipboard.writeText(`http://localhost:3001/post/${this.props._id}`).then(() => {
+                                                toast.success('Copied!')
+                                            }).catch(err => toast.error(err));
                                         }}>Copy Link</MDBDropdownItem>
-                                        <MDBDropdownItem>Mute</MDBDropdownItem>
                                     </MDBDropdownMenu>
                                 </MDBDropdown>
                             </div>

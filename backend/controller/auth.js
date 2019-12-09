@@ -8,54 +8,52 @@ const moment = require('moment');
 
 exports.login = (req, res) => {
     const {password, email} = req.body;
-    if (password == null || email == null) {
+    if (!password || !email) {
         res.status(401).json({
             message: "Email / Password is Empty"
         });
     } else {
         user.findOne({email: email}).select('+password').then(data => {
             if (data) {
-                switch (data.status) {
-                    case 1:
-                        res.status(401).json({message: "You've Been Blocked!"});
-                        break;
-                    default:
-                        bcrypt.compare(password, data.password).then(check => {
-                            if (check) {
-                                if (data.email_st) {
-                                    jwt.sign(
-                                        {
-                                            id: data._id,
-                                            username: data.username,
-                                            email: email,
-                                            profilepicture: data.profilepicture
-                                        },
-                                        process.env.JWTSECRETKEY,
-                                        {expiresIn: "100000h"},
-                                        (err, token) => {
-                                            if (err) {
-                                                res.status(500).json({error: err});
-                                            } else {
-                                                res.status(200).json({
-                                                    _token: token,
-                                                    username: data.username,
-                                                    _id: data._id,
-                                                    profile_picture: data.profilepicture
-                                                });
-                                            }
+                if (data.status === 1){
+                    bcrypt.compare(password, data.password).then(check => {
+                        if (check) {
+                            if (data.email_st) {
+                                jwt.sign(
+                                    {
+                                        id: data._id,
+                                        username: data.username,
+                                        email: email,
+                                        profilepicture: data.profilepicture
+                                    },
+                                    process.env.JWTSECRETKEY,
+                                    {expiresIn: "100000h"},
+                                    (err, token) => {
+                                        if (err) {
+                                            res.status(500).json({error: err});
+                                        } else {
+                                            res.status(200).json({
+                                                _token: token,
+                                                username: data.username,
+                                                _id: data._id,
+                                                profile_picture: data.profilepicture
+                                            });
                                         }
-                                    );
-                                    return;
-                                }
-                                res.status(401).json({
-                                    message: "Please Verify Your Email"
-                                });
+                                    }
+                                );
                                 return;
                             }
                             res.status(401).json({
-                                message: "Password Incorrect"
-                            })
-                        }).catch(err => res.status(500).json({error: err}))
+                                message: "Please Verify Your Email"
+                            });
+                            return;
+                        }
+                        res.status(401).json({
+                            message: "Password Incorrect"
+                        })
+                    }).catch(err => res.status(500).json({error: err}))
+                }else{
+                    res.status(401).json({message: "You've Been Blocked!"});
                 }
             } else {
                 res.status(401).json({
@@ -404,10 +402,10 @@ exports.verify = (req, res) => {
     }).catch(err => res.status(500).json({err: err}));
 };
 exports.checkemail = (req, res, next) => {
-    user.count({email: req.body.email}, (err, c) => {
+    user.count({email: req.body.email}).then(c => {
         res.status(c ? 500 : 200).send({
             message: c ? "Email tersedia" : ""
-        });
+        }).catch(err => res.status(500).json({err: err}));
     });
 };
 exports.checkusername = (req, res) => {

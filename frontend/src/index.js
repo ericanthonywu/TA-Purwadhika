@@ -18,7 +18,7 @@ import reducer from './redux/reducers'
 const store = createStore(reducer, {}, applyMiddleware(reduxthunk));
 ReactDOM.render(
     <Provider store={store}>
-        <BrowserRouter basename={process.env.PUBLIC_URL}>
+        <BrowserRouter>
             <App/>
         </BrowserRouter>
     </Provider>, document.getElementById('apps'));

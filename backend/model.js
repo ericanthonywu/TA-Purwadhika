@@ -110,3 +110,4 @@ const loginSchema = new mongoose.Schema({
 }, {timestamps: true});
 
 exports.login = mongoose.model('login', loginSchema);
+

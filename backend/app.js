@@ -11,19 +11,6 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config({path: ".env"});
 app.io = io;
 
-io.on("connection", socket => {
-    const {token} = socket.handshake.query;
-    if(token) {
-        jwt.verify(token, "ysn852jd48", (err, data) => {
-            if (err) {
-                io.sockets.emit('error',"error");
-            }else {
-
-            }
-        })
-    }
-});
-
 app.use((req, res, next) => { //global socket io
     req.io = io;
     next()

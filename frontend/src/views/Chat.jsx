@@ -206,7 +206,7 @@ class Chat extends React.Component {
                         <Error404/>
                         :
                         <MDBCol size={4} style={{paddingTop: 100, margin: "auto"}}>
-                            {/*<img src={""}/>*/}
+                            <h3>{this.props.match.params.username}</h3>
                             <div className={"show-chat"}>
                                 {
                                     this.state.chat ?

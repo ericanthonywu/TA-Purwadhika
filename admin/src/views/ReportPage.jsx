@@ -51,7 +51,7 @@ class ReportPage extends React.Component {
                 data: data,
                 loading: false
             })
-        }).catch(err);
+        });
     };
     action = rows => rows.userId ? <>
         <MDBBtn size={"sm"} gradient={"frozen-dreams"} onClick={() => {

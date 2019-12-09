@@ -59,7 +59,7 @@ class DashboardPage extends React.Component{
     render() {
         return (
             <div>
-                <div id="chartdiv" style={{ width: "100%", height: "500px" }}></div>
+                <div id="chartdiv" style={{ width: "100%", height: "500px" }}/>
             </div>
         );
     }

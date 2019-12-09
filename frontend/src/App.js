@@ -157,7 +157,7 @@ class App extends Component {
                     if (data.to == (this.props.userid || localStorage.getItem('_id'))) {
                         toast.error("Your account has been blocked");
                         this.props.logout();
-                        this.props.history.push('/')
+                        this.props.history.push('/login')
                     }
                 })
             });
@@ -300,8 +300,9 @@ class App extends Component {
                                                                                 <p className={"pointer"}
                                                                                    style={{fontWeight: 600}}>Warning</p>
                                                                                 <p className={"pointer"}
-                                                                                   style={{fontWeight: 600}}>{o.message} <span
-                                                                                    style={{fontWeight: "lighter"}}>{moment(o.time).fromNow()}</span>
+                                                                                   style={{fontWeight: 600}}>{o.message}
+                                                                                    <span
+                                                                                        style={{fontWeight: "lighter"}}>{moment(o.time).fromNow()}</span>
                                                                                 </p>
                                                                             </a>
                                                                             :
@@ -310,8 +311,9 @@ class App extends Component {
                                                                                 <p className={"pointer"}
                                                                                    style={{fontWeight: 600}}>{o.user.username}</p>
                                                                                 <p className={"pointer"}
-                                                                                   style={{fontWeight: 600}}>{o.message} <span
-                                                                                    style={{fontWeight: "lighter"}}>{moment(o.time).fromNow()}</span>
+                                                                                   style={{fontWeight: 600}}>{o.message}
+                                                                                    <span
+                                                                                        style={{fontWeight: "lighter"}}>{moment(o.time).fromNow()}</span>
                                                                                 </p>
                                                                             </a>
                                                                     }
@@ -363,52 +365,59 @@ class App extends Component {
                     </MDBCollapse>
                 </MDBNavbar>
                 <div>
-                    <span className={"toggle-chat"} style={this.state.chatMinimized ? {left: "calc(100% - 20px)"} : {}}
-                          onClick={() => this.setState({chatMinimized: !this.state.chatMinimized}, () => {
-                              localStorage.setItem('chatMinimized', this.state.chatMinimized)
-                          })}><MDBIcon
-                        icon={this.state.chatMinimized ? "bars" : "times"}/></span>
-                    <div className={"chat-container"} style={this.state.chatMinimized ? {width: 0, left: "100%"} : {}}>
-                        <div>
-                            <MDBInput type={"text"} ref={"finduser"} onChange={this.searchUser}
-                                      labelClass={"colorwhite"} label={"Find User ..."} style={{width: 140}}/>
-                        </div>
-                        <div style={{backgroundColor: "white", color: "black"}}>
-                            {
-                                this.state.search ?
-                                    this.state.search.map(o => {
+                    {
+                        this.props.loggedin ? <><span className={"toggle-chat"}
+                                                      style={this.state.chatMinimized ? {left: "calc(100% - 20px)"} : {}}
+                                                      onClick={() => this.setState({chatMinimized: !this.state.chatMinimized}, () => {
+                                                          localStorage.setItem('chatMinimized', this.state.chatMinimized)
+                                                      })}><MDBIcon
+                            icon={this.state.chatMinimized ? "bars" : "times"}/></span>
+                            <div className={"chat-container"}
+                                 style={this.state.chatMinimized ? {width: 0, left: "100%"} : {}}>
+                                <div>
+                                    <MDBInput type={"text"} ref={"finduser"} onChange={this.searchUser}
+                                              labelClass={"colorwhite"} label={"Find User ..."} style={{width: 140}}/>
+                                </div>
+                                <div style={{backgroundColor: "white", color: "black"}}>
+                                    {
+                                        this.state.search ?
+                                            this.state.search.map(o => {
+                                                return (
+                                                    <div
+                                                        onClick={() => this.props.history.push(`/chat/${o._source.username}`)}>
+                                                        <img
+                                                            src={profile_url + o._source.profilepicture}
+                                                            className={"mr-2"} width={30}
+                                                            alt={o._source.username + "'s photo"}/>
+                                                        <span>{o._source.username}</span>
+                                                        <span></span>
+                                                    </div>
+                                                )
+                                            })
+                                            :
+                                            null
+                                    }
+                                </div>
+                                {
+                                    this.state.listChat.map(data => {
                                         return (
-                                            <div onClick={() => this.props.history.push(`/chat/${o._source.username}`)}>
-                                                <img
-                                                    src={profile_url + o._source.profilepicture}
-                                                    className={"mr-2"} width={30}
-                                                    alt={o._source.username + "'s photo"}/>
-                                                <span>{o._source.username}</span>
+                                            <div onClick={() => this.props.history.push('/chat/' + data.username)}>
+                                                <img width={60} src={profile_url + data.profilepicture} alt=""/>
+                                                <span>{data.username}</span>
                                                 <span></span>
                                             </div>
                                         )
                                     })
-                                    :
-                                    null
-                            }
-                        </div>
-                        {
-                            this.state.listChat.map(data => {
-                                return (
-                                    <div onClick={() => this.props.history.push('/chat/' + data.username)}>
-                                        <img width={60} src={profile_url + data.profilepicture} alt=""/>
-                                        <span>{data.username}</span>
-                                        <span></span>
-                                    </div>
-                                )
-                            })
-                        }
-                    </div>
+                                }
+                            </div>
+                        </> : null
+                    }
                 </div>
                 <Switch>
                     <Route path={'/'} exact component={DashboardPage}/>
-                    <Route path={'/login'} exact component={Login}/>
                     <Route path={'/explore'} exact component={Explore}/>
+
+                    <Route path={'/login'} exact component={Login}/>
                     <Route path={'/register'} exact component={Register}/>
                     <Route path={'/profile/:profile'} component={withAuth(Profile)}/>
                     <Route path={'/addpost'} exact component={withAuth(AddPost)}/>
